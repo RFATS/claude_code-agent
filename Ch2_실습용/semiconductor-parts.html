@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>반도체 부품 현황</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@500;700;900&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #EEF0F5; color: #0A1547;
+         font-family: "Noto Sans KR", "Malgun Gothic", sans-serif; -webkit-font-smoothing: antialiased; }
+  .num { font-family: "Gothic A1", sans-serif; }
+  header { background: #0A1547; padding: 26px 44px 30px; display: flex; flex-direction: column; gap: 22px; }
+  .top { display: flex; align-items: flex-end; justify-content: space-between; gap: 32px; flex-wrap: wrap; }
+  .eyebrow { font-size: 11px; letter-spacing: 0.22em; color: #7C9BFF; font-weight: 700; }
+  h1 { margin: 8px 0; font-family: "Gothic A1", sans-serif; font-size: 32px; font-weight: 700; color: #fff; }
+  .sub { font-size: 13px; color: #98A3D2; }
+  .actions { display: flex; align-items: center; gap: 10px; }
+  .tabs { display: flex; background: rgba(200,210,240,.12); border: 1px solid rgba(200,210,240,.24); border-radius: 8px; overflow: hidden; }
+  .tabs div { padding: 9px 18px; font-size: 13px; color: #AEB8DE; }
+  .tabs .on { background: #1428A0; color: #fff; font-weight: 500; }
+  .btn { padding: 10px 20px; border-radius: 8px; background: #fff; font-size: 13px; font-weight: 700; }
+  .strip { display: flex; gap: 34px; flex-wrap: wrap; border-top: 1px solid rgba(200,210,240,.2); padding-top: 20px; }
+  .strip > div { display: flex; align-items: baseline; gap: 10px; }
+  .strip .l { font-size: 13px; color: #98A3D2; }
+  .strip .v { font-size: 18px; font-weight: 700; color: #fff; }
+  .strip .d { font-size: 12px; color: #7C9BFF; font-weight: 700; }
+  .strip .d.warn { color: #E29A80; }
+  main { padding: 26px 44px 44px; display: flex; flex-direction: column; gap: 20px; }
+  .grid { display: grid; gap: 18px; align-items: stretch; }
+  .g5 { grid-template-columns: repeat(5, 1fr); }
+  .g2 { grid-template-columns: 1.9fr 1fr; }
+  .g3 { grid-template-columns: 1.35fr 1fr 1fr; }
+  .card { background: #fff; border: 1px solid #E1E4EC; border-radius: 12px; padding: 24px 28px; display: flex; flex-direction: column; gap: 18px; }
+  .kpi { padding: 20px 22px; gap: 14px; }
+  .kpi .t { font-size: 13px; color: #6E7688; }
+  .kpi .row { display: flex; align-items: baseline; gap: 9px; }
+  .kpi .big { font-size: 34px; font-weight: 900; line-height: 1; }
+  .kpi .chg { font-size: 12px; color: #1428A0; font-weight: 700; }
+  .kpi .chg.bad { color: #B0472F; }
+  .kpi svg { width: 100%; height: 44px; }
+  h2 { margin: 0; font-size: 16px; font-weight: 700; }
+  .hint { font-size: 13px; color: #6E7688; margin-top: 5px; }
+  .head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+  .legend { display: flex; gap: 18px; font-size: 12px; color: #6E7688; }
+  .legend i { display: inline-block; width: 14px; height: 3px; vertical-align: middle; margin-right: 7px; }
+  .legend i.sq { width: 10px; height: 10px; border-radius: 2px; }
+  .note { border-top: 1px solid #EEF0F5; padding-top: 16px; font-size: 13px; line-height: 1.6; color: #4A5568; margin-top: auto; }
+  .chart { display: grid; grid-template-columns: 44px 1fr; gap: 10px; }
+  .yax { display: flex; flex-direction: column; justify-content: space-between; align-items: flex-end; height: 240px; font-size: 11px; color: #8B92A2; }
+  .plot { position: relative; height: 240px; border-left: 1px solid #E1E4EC; border-bottom: 1px solid #DCE0E9; }
+  .plot .gl { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: space-between; }
+  .plot .gl div { height: 1px; background: #F1F2F7; }
+  .plot svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .xax { display: grid; grid-template-columns: repeat(8, 1fr); padding-top: 10px; font-size: 11px; color: #8B92A2; }
+  .donut { width: 176px; height: 176px; border-radius: 50%; margin: 4px auto 8px; display: flex; align-items: center; justify-content: center;
+           background: conic-gradient(#1428A0 0 34%, #4B5CC0 34% 58%, #7C9BFF 58% 76%, #C2C8E8 76% 91%, #DCE0E9 91% 100%); }
+  .donut > div { width: 116px; height: 116px; border-radius: 50%; background: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .li { display: grid; grid-template-columns: 12px 1fr auto; gap: 12px; align-items: center; font-size: 13px; color: #2D3A52; }
+  .li i { width: 10px; height: 10px; border-radius: 2px; }
+  .li b { color: #0A1547; }
+  .list { display: flex; flex-direction: column; gap: 12px; }
+  .stack { display: grid; grid-template-columns: repeat(6, 1fr); gap: 20px; height: 200px; }
+  .stack > div { display: flex; flex-direction: column; border-radius: 4px; overflow: hidden; }
+  .stack span:nth-child(1) { background: #1428A0; } .stack span:nth-child(2) { background: #4B5CC0; }
+  .stack span:nth-child(3) { background: #7C9BFF; } .stack span:nth-child(4) { background: #C2C8E8; }
+  .stackx { display: grid; grid-template-columns: repeat(6, 1fr); gap: 20px; font-size: 11px; color: #8B92A2; text-align: center; }
+  .meter { display: flex; flex-direction: column; gap: 8px; }
+  .meter .h { display: flex; justify-content: space-between; font-size: 13px; color: #2D3A52; }
+  .meter .h b { font-family: "Gothic A1", sans-serif; font-size: 14px; color: #0A1547; }
+  .track { height: 8px; border-radius: 4px; background: #F1F2F7; }
+  .track i { display: block; height: 8px; border-radius: 4px; background: #1428A0; }
+  table { width: 100%; border-collapse: collapse; }
+  th { text-align: left; padding: 10px 12px; font-size: 12px; color: #8B92A2; border-bottom: 1px solid #DCE0E9; }
+  td { padding: 14px 12px; font-size: 14px; color: #4A5568; border-bottom: 1px solid #EEF0F5; }
+  td:first-child { font-weight: 500; color: #0A1547; }
+  tr:last-child td { border-bottom: 0; }
+  td .code { display: block; font-size: 11px; color: #8B92A2; font-weight: 400; margin-top: 2px; }
+  .r { text-align: right; }
+  .pill { display: inline-block; padding: 3px 10px; border-radius: 10px; font-size: 12px; font-weight: 700; }
+  .ok { background: #E3E9FF; color: #1428A0; } .wn { background: #FBEFD9; color: #9A6A17; } .er { background: #F8E1DA; color: #B0472F; }
+  .dark { background: #0A1547; border: 0; }
+  .dark h2 { color: #fff; }
+  .ins { display: grid; grid-template-columns: 26px 1fr; gap: 14px; align-items: start; }
+  .ins .n { font-family: "Gothic A1", sans-serif; font-size: 15px; font-weight: 900; color: #7C9BFF; }
+  .ins b { display: block; font-size: 14px; font-weight: 500; color: #fff; line-height: 1.5; margin-bottom: 5px; }
+  .ins span { font-size: 12px; line-height: 1.6; color: #AEB8DE; }
+  .next { margin-top: auto; background: rgba(124,155,255,.14); border-radius: 8px; padding: 16px 18px; }
+  .next small { display: block; font-size: 11px; letter-spacing: .14em; color: #98A3D2; font-weight: 700; margin-bottom: 6px; }
+  .next div { font-size: 13px; line-height: 1.6; color: #fff; }
+  .alert { display: grid; grid-template-columns: 8px 1fr; gap: 14px; align-items: start; }
+  .alert i { width: 8px; height: 8px; border-radius: 50%; margin-top: 6px; }
+  .alert b { font-size: 14px; font-weight: 500; display: block; margin-bottom: 4px; }
+  .alert span { font-size: 12px; color: #8B92A2; }
+  @media (max-width: 1200px) { .g5 { grid-template-columns: repeat(3, 1fr); } .g2, .g3 { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 800px) { .g5, .g2, .g3 { grid-template-columns: 1fr; } header, main { padding-left: 20px; padding-right: 20px; } }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="top">
+    <div>
+      <div class="eyebrow">SEMICONDUCTOR SUPPLY CHAIN · 구매전략팀</div>
+      <h1>반도체 부품 현황</h1>
+      <div class="sub">2026년 9월 마감 기준 · 데이터 갱신 9월 30일 06:00</div>
+    </div>
+    <div class="actions">
+      <div class="tabs"><div>주간</div><div class="on">월간</div><div>분기</div><div>누적</div></div>
+      <div class="btn">현황 보고서 내보내기</div>
+    </div>
+  </div>
+  <div class="strip">
+    <div><span class="l">전체 재고 금액</span><span class="v num">3,842억원</span><span class="d">+4.6%</span></div>
+    <div><span class="l">납기 준수율</span><span class="v num">93.8%</span><span class="d">+1.9%p</span></div>
+    <div><span class="l">평균 리드타임</span><span class="v num">14.2주</span><span class="d">-1.3주</span></div>
+    <div><span class="l">부족 위험 품목</span><span class="v num">9종</span><span class="d warn">전월 +2종</span></div>
+  </div>
+</header>
+
+<main>
+
+  <section class="grid g5">
+    <div class="card kpi">
+      <div class="t">관리 부품 수</div>
+      <div class="row"><div class="big num">1,284</div><div class="chg">+38</div></div>
+      <svg viewBox="0 0 200 44" preserveAspectRatio="none"><polyline points="0,36 28,33 57,30 85,28 114,22 142,17 171,11 200,6" fill="none" stroke="#1428A0" stroke-width="2.5" stroke-linejoin="round"/></svg>
+    </div>
+    <div class="card kpi">
+      <div class="t">월 입고 수량</div>
+      <div class="row"><div class="big num">86만</div><div class="chg">+7.2%</div></div>
+      <svg viewBox="0 0 200 44" preserveAspectRatio="none"><polyline points="0,30 28,34 57,26 85,28 114,20 142,22 171,12 200,8" fill="none" stroke="#4B5CC0" stroke-width="2.5" stroke-linejoin="round"/></svg>
+    </div>
+    <div class="card kpi">
+      <div class="t">불량률</div>
+      <div class="row"><div class="big num">0.42%</div><div class="chg">-0.08%p</div></div>
+      <svg viewBox="0 0 200 44" preserveAspectRatio="none"><polyline points="0,8 28,12 57,14 85,18 114,24 142,26 171,31 200,36" fill="none" stroke="#7C9BFF" stroke-width="2.5" stroke-linejoin="round"/></svg>
+    </div>
+    <div class="card kpi" style="flex-direction: row; align-items: center; gap: 18px;">
+      <div style="width: 78px; height: 78px; border-radius: 50%; background: conic-gradient(#1428A0 0 72%, #E1E4EC 72% 100%); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+        <div class="num" style="width: 58px; height: 58px; border-radius: 50%; background: #fff; display: flex; align-items: center; justify-content: center; font-size: 17px; font-weight: 900;">72%</div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+        <div class="t">복수 공급사 확보율</div>
+        <div style="font-size: 13px; font-weight: 500;">목표 80%</div>
+        <div style="font-size: 12px; color: #8B92A2;">단일 소싱 359종</div>
+      </div>
+    </div>
+    <div class="card kpi">
+      <div class="t">재고 회전율</div>
+      <div class="row"><div class="big num">6.8회</div><div class="chg bad">-0.3회</div></div>
+      <div style="display: flex; gap: 4px; align-items: flex-end; height: 44px;">
+        <div style="flex:1;height:100%;background:#1428A0;border-radius:2px 2px 0 0"></div>
+        <div style="flex:1;height:96%;background:#1428A0;border-radius:2px 2px 0 0"></div>
+        <div style="flex:1;height:92%;background:#4B5CC0;border-radius:2px 2px 0 0"></div>
+        <div style="flex:1;height:88%;background:#4B5CC0;border-radius:2px 2px 0 0"></div>
+        <div style="flex:1;height:84%;background:#909BD6;border-radius:2px 2px 0 0"></div>
+        <div style="flex:1;height:80%;background:#C2C8E8;border-radius:2px 2px 0 0"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="grid g2">
+    <div class="card">
+      <div class="head">
+        <div><h2>재고 수준과 안전재고선</h2><div class="hint">단위: 억원 · 2026년 2~9월</div></div>
+        <div class="legend"><span><i style="background:#1428A0"></i>실재고</span><span><i style="background:#98A3D2"></i>안전재고</span></div>
+      </div>
+      <div class="chart">
+        <div class="yax"><div>4,500</div><div>3,400</div><div>2,250</div><div>1,100</div><div>0</div></div>
+        <div class="plot">
+          <div class="gl"><div></div><div></div><div></div><div></div><div style="background:transparent"></div></div>
+          <svg viewBox="0 0 720 240" preserveAspectRatio="none">
+            <defs><linearGradient id="fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#1428A0" stop-opacity=".22"/><stop offset="100%" stop-color="#1428A0" stop-opacity=".02"/></linearGradient></defs>
+            <path d="M0,150 L103,140 L206,120 L309,128 L411,100 L514,88 L617,72 L720,62 L720,240 L0,240 Z" fill="url(#fill)"/>
+            <polyline points="0,150 103,140 206,120 309,128 411,100 514,88 617,72 720,62" fill="none" stroke="#1428A0" stroke-width="3" stroke-linejoin="round"/>
+            <polyline points="0,130 103,124 206,118 309,112 411,106 514,100 617,94 720,88" fill="none" stroke="#98A3D2" stroke-width="2" stroke-dasharray="8 7"/>
+          </svg>
+        </div>
+        <div></div>
+        <div class="xax"><span>2월</span><span>3월</span><span>4월</span><span>5월</span><span>6월</span><span>7월</span><span>8월</span><span style="text-align:right">9월</span></div>
+      </div>
+      <div class="note">5월 이후 실재고가 안전재고선을 지속 상회하고 있습니다. 9월 재고 3,842억원은 안전재고 대비 약 1.15배입니다.</div>
+    </div>
+
+    <div class="card">
+      <div><h2>부품 유형별 재고 구성</h2><div class="hint">전체 3,842억원</div></div>
+      <div class="donut"><div><div class="num" style="font-size:26px;font-weight:900">34%</div><div style="font-size:12px;color:#6E7688">메모리</div></div></div>
+      <div class="list">
+        <div class="li"><i style="background:#1428A0"></i>메모리 (DRAM·NAND)<b>1,306</b></div>
+        <div class="li"><i style="background:#4B5CC0"></i>시스템 반도체<b>922</b></div>
+        <div class="li"><i style="background:#7C9BFF"></i>전력·아날로그<b>692</b></div>
+        <div class="li"><i style="background:#C2C8E8"></i>센서·통신<b>576</b></div>
+        <div class="li"><i style="background:#DCE0E9"></i>기타<b>346</b></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="grid g3">
+    <div class="card">
+      <div class="head">
+        <div><h2>공정 노드별 입고 비중 추이</h2><div class="hint">월 입고 수량 100% 기준</div></div>
+        <div class="list" style="gap:6px;font-size:11px;color:#6E7688">
+          <span class="legend"><span><i class="sq" style="background:#1428A0"></i>5nm 이하</span></span>
+          <span class="legend"><span><i class="sq" style="background:#4B5CC0"></i>7~14nm</span></span>
+          <span class="legend"><span><i class="sq" style="background:#7C9BFF"></i>28nm</span></span>
+          <span class="legend"><span><i class="sq" style="background:#C2C8E8"></i>레거시</span></span>
+        </div>
+      </div>
+      <div class="stack">
+        <div><span style="height:18%"></span><span style="height:26%"></span><span style="height:30%"></span><span style="height:26%"></span></div>
+        <div><span style="height:20%"></span><span style="height:26%"></span><span style="height:29%"></span><span style="height:25%"></span></div>
+        <div><span style="height:23%"></span><span style="height:27%"></span><span style="height:27%"></span><span style="height:23%"></span></div>
+        <div><span style="height:26%"></span><span style="height:27%"></span><span style="height:26%"></span><span style="height:21%"></span></div>
+        <div><span style="height:29%"></span><span style="height:27%"></span><span style="height:25%"></span><span style="height:19%"></span></div>
+        <div><span style="height:32%"></span><span style="height:27%"></span><span style="height:24%"></span><span style="height:17%"></span></div>
+      </div>
+      <div class="stackx"><span>4월</span><span>5월</span><span>6월</span><span>7월</span><span>8월</span><span>9월</span></div>
+    </div>
+
+    <div class="card">
+      <div><h2>공급사별 납기 준수율</h2><div class="hint">9월 · 단위 %</div></div>
+      <div class="list" style="gap:18px">
+        <div class="meter"><div class="h"><span>A 파운드리</span><b>98</b></div><div class="track"><i style="width:98%"></i></div></div>
+        <div class="meter"><div class="h"><span>B 메모리</span><b>95</b></div><div class="track"><i style="width:95%"></i></div></div>
+        <div class="meter"><div class="h"><span>C 패키징</span><b>91</b></div><div class="track"><i style="width:91%;background:#4B5CC0"></i></div></div>
+        <div class="meter"><div class="h"><span>D 전력소자</span><b>84</b></div><div class="track"><i style="width:84%;background:#7C9BFF"></i></div></div>
+        <div class="meter"><div class="h"><span>E 센서</span><b>72</b></div><div class="track"><i style="width:72%;background:#B0472F"></i></div></div>
+      </div>
+      <div class="note">E 센서 공급사는 목표 90%에 크게 못 미쳐 대체 소싱 검토가 필요합니다.</div>
+    </div>
+
+    <div class="card dark">
+      <h2>분석 요약</h2>
+      <div class="list" style="gap:20px">
+        <div class="ins"><div class="n">01</div><div><b>선단 공정 비중 지속 확대</b><span>5nm 이하 입고 비중이 6개월간 18%→32%로 상승.</span></div></div>
+        <div class="ins"><div class="n">02</div><div><b>단일 소싱 리스크</b><span>단일 공급사 부품 359종 중 부족 위험 9종이 집중.</span></div></div>
+        <div class="ins"><div class="n">03</div><div><b>리드타임 단축</b><span>평균 15.5주→14.2주로 개선, 전력소자는 여전히 20주 수준.</span></div></div>
+      </div>
+      <div class="next"><small>다음 조치</small><div>전력소자·센서 대체 공급사 2곳 승인 절차 착수, 10월 안전재고 상향</div></div>
+    </div>
+  </section>
+
+  <section class="grid g2" style="align-items:start">
+    <div class="card" style="padding-bottom:14px">
+      <div class="head">
+        <div><h2>주요 부품 상세</h2><div class="hint">재고 · 리드타임 · 불량률 · 상태</div></div>
+        <div style="font-size:13px;color:#1428A0;font-weight:500">전체 1,284종 보기</div>
+      </div>
+      <table>
+        <thead><tr><th>부품</th><th>공급사</th><th class="r">재고(만개)</th><th class="r">리드타임</th><th class="r">불량률</th><th>상태</th></tr></thead>
+        <tbody>
+          <tr><td>DRAM DDR5 16Gb<span class="code">MEM-D5-016</span></td><td>B 메모리</td><td class="r">128.4</td><td class="r">12주</td><td class="r">0.31%</td><td><span class="pill ok">충분</span></td></tr>
+          <tr><td>AP 5nm 모바일<span class="code">SOC-05-M21</span></td><td>A 파운드리</td><td class="r">42.7</td><td class="r">16주</td><td class="r">0.52%</td><td><span class="pill ok">충분</span></td></tr>
+          <tr><td>PMIC 전력관리<span class="code">PWR-PM-114</span></td><td>D 전력소자</td><td class="r">18.2</td><td class="r">20주</td><td class="r">0.44%</td><td><span class="pill wn">주의</span></td></tr>
+          <tr><td>이미지 센서 50MP<span class="code">SEN-IM-050</span></td><td>E 센서</td><td class="r">6.9</td><td class="r">18주</td><td class="r">0.87%</td><td><span class="pill er">부족</span></td></tr>
+          <tr><td>NAND 1Tb 적층<span class="code">MEM-N4-1T</span></td><td>B 메모리</td><td class="r">74.5</td><td class="r">11주</td><td class="r">0.28%</td><td><span class="pill ok">충분</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h2>점검 필요</h2>
+      <div class="list" style="gap:16px">
+        <div class="alert"><i style="background:#B0472F"></i><div><b>이미지 센서 재고 6.9만개</b><span>안전재고 대비 58% · 긴급 발주 검토</span></div></div>
+        <div class="alert"><i style="background:#C98A2E"></i><div><b>PMIC 리드타임 20주 유지</b><span>D 전력소자 · 대체 공급사 승인 대기</span></div></div>
+        <div class="alert"><i style="background:#C98A2E"></i><div><b>E 센서 납기 준수율 72%</b><span>목표 90% · 9월 3회 지연</span></div></div>
+        <div class="alert"><i style="background:#1428A0"></i><div><b>4분기 수요계획 확정</b><span>10월 5일 S&amp;OP 회의 상정</span></div></div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+</body>
+</html>

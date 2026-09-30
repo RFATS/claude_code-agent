@@ -1,0 +1,12 @@
+[2026-09-28, 07:29:50 KST] {taskinstance.py:1308} INFO - Starting attempt 1 of 3
+[2026-09-28, 07:29:51 KST] {yield_report.py:18} INFO - connecting smtp.example.internal:587
+[2026-09-28, 07:30:12 KST] {taskinstance.py:1826} ERROR - Task failed with exception
+Traceback (most recent call last):
+  File "/opt/airflow/dags/yield_report.py", line 19, in send_daily_yield_report
+    server = smtplib.SMTP("smtp.example.internal", 587, timeout=20)
+TimeoutError: timed out
+[2026-09-28, 07:30:12 KST] {taskinstance.py:1346} INFO - Marking task as UP_FOR_RETRY. dag_id=yield_report_mail, task_id=send_daily_yield_report
+[2026-09-28, 07:35:13 KST] {taskinstance.py:1308} INFO - Starting attempt 2 of 3
+[2026-09-28, 07:35:13 KST] {yield_report.py:18} INFO - connecting smtp.example.internal:587
+[2026-09-28, 07:35:14 KST] {yield_report.py:27} INFO - mail sent to 12 recipients
+[2026-09-28, 07:35:14 KST] {taskinstance.py:1346} INFO - Marking task as SUCCESS. dag_id=yield_report_mail, task_id=send_daily_yield_report

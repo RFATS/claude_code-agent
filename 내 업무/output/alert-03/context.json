@@ -1,0 +1,43 @@
+{
+  "alert_id": "alert-03",
+  "dag_id": "yield_report_mail",
+  "task_id": "send_daily_yield_report",
+  "logical_date": "2026-09-28 02:00 KST",
+  "failed_at": "2026-09-28 07:30:12 KST",
+  "try": "1 of 3",
+  "log_file": "data/logs/log_03_yield_report_mail_send_daily_yield_report_20260928.txt",
+  "attempts": [
+    {
+      "attempt": 1,
+      "max": 3,
+      "outcome": "UP_FOR_RETRY",
+      "error_type": "TimeoutError",
+      "error_message": "timed out",
+      "started_at": "2026-09-28, 07:29:50"
+    },
+    {
+      "attempt": 2,
+      "max": 3,
+      "outcome": "SUCCESS",
+      "error_type": null,
+      "error_message": null,
+      "started_at": "2026-09-28, 07:35:13"
+    }
+  ],
+  "attempt_count": 2,
+  "final_outcome": "SUCCESS",
+  "retry_succeeded": true,
+  "error_type": "TimeoutError",
+  "error_message": "timed out",
+  "same_error_every_attempt": false,
+  "error_location": {
+    "file": "/opt/airflow/dags/yield_report.py",
+    "line": 19,
+    "function": "send_daily_yield_report",
+    "code": "server = smtplib.SMTP(\"smtp.example.internal\", 587, timeout=20)"
+  },
+  "dag_stack": [
+    "/opt/airflow/dags/yield_report.py:19 send_daily_yield_report"
+  ],
+  "source_file": null
+}

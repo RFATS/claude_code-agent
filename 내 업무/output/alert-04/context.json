@@ -1,0 +1,53 @@
+{
+  "alert_id": "alert-04",
+  "dag_id": "essd_ft_result_etl",
+  "task_id": "transform_ft_results",
+  "logical_date": "2026-09-28 02:00 KST",
+  "failed_at": "2026-09-29 02:25:07 KST",
+  "try": "3 of 3 (retries exhausted)",
+  "log_file": "data/logs/log_04_essd_ft_result_etl_transform_ft_results_20260928.txt",
+  "attempts": [
+    {
+      "attempt": 1,
+      "max": 3,
+      "outcome": "UP_FOR_RETRY",
+      "error_type": "ValueError",
+      "error_message": "could not convert string to float: 'NA'",
+      "started_at": "2026-09-29, 02:15:02"
+    },
+    {
+      "attempt": 2,
+      "max": 3,
+      "outcome": "UP_FOR_RETRY",
+      "error_type": "ValueError",
+      "error_message": "could not convert string to float: 'NA'",
+      "started_at": "2026-09-29, 02:20:04"
+    },
+    {
+      "attempt": 3,
+      "max": 3,
+      "outcome": "FAILED",
+      "error_type": "ValueError",
+      "error_message": "could not convert string to float: 'NA'",
+      "started_at": "2026-09-29, 02:25:06"
+    }
+  ],
+  "attempt_count": 3,
+  "final_outcome": "FAILED",
+  "retry_succeeded": false,
+  "error_type": "ValueError",
+  "error_message": "could not convert string to float: 'NA'",
+  "same_error_every_attempt": true,
+  "error_location": {
+    "file": "/opt/airflow/dags/ft_result_transform.py",
+    "line": 23,
+    "function": "parse_metric",
+    "code": "return float(value)"
+  },
+  "dag_stack": [
+    "/opt/airflow/dags/essd_ft_result_etl.py:22 run_transform",
+    "/opt/airflow/dags/ft_result_transform.py:46 transform_ft_results",
+    "/opt/airflow/dags/ft_result_transform.py:23 parse_metric"
+  ],
+  "source_file": "data/dags/ft_result_transform.py"
+}

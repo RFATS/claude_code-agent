@@ -1,0 +1,43 @@
+{
+  "alert_id": "alert-01",
+  "dag_id": "ssd_tester_log_sync",
+  "task_id": "fetch_tester_logs",
+  "logical_date": "2026-09-27 02:00 KST",
+  "failed_at": "2026-09-27 02:10:43 KST",
+  "try": "1 of 3",
+  "log_file": "data/logs/log_01_ssd_tester_log_sync_fetch_tester_logs_20260927.txt",
+  "attempts": [
+    {
+      "attempt": 1,
+      "max": 3,
+      "outcome": "UP_FOR_RETRY",
+      "error_type": "ConnectionResetError",
+      "error_message": "[Errno 104] Connection reset by peer",
+      "started_at": "2026-09-27, 02:10:20"
+    },
+    {
+      "attempt": 2,
+      "max": 3,
+      "outcome": "SUCCESS",
+      "error_type": null,
+      "error_message": null,
+      "started_at": "2026-09-27, 02:15:44"
+    }
+  ],
+  "attempt_count": 2,
+  "final_outcome": "SUCCESS",
+  "retry_succeeded": true,
+  "error_type": "ConnectionResetError",
+  "error_message": "[Errno 104] Connection reset by peer",
+  "same_error_every_attempt": false,
+  "error_location": {
+    "file": "/opt/airflow/dags/sftp_fetch.py",
+    "line": 44,
+    "function": "fetch_tester_logs",
+    "code": "sftp.get(remote_path, local_path)"
+  },
+  "dag_stack": [
+    "/opt/airflow/dags/sftp_fetch.py:44 fetch_tester_logs"
+  ],
+  "source_file": null
+}

@@ -1,0 +1,74 @@
+{
+  "alert_id": "alert-01",
+  "query": "ssd_tester_log_sync fetch_tester_logs\n에러 유형: ConnectionResetError\n에러 메시지: [Errno 104] Connection reset by peer\n재시도 성공\n위치: fetch_tester_logs sftp.get(remote_path, local_path)",
+  "approved": [
+    {
+      "case_id": "PC-037",
+      "similarity": 0.8249,
+      "date": "2026-03-04",
+      "dag_id": "ssd_tester_log_sync",
+      "task_id": "fetch_tester_logs",
+      "error_type": "ConnectionResetError",
+      "judgment": "가성",
+      "decision": "승인",
+      "content": "[PC-037 · 2026-03-04 · ssd_tester_log_sync / fetch_tester_logs]\n에러 유형: ConnectionResetError\n에러 메시지: [Errno 104] Connection reset by peer\n판별 결과: 가성\n원인: 테스터 로그 서버 SFTP 일시 단절\n조치 내용: 조치 없음(재시도 성공 확인 후 종결)\n사람의 결정: 승인\n검토 의견: 재시도 2회차 성공과 다운로드 파일 수 일치 확인이 충분한 근거였음"
+    },
+    {
+      "case_id": "PC-030",
+      "similarity": 0.8243,
+      "date": "2026-01-31",
+      "dag_id": "ssd_tester_log_sync",
+      "task_id": "fetch_tester_logs",
+      "error_type": "ConnectionResetError",
+      "judgment": "가성",
+      "decision": "승인",
+      "content": "[PC-030 · 2026-01-31 · ssd_tester_log_sync / fetch_tester_logs]\n에러 유형: ConnectionResetError\n에러 메시지: [Errno 104] Connection reset by peer\n판별 결과: 가성\n원인: 테스터 로그 서버 SFTP 일시 단절\n조치 내용: 조치 없음(재시도 성공, 다운로드 파일 수가 테스터 수와 일치함을 확인)\n사람의 결정: 승인\n검토 의견: 재시도 성공과 파일 수 일치를 함께 확인해 종결한 점이 적절함"
+    },
+    {
+      "case_id": "PC-083",
+      "similarity": 0.8205,
+      "date": "2026-07-21",
+      "dag_id": "ssd_tester_log_sync",
+      "task_id": "fetch_tester_logs",
+      "error_type": "ConnectionResetError",
+      "judgment": "가성",
+      "decision": "승인",
+      "content": "[PC-083 · 2026-07-21 · ssd_tester_log_sync / fetch_tester_logs]\n에러 유형: ConnectionResetError\n에러 메시지: [Errno 54] Connection reset by peer\n판별 결과: 가성\n원인: 테스터 로그 서버 SFTP 일시 단절\n조치 내용: 조치 없음(재시도 성공, 다운로드 파일 수가 테스터 수와 일치함을 확인)\n사람의 결정: 승인\n검토 의견: 재시도 성공과 파일 수 일치를 함께 확인해 종결한 점이 적절함"
+    }
+  ],
+  "rejected": [
+    {
+      "case_id": "PC-068",
+      "similarity": 0.7799,
+      "date": "2026-06-11",
+      "dag_id": "ssd_tester_log_sync",
+      "task_id": "fetch_tester_logs",
+      "error_type": "ConnectionResetError",
+      "judgment": "가성",
+      "decision": "불승인",
+      "content": "[PC-068 · 2026-06-11 · ssd_tester_log_sync / fetch_tester_logs]\n에러 유형: ConnectionResetError\n에러 메시지: [Errno 104] Connection reset by peer\n판별 결과: 가성\n원인: (오판) 일시 단절로 판단\n조치 내용: 조치 없음으로 종결했으나 재시도 성공 이후에도 일부 테스터 파일이 누락됨\n사람의 결정: 불승인\n검토 의견: 재시도 성공만 보고 가성으로 종결함. 다운로드 파일 수(3개 테스터 중 2개)가 부족했는데 확인하지 않았음. 재시도 성공이어도 결과 건수 확인 필수"
+    },
+    {
+      "case_id": "PC-001",
+      "similarity": 0.7602,
+      "date": "2025-10-06",
+      "dag_id": "ssd_tester_log_sync",
+      "task_id": "fetch_tester_logs",
+      "error_type": "ConnectionResetError",
+      "judgment": "가성",
+      "decision": "불승인",
+      "content": "[PC-001 · 2025-10-06 · ssd_tester_log_sync / fetch_tester_logs]\n에러 유형: ConnectionResetError\n에러 메시지: [Errno 104] Connection reset by peer\n판별 결과: 가성\n원인: (오판) SFTP 일시 단절로 판단\n조치 내용: 조치 없음으로 종결했으나 재시도 성공 이후에도 일부 테스터 파일이 누락됨\n사람의 결정: 불승인\n검토 의견: 재시도 성공만 보고 가성으로 종결함. 결과 파일 수·행 수 검증 없이 종결하면 안 됨"
+    },
+    {
+      "case_id": "PC-018",
+      "similarity": 0.6862,
+      "date": "2025-11-26",
+      "dag_id": "essd_ft_result_etl",
+      "task_id": "collect_tester_results",
+      "error_type": "ConnectionResetError",
+      "judgment": "가성",
+      "decision": "불승인",
+      "content": "[PC-018 · 2025-11-26 · essd_ft_result_etl / collect_tester_results]\n에러 유형: ConnectionResetError\n에러 메시지: [Errno 104] Connection reset by peer\n판별 결과: 가성\n원인: (오판) SFTP 일시 단절로 판단\n조치 내용: 조치 없음으로 종결했으나 재시도 성공 이후에도 일부 테스터 파일이 누락됨\n사람의 결정: 불승인\n검토 의견: 재시도 성공만 보고 가성으로 종결함. 결과 파일 수·행 수 검증 없이 종결하면 안 됨"
+    }
+  ]
+}

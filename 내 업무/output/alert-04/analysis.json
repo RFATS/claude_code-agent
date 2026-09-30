@@ -1,0 +1,43 @@
+{
+  "alert_id": "alert-04",
+  "error_location": {
+    "file": "data/dags/ft_result_transform.py",
+    "line": 23,
+    "function": "parse_metric",
+    "code": "return float(value)"
+  },
+  "root_cause": "parse_metric이 결측 표기 문자열('NA')에 대한 처리 없이 float()를 바로 호출한다. FT-T03 테스터가 ABORT 판정(bin B99) 드라이브의 측정값 4개 컬럼을 모두 'NA'로 출력하는데, transform_ft_results가 result 유효성만 검사하고 ABORT 행도 동일하게 parse_metric으로 변환해 ValueError가 발생한다.",
+  "root_cause_evidence": [
+    {"fact": "parse_metric은 입력 검증·결측 처리 없이 float(value)만 수행한다", "source": "data/dags/ft_result_transform.py:21-23"},
+    {"fact": "transform_ft_results는 result가 PASS/FAIL/ABORT 중 하나인지만 검사하고, ABORT 행을 포함해 4개 측정 컬럼 모두에 parse_metric을 적용한다(NA 허용 분기 없음)", "source": "data/dags/ft_result_transform.py:35-36, 46-49"},
+    {"fact": "3회 시도 모두 동일 스택(essd_ft_result_etl.py:22 -> ft_result_transform.py:46 -> :23)에서 ValueError 'NA'로 실패. 실패 지점은 첫 측정 컬럼 read_bw_mbps(46번 줄)", "source": "data/logs/log_04_essd_ft_result_etl_transform_ft_results_20260928.txt:5-11, 17-23, 29-35"},
+    {"fact": "입력 파일은 매번 동일한 /data/raw/ft_results_2026-09-28.csv이므로 재시도로 해소되지 않는 결정적(deterministic) 오류", "source": "log 파일:2,14,26; context.json: same_error_every_attempt"},
+    {"fact": "샘플 CSV 전체 40행 중 'NA'가 있는 행은 4행이며 모두 result=ABORT, bin_code=B99, tester_id=FT-T03, 측정 4개 컬럼 전부 'NA'. ABORT 행은 전체 4행이 모두 이 패턴(ABORT인데 숫자값이 있는 행은 없음)", "source": "data/essd_ft_results_20260926_20260928.csv: 14, 20, 22, 28행(헤더 포함 줄 번호)"},
+    {"fact": "2026-09-28 데이터(14행) 중 NA 행은 28행 1건(LOT0928A, S7A837873, ES7460-1T92, FT-T03, ABORT). 이 행이 이번 fail의 직접 트리거", "source": "data/essd_ft_results_20260926_20260928.csv:28"},
+    {"fact": "승인 사례 PC-088/PC-058(동일 'NA', ABORT 행 측정값 미출력 -> NULL 저장 + ABORT 건수 별도 집계)과 PC-047(동일 DAG/Task, 측정 불가 항목 -> NULL 허용, ABORT/FAIL이면 NULL 허용)이 같은 원인 유형", "source": "similar_cases.json: approved"}
+  ],
+  "impact": {
+    "fail_period": "2026-09-28 배치(logical_date 2026-09-28 02:00 KST, 실행 2026-09-29 02:15~02:25 KST, 3회 재시도 모두 실패). 같은 유형의 NA 데이터는 샘플 CSV상 2026-09-27에도 3행 존재",
+    "testers": ["FT-T03"],
+    "lots": ["LOT0928A (이번 fail 대상 일자)", "LOT0927A (샘플 CSV에서 동일 NA 패턴 3행, 별도 일자)"],
+    "affected_rows": 1,
+    "notes": "이번 fail 일자(2026-09-28) 기준: 파일 14행 전체(LOT0928A)가 변환 실패로 stage 미생성 상태이므로 사실상 14행이 미처리 영향 범위이며, 원인 트리거 행은 NA 1행(FT-T03 ABORT). 샘플 CSV 전체(09-26~09-28, 40행)의 NA/ABORT 행은 4건(09-27 3건 + 09-28 1건), 모두 FT-T03. 09-27 데이터에서 동일 오류가 났는지, 어떻게 처리되었는지는 제공된 로그로 확인 불가. affected_rows는 원인 트리거 행 수(1) 기준이며 미처리 전체 행 수는 14."
+  },
+  "referenced_cases": [
+    {"case_id": "PC-047", "decision": "승인", "how_used": "동일 DAG/Task 사례. 결측 표기를 0이 아닌 NULL로 처리하고 ABORT/FAIL 행에서만 허용하며 재처리 대상 일자를 정리한 방식을 원인 유형(테스터 출력 결측 표기) 판단 근거로 참고"},
+    {"case_id": "PC-088", "decision": "승인", "how_used": "'NA' 동일 메시지, ABORT 드라이브의 측정값 미출력이 원인이라는 유형을 근거로 참고(ABORT 행 NULL 저장 + ABORT 건수 별도 집계)"},
+    {"case_id": "PC-058", "decision": "승인", "how_used": "PC-088과 같은 유형(ABORT 행 측정값 미출력)으로 원인 판단 근거를 보강"},
+    {"case_id": "PC-005", "decision": "불승인", "how_used": "특정 일자만 건너뛰는 하드코딩 우회는 데이터 누락을 숨겨 불승인됨. 원인을 날짜 특이 문제로 단정하지 않고 테스터/ABORT 패턴이라는 구조적 원인으로 분석"},
+    {"case_id": "PC-049", "decision": "불승인", "how_used": "변환 실패 시 0으로 대체하는 방식은 통계 왜곡으로 불승인됨. 결측을 0/예외 삼키기로 처리하는 방향을 원인 해석에 채택하지 않음"},
+    {"case_id": "PC-056", "decision": "불승인", "how_used": "try/except: pass로 오류를 삼키면 원인이 숨겨져 불승인됨. 결측 표기를 명시적으로 다뤄야 한다는 점을 유의사항에 반영"}
+  ],
+  "cautions": [
+    "스택트레이스의 줄 번호는 소스와 일치함(essd_ft_result_etl.py는 로그 기준 :22이며 본 분석에서 해당 파일은 직접 대조하지 않음). ft_result_transform.py:23, :46은 실제 소스와 일치",
+    "직접 실패 지점은 46번 줄 read_bw_mbps이지만, 49번 줄까지 4개 측정 컬럼 모두 같은 방식으로 NA에 취약하다(샘플상 NA 행은 4개 컬럼 전부 NA)",
+    "원본 /data/raw/ft_results_2026-09-28.csv는 제공되지 않았고 분석은 샘플 CSV(09-26~09-28, 40행)에 기반함. 샘플의 09-28 NA 행이 실제 fail 파일과 동일하다고 로그만으로 확정할 수는 없으나 로그 오류 메시지('NA')와 일치",
+    "FT-T03에서 ABORT 시 NA가 출력되는 원인(장비/SW 변경 여부 등)은 자료로 확인 불가",
+    "09-27 파일의 NA 3행이 왜 그날 fail을 일으키지 않았는지(또는 일으켰는지)는 09-27 로그가 없어 확인 불가",
+    "수정 방향 참고(코드는 code-fixer 담당): 결측을 0으로 대체하거나 예외를 삼키는 방식, 특정 일자 우회는 과거 불승인 사례(PC-049, PC-056, PC-005)와 같아 피해야 함. ABORT 행 NULL 처리와 ABORT 건수 별도 집계 등 승인 사례(PC-047, PC-088, PC-058) 기준을 따르는 것이 바람직. 결측이 ABORT/FAIL 이외 result에서 나타나면 여전히 오류로 드러나야 하는지 검토 필요",
+    "2026-09-28 배치 재처리 필요(현재 stage 파일 미생성 추정, 확인 불가)"
+  ]
+}

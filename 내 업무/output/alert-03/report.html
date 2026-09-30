@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>fail 대응 리포트 - yield_report_mail</title>
+<style>
+  :root {
+    --bg: #f4f6f9; --card: #ffffff; --ink: #1c2430; --muted: #5d6b7c; --line: #dde3ea;
+    --accent: #1f5fbf; --true: #c62828; --true-bg: #fdecea; --ok: #2e7d32; --ok-bg: #e8f5e9;
+    --warn-bg: #fff6e0; --warn: #a66300; --code-bg: #0f1722; --code-ink: #e6edf5;
+    --add-bg: #e6ffed; --del-bg: #ffeef0;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #10161e; --card: #18212c; --ink: #e6edf5; --muted: #98a6b8; --line: #2b3746;
+      --accent: #6aa5ff; --true: #ff8a80; --true-bg: #3a1e1e; --ok: #7bd88f; --ok-bg: #1c3324;
+      --warn-bg: #3a2e12; --warn: #ffc65c; --code-bg: #0a0f16; --code-ink: #e6edf5;
+      --add-bg: #143222; --del-bg: #3a1a20;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.6 "Pretendard", "Malgun Gothic", system-ui, sans-serif; }
+  .wrap { max-width: 920px; margin: 0 auto; padding: 24px 16px 56px; }
+  header { margin-bottom: 20px; }
+  .eyebrow { color: var(--muted); font-size: 13px; letter-spacing: .02em; }
+  h1 { font-size: 24px; margin: 4px 0 10px; }
+  .badges { display: flex; gap: 8px; flex-wrap: wrap; }
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 13px; font-weight: 600; border: 1px solid var(--line); background: var(--card); }
+  .badge.true { color: var(--true); background: var(--true-bg); border-color: transparent; }
+  .badge.ok { color: var(--ok); background: var(--ok-bg); border-color: transparent; }
+  .badge.warn { color: var(--warn); background: var(--warn-bg); border-color: transparent; }
+  section { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 20px 22px; margin-bottom: 16px; }
+  section h2 { font-size: 17px; margin: 0 0 14px; display: flex; align-items: center; gap: 10px; }
+  .num { width: 24px; height: 24px; border-radius: 50%; background: var(--accent); color: #fff; font-size: 13px; display: inline-flex; align-items: center; justify-content: center; }
+  h3 { font-size: 14px; margin: 18px 0 8px; color: var(--muted); }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; width: 130px; white-space: nowrap; }
+  table.grid th { width: auto; background: transparent; }
+  .callout { border-left: 4px solid var(--true); background: var(--true-bg); padding: 12px 14px; border-radius: 6px; margin: 0 0 14px; }
+  .callout strong { color: var(--true); }
+  .callout.ok { border-left-color: var(--ok); background: var(--ok-bg); }
+  .callout.ok strong { color: var(--ok); }
+  ul { margin: 6px 0 0; padding-left: 20px; }
+  li { margin: 3px 0; }
+  pre { margin: 0; background: var(--code-bg); color: var(--code-ink); border-radius: 8px; padding: 12px 0; overflow-x: auto; font: 13px/1.55 Consolas, "D2Coding", monospace; }
+  pre .l { display: block; padding: 0 14px; white-space: pre; }
+  pre .add { background: var(--add-bg); color: inherit; }
+  pre .del { background: var(--del-bg); color: inherit; }
+  @media (prefers-color-scheme: light) { pre .add { background: #1d4d2c; } pre .del { background: #5a2229; } }
+  .file { font: 13px Consolas, monospace; color: var(--muted); margin: 0 0 6px; }
+  .checklist { list-style: none; padding: 0; }
+  .checklist li { display: flex; gap: 10px; align-items: flex-start; padding: 8px 0; border-bottom: 1px solid var(--line); }
+  .box { width: 18px; height: 18px; border: 2px solid var(--muted); border-radius: 4px; flex: none; margin-top: 3px; }
+  .box.done { background: var(--ok); border-color: var(--ok); position: relative; }
+  .box.done::after { content: ""; position: absolute; left: 4px; top: 0; width: 5px; height: 10px; border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg); }
+  .approve { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 14px; align-items: center; }
+  .btn { padding: 8px 18px; border-radius: 8px; border: 1px solid var(--line); font-weight: 600; background: var(--card); color: var(--ink); }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .num-r { text-align: right; font-variant-numeric: tabular-nums; }
+  .na { color: var(--muted); margin: 0; }
+  .src { color: var(--muted); font-size: 12px; }
+  footer { color: var(--muted); font-size: 12px; text-align: center; margin-top: 20px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Solution PE팀 · Airflow fail 대응 리포트 · 2026-09-30 생성</div>
+    <h1>yield_report_mail / send_daily_yield_report</h1>
+    <div class="badges">
+      <span class="badge ok">가성 fail</span>
+      <span class="badge">원인: SMTP 접속 지연 (TimeoutError)</span>
+      <span class="badge warn">사람 승인 대기</span>
+    </div>
+  </header>
+
+  <section>
+    <h2><span class="num">1</span>알림 정보 및 진성/가성 판별</h2>
+    <table>
+      <tr><th>DAG</th><td>yield_report_mail</td></tr>
+      <tr><th>Task</th><td>send_daily_yield_report</td></tr>
+      <tr><th>Logical date</th><td>2026-09-28 02:00 KST</td></tr>
+      <tr><th>최종 fail 시각</th><td>2026-09-28 07:30:12 KST (1차 시도 실패, 재시도 2차 시도에서 SUCCESS)</td></tr>
+      <tr><th>판별 결과</th><td><strong style="color:var(--ok)">가성</strong></td></tr>
+    </table>
+
+    <h3>재시도 이력</h3>
+    <table class="grid">
+      <thead><tr><th>시도</th><th>시작 시각</th><th>결과</th><th>오류</th></tr></thead>
+      <tbody>
+        <tr><td>1 / 3</td><td>2026-09-28 07:29:50</td><td><span class="badge warn">UP_FOR_RETRY</span> (07:30:12 실패)</td><td><code>TimeoutError: timed out</code></td></tr>
+        <tr><td>2 / 3</td><td>2026-09-28 07:35:13</td><td><span class="badge ok">SUCCESS</span> (07:35:14)</td><td>없음</td></tr>
+      </tbody>
+    </table>
+
+    <h3>판별 근거</h3>
+    <ul>
+      <li>에러 유형은 <code>TimeoutError</code>(timed out)이고, 발생 위치는 SMTP 서버(<code>smtp.example.internal:587</code>) 접속 코드(<code>timeout=20</code>)입니다. 코드·데이터 스키마 오류가 아니라 접속 시 응답 지연 유형입니다.
+        <div class="src">출처: context.json error_type, error_location.code · 로그 3-7행</div></li>
+      <li>실패는 1차 시도 1회뿐입니다. 1차 시도는 접속 시도(07:29:51) 21초 뒤 07:30:12에 timed out으로 실패했고, 2차 시도(07:35:13)는 같은 서버·같은 코드 경로로 접속해 SUCCESS로 끝났습니다.
+        <div class="src">출처: context.json attempts, attempt_count, final_outcome, retry_succeeded · 로그 1-12행</div></li>
+      <li>매번 같은 오류가 아닙니다. <code>same_error_every_attempt</code>는 false(정정값)이고 2차 시도에는 오류가 없어, 같은 오류가 반복되는 결정적 결함으로 볼 근거가 없습니다.
+        <div class="src">출처: context.json same_error_every_attempt, attempts[1].error_type</div></li>
+      <li>2차 시도 로그에 <code>mail sent to 12 recipients</code>(발송 수신자 12명)가 기록되어 있습니다.
+        <div class="src">출처: 로그 11행</div></li>
+      <li>로그에 인증 오류(SMTPAuthenticationError 등)나 스키마·코드 결함을 시사하는 다른 오류는 없습니다.
+        <div class="src">출처: 로그 전체</div></li>
+    </ul>
+
+    <h3>참고한 과거 사례</h3>
+    <table class="grid">
+      <thead><tr><th>case_id</th><th>결정</th><th class="num-r">유사도</th><th>참고 방식</th></tr></thead>
+      <tbody>
+        <tr><td>PC-043</td><td><span class="badge ok">승인</span></td><td class="num-r">0.891</td><td>같은 DAG/Task의 TimeoutError(timed out)를 SMTP 일시 지연으로 보고, 재시도 성공과 수신자 수 확인 후 가성 판정한 방식을 따랐습니다. 이번에도 수신자 수(12명)를 로그에서 확인해 근거에 넣었습니다.</td></tr>
+        <tr><td>PC-062</td><td><span class="badge ok">승인</span></td><td class="num-r">0.8796</td><td>동일 Task의 TimeoutError를 재시도 성공과 메일 발송 확인으로 가성 처리한 방식을 참고했습니다.</td></tr>
+        <tr><td>PC-045</td><td><span class="badge ok">승인</span></td><td class="num-r">0.8614</td><td>Task는 다르지만(build_yield_report) SMTP 지연 TimeoutError를 발송 결과 확인 후 가성으로 본 판단 방식을 참고했습니다.</td></tr>
+        <tr><td>PC-012</td><td><span class="badge true">불승인</span></td><td class="num-r">0.6115</td><td>SMTPAuthenticationError를 진성으로 분류했다가 불승인된 사례(검토 의견: 코드 수정이 필요한 건이 아님)입니다. 에러 유형이 달라 직접 대응하지 않고, 이번 건이 인증 오류가 아님을 로그에서 확인하는 데만 참고했습니다.</td></tr>
+        <tr><td>PC-092</td><td><span class="badge true">불승인</span></td><td class="num-r">0.5865</td><td>PC-012와 같은 이유(인증 오류, 코드 수정 불필요)로 불승인된 사례입니다. 에러 유형 확인 시에만 참고했습니다.</td></tr>
+        <tr><td>PC-013</td><td><span class="badge true">불승인</span></td><td class="num-r">0.5622</td><td>PC-012와 같은 이유(인증 오류, 코드 수정 불필요)로 불승인된 사례입니다. 에러 유형 확인 시에만 참고했습니다.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>확인 불가 · 유의 사항</h3>
+    <ul>
+      <li>성공 후 결과 건수 검증은 로그에서 확인 불가입니다. 로그에는 <code>mail sent to 12 recipients</code>만 있고, 12명이 정상 수신자 수인지, 실제 수신 여부는 확인 불가입니다.</li>
+      <li>SMTP 서버 지연의 원인은 로그로 확인 불가입니다. 같은 DAG/Task의 TimeoutError가 과거에도 있었으므로(PC-043, PC-062) 발생 빈도는 사람이 확인할 필요가 있습니다.</li>
+      <li>이 판별은 <code>same_error_every_attempt</code>가 false로 정정된 context.json 기준입니다. 정정 전 값(true)을 근거로 한 기존 판별 내용은 덮어썼습니다.</li>
+    </ul>
+
+    <h3>조치 없음 종결 확인</h3>
+    <ul class="checklist">
+      <li><span class="box done"></span><span>재시도 성공 확인 <span class="badge ok">로그 확인</span><br><span class="src">2차 시도(07:35:13) SUCCESS, 로그 12행</span></span></li>
+      <li><span class="box"></span><span>결과 건수 확인 <span class="badge warn">확인 필요</span><br><span class="src">로그에 발송 수신자 12명 기록만 있음. 정상 수신자 수인지 여부는 로그로 확인되지 않아 사람이 확인해야 함</span></span></li>
+    </ul>
+    <p class="src" style="margin-top:10px">종결 여부의 최종 결정은 사람이 합니다. 현재 상태: 승인 대기</p>
+  </section>
+
+  <section>
+    <h2><span class="num">2</span>진성 fail 원인 분석</h2>
+    <p class="na">해당 없음 (가성 fail로 판별되어 조치 대상이 아님)</p>
+  </section>
+
+  <section>
+    <h2><span class="num">3</span>수정 코드 변경 내역</h2>
+    <p class="na">해당 없음 (가성 fail로 판별되어 조치 대상이 아님)</p>
+  </section>
+
+  <section>
+    <h2><span class="num">4</span>검증 결과 및 배포 승인 요청</h2>
+    <p class="na">해당 없음 (가성 fail로 판별되어 조치 대상이 아님)</p>
+  </section>
+
+  <footer>이 리포트는 Agent가 생성했으며, 종결 및 운영 조치 여부는 사람의 확인 후에만 결정됩니다.</footer>
+</div>
+</body>
+</html>

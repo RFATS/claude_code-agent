@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RAG 검색</title>
+<style>
+  :root {
+    --bg: #f5f6f8; --card: #fff; --text: #1b1f24; --muted: #667085;
+    --border: #e1e4ea; --accent: #2456d6; --accent-soft: #e8eefc; --bar: #d9e2fa;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14161a; --card: #1e2126; --text: #e8eaee; --muted: #9aa3b2;
+      --border: #2e333b; --accent: #7aa2ff; --accent-soft: #232c45; --bar: #2b3a63;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font: 15px/1.6 system-ui, "Malgun Gothic", sans-serif; }
+  main { max-width: 820px; margin: 0 auto; padding: 32px 16px 64px; }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  .sub { color: var(--muted); margin: 0 0 20px; font-size: 14px; }
+  form { display: flex; gap: 8px; }
+  input[type=search] { flex: 1; min-width: 0; padding: 11px 14px; font: inherit;
+    color: var(--text); background: var(--card); border: 1px solid var(--border); border-radius: 8px; }
+  input:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  button { padding: 0 20px; font: inherit; font-weight: 600; color: #fff; background: var(--accent);
+    border: 0; border-radius: 8px; cursor: pointer; }
+  @media (prefers-color-scheme: dark) { button { color: #0d1117; } }
+  button:disabled { opacity: .6; cursor: wait; }
+  .examples { margin: 10px 0 0; display: flex; flex-wrap: wrap; gap: 6px; }
+  .examples button { padding: 3px 10px; font-size: 13px; font-weight: 400; color: var(--accent);
+    background: var(--accent-soft); border-radius: 999px; }
+  #status { margin: 20px 0 8px; color: var(--muted); font-size: 14px; }
+  #status.error { color: #c0392b; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; margin-bottom: 12px; }
+  .head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+  .rank { font-weight: 700; color: var(--accent); }
+  .file { font-weight: 600; word-break: break-all; }
+  .section { color: var(--muted); font-size: 13px; margin-top: 2px; }
+  .sim { display: flex; align-items: center; gap: 8px; margin: 8px 0; font-size: 13px; color: var(--muted); }
+  .sim b { color: var(--text); font-variant-numeric: tabular-nums; }
+  .bar { flex: 0 1 200px; height: 6px; background: var(--bar); border-radius: 3px; overflow: hidden; }
+  .bar i { display: block; height: 100%; background: var(--accent); }
+  pre { margin: 0; padding: 10px 12px; white-space: pre-wrap; word-break: break-word;
+    font: 14px/1.6 inherit; background: var(--bg); border-radius: 6px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>RAG 검색</h1>
+  <p class="sub">질문을 벡터로 바꿔 rag.db에서 가장 관련 있는 문서 5개를 찾습니다.</p>
+
+  <form id="form">
+    <input id="q" type="search" placeholder="예: CVD-01 파티클 불량의 원인은?" autocomplete="off" autofocus>
+    <button id="go" type="submit">검색</button>
+  </form>
+  <div class="examples" id="examples"></div>
+
+  <div id="status" role="status"></div>
+  <div id="results"></div>
+</main>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const EXAMPLES = ["ETCH-02 온도 상승 원인", "CVD-01 파티클 불량 조치", "파티클 필터 교체 주기", "PM 주기 연장 결정"];
+
+EXAMPLES.forEach((text) => {
+  const b = document.createElement("button");
+  b.type = "button";
+  b.textContent = text;
+  b.onclick = () => { $("q").value = text; run(text); };
+  $("examples").append(b);
+});
+
+$("form").onsubmit = (e) => { e.preventDefault(); run($("q").value.trim()); };
+
+async function run(query) {
+  if (!query) return;
+  $("go").disabled = true;
+  $("results").replaceChildren();
+  setStatus("검색 중…");
+  try {
+    const res = await fetch(`/api/search?q=${encodeURIComponent(query)}&top=5`);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+    setStatus(`"${data.query}" 검색 결과 ${data.results.length}건`);
+    data.results.forEach((r) => $("results").append(card(r)));
+  } catch (err) {
+    setStatus(`오류: ${err.message}`, true);
+  } finally {
+    $("go").disabled = false;
+  }
+}
+
+function setStatus(text, isError = false) {
+  $("status").textContent = text;
+  $("status").className = isError ? "error" : "";
+}
+
+// textContent만 사용해 원문이 HTML로 해석되지 않게 함
+function el(tag, cls, text) {
+  const n = document.createElement(tag);
+  if (cls) n.className = cls;
+  if (text !== undefined) n.textContent = text;
+  return n;
+}
+
+function card(r) {
+  const c = el("div", "card");
+  const head = el("div", "head");
+  head.append(el("span", "rank", `#${r.rank}`), el("span", "file", r.fileName));
+
+  const sim = el("div", "sim");
+  const bar = el("div", "bar");
+  const fill = document.createElement("i");
+  fill.style.width = `${Math.max(0, Math.min(1, r.similarity)) * 100}%`;
+  bar.append(fill);
+  sim.append(el("span", "", "유사도"), el("b", "", r.similarity.toFixed(4)), bar);
+
+  c.append(head, el("div", "section", r.section), sim, el("pre", "", r.content));
+  return c;
+}
+</script>
+</body>
+</html>

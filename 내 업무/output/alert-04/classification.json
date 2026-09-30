@@ -1,0 +1,24 @@
+{
+  "alert_id": "alert-04",
+  "judgment": "진성",
+  "evidence": [
+    {"fact": "3회 시도 모두 동일한 ValueError(could not convert string to float: 'NA')로 실패했고 재시도 성공 없이 최종 FAILED", "source": "context.json: attempts, same_error_every_attempt, retry_succeeded, final_outcome"},
+    {"fact": "오류 위치가 parse_metric의 return float(value)로, 네트워크·서버 등 일시적 오류가 아니라 데이터 값('NA')을 변환하지 못하는 코드/데이터 처리 문제임", "source": "context.json: error_location, error_type"},
+    {"fact": "같은 입력 파일(/data/raw/ft_results_2026-09-28.csv)을 매 시도마다 읽고 같은 행 처리(read_bw_mbps)에서 동일하게 실패함", "source": "data/logs/log_04_essd_ft_result_etl_transform_ft_results_20260928.txt: 시도 1~3의 read 로그와 Traceback"},
+    {"fact": "재시도가 성공한 적이 없으므로 성공 결과 건수 검증 대상 없음(로그에 결과 건수 출력도 없음)", "source": "context.json: retry_succeeded; 로그 파일"},
+    {"fact": "동일 DAG/Task에서 결측 표기 문자열로 인한 같은 유형 오류가 과거에 진성으로 처리된 이력이 있음", "source": "similar_cases.json: approved PC-047, rejected PC-005/PC-049/PC-056"}
+  ],
+  "referenced_cases": [
+    {"case_id": "PC-047", "decision": "승인", "how_used": "동일 DAG/Task에서 결측 표기('-')로 인한 ValueError를 진성으로 판별한 승인 사례. 진성 판단의 근거로 참고"},
+    {"case_id": "PC-088", "decision": "승인", "how_used": "메시지가 같은 'NA' 변환 오류를 진성으로 판별한 승인 사례. 진성 판단의 근거로 참고"},
+    {"case_id": "PC-058", "decision": "승인", "how_used": "메시지가 같은 'NA' 변환 오류를 진성으로 판별한 승인 사례. 진성 판단의 근거로 참고"},
+    {"case_id": "PC-005", "decision": "불승인", "how_used": "검토 의견(특정 일자 우회 시 데이터가 누락된 채 정상 표시)을 참고해, 진성 판별 자체는 유지하되 재시도·우회로 넘기지 않도록 신중히 판단"},
+    {"case_id": "PC-049", "decision": "불승인", "how_used": "검토 의견(결측을 0으로 대체하면 통계 왜곡, 오류를 삼키면 원인 숨김)을 참고해, 오류 무시·재시도 종결 방식의 가성 판단을 피함"},
+    {"case_id": "PC-056", "decision": "불승인", "how_used": "검토 의견(오류를 삼키면 검증에서도 드러나지 않음)을 참고해, 오류 무시·재시도 종결 방식의 가성 판단을 피함"}
+  ],
+  "cautions": [
+    "'NA' 값이 나온 원인(ABORT 행 여부, 테스터 변경 등)은 입력에 없어 확인 불가. 원본 CSV(ft_results_2026-09-28.csv)는 확인하지 못함",
+    "성공 후 결과 건수 검증은 로그에서 확인 불가(재시도 성공 사례 없음)",
+    "사람이 확인할 부분: 해당 일자 데이터의 결측 표기 실태와 재처리 필요 여부"
+  ]
+}

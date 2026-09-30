@@ -1,0 +1,18 @@
+{
+  "name": "tier-inversion",
+  "version": "0.1.0",
+  "private": true,
+  "description": "급지 역전 탐지 웹사이트 — MCP(real-estate-mcp)로 실거래가를 실시간 조회하고 LLM 없이 분석",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test",
+    "setup:mcp": "node scripts/setup-mcp.js",
+    "probe": "node scripts/probe.js"
+  },
+  "engines": {
+    "node": ">=22.5"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.31.0"
+  }
+}

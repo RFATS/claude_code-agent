@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>서비스 운영 대시보드</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@500;700;900&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #EEF0F5; color: #0A1547;
+         font-family: "Noto Sans KR", "Malgun Gothic", sans-serif; -webkit-font-smoothing: antialiased; }
+  .num { font-family: "Gothic A1", sans-serif; }
+  header { background: #0A1547; padding: 26px 44px 30px; display: flex; flex-direction: column; gap: 22px; }
+  .top { display: flex; align-items: flex-end; justify-content: space-between; gap: 32px; flex-wrap: wrap; }
+  .eyebrow { font-size: 11px; letter-spacing: 0.22em; color: #7C9BFF; font-weight: 700; }
+  h1 { margin: 8px 0; font-family: "Gothic A1", sans-serif; font-size: 32px; font-weight: 700; color: #fff; }
+  .sub { font-size: 13px; color: #98A3D2; }
+  .tabs { display: flex; background: rgba(200,210,240,.12); border: 1px solid rgba(200,210,240,.24); border-radius: 8px; overflow: hidden; }
+  .tabs div { padding: 9px 18px; font-size: 13px; color: #AEB8DE; }
+  .tabs .on { background: #1428A0; color: #fff; font-weight: 500; }
+  .strip { display: flex; gap: 34px; flex-wrap: wrap; border-top: 1px solid rgba(200,210,240,.2); padding-top: 20px; }
+  .strip > div { display: flex; align-items: baseline; gap: 10px; }
+  .strip .l { font-size: 13px; color: #98A3D2; }
+  .strip .v { font-size: 18px; font-weight: 700; color: #fff; }
+  .strip .d { font-size: 12px; color: #7C9BFF; font-weight: 700; }
+  .strip .d.warn { color: #E29A80; }
+  main { padding: 26px 44px 44px; display: flex; flex-direction: column; gap: 20px; }
+  .grid { display: grid; gap: 18px; align-items: stretch; }
+  .g4 { grid-template-columns: repeat(4, 1fr); }
+  .g2 { grid-template-columns: 1.9fr 1fr; }
+  .card { background: #fff; border: 1px solid #E1E4EC; border-radius: 12px; padding: 24px 28px; display: flex; flex-direction: column; gap: 18px; }
+  .kpi { padding: 20px 22px; gap: 14px; }
+  .kpi .t { font-size: 13px; color: #6E7688; }
+  .kpi .row { display: flex; align-items: baseline; gap: 9px; }
+  .kpi .big { font-size: 34px; font-weight: 900; line-height: 1; }
+  .kpi .chg { font-size: 12px; color: #1428A0; font-weight: 700; }
+  .kpi .chg.bad { color: #B0472F; }
+  .kpi svg { width: 100%; height: 44px; }
+  h2 { margin: 0; font-size: 16px; font-weight: 700; }
+  .hint { font-size: 13px; color: #6E7688; margin-top: 5px; }
+  .note { border-top: 1px solid #EEF0F5; padding-top: 16px; font-size: 13px; line-height: 1.6; color: #4A5568; margin-top: auto; }
+  .bars { display: grid; grid-template-columns: repeat(12, 1fr); gap: 10px; height: 220px; align-items: end; border-bottom: 1px solid #DCE0E9; }
+  .bars div { background: #C2C8E8; border-radius: 3px 3px 0 0; }
+  .bars div.hi { background: #1428A0; }
+  .bars div.mid { background: #4B5CC0; }
+  .months { display: grid; grid-template-columns: repeat(12, 1fr); gap: 10px; font-size: 11px; color: #8B92A2; text-align: center; }
+  .meter { display: flex; flex-direction: column; gap: 8px; }
+  .meter .h { display: flex; justify-content: space-between; font-size: 13px; color: #2D3A52; }
+  .meter .h b { font-family: "Gothic A1", sans-serif; }
+  .track { height: 8px; border-radius: 4px; background: #F1F2F7; }
+  .track i { display: block; height: 8px; border-radius: 4px; background: #1428A0; }
+  table { width: 100%; border-collapse: collapse; }
+  th { text-align: left; padding: 10px 12px; font-size: 12px; color: #8B92A2; border-bottom: 1px solid #DCE0E9; }
+  td { padding: 14px 12px; font-size: 14px; color: #4A5568; border-bottom: 1px solid #EEF0F5; }
+  td:first-child { font-weight: 500; color: #0A1547; }
+  tr:last-child td { border-bottom: 0; }
+  .pill { display: inline-block; padding: 3px 10px; border-radius: 10px; font-size: 12px; font-weight: 700; }
+  .ok { background: #E3E9FF; color: #1428A0; }
+  .wn { background: #FBEFD9; color: #9A6A17; }
+  .er { background: #F8E1DA; color: #B0472F; }
+  .dark { background: #0A1547; border: 0; }
+  .dark h2 { color: #fff; }
+  .alert { display: grid; grid-template-columns: 8px 1fr; gap: 14px; align-items: start; }
+  .alert i { width: 8px; height: 8px; border-radius: 50%; margin-top: 6px; }
+  .alert b { font-size: 14px; font-weight: 500; display: block; margin-bottom: 4px; }
+  .alert span { font-size: 12px; color: #8B92A2; }
+  .dark .alert b { color: #fff; }
+  .dark .alert span { color: #AEB8DE; }
+  .list { display: flex; flex-direction: column; gap: 16px; }
+  @media (max-width: 1100px) { .g4, .g2 { grid-template-columns: 1fr 1fr; } header, main { padding-left: 20px; padding-right: 20px; } }
+  @media (max-width: 700px) { .g4, .g2 { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="top">
+    <div>
+      <div class="eyebrow">PLATFORM OPERATIONS · SRE팀</div>
+      <h1>서비스 운영 대시보드</h1>
+      <div class="sub">2026년 9월 마감 기준 · 데이터 갱신 9월 30일 06:00</div>
+    </div>
+    <div class="tabs"><div>일간</div><div>주간</div><div class="on">월간</div><div>분기</div></div>
+  </div>
+  <div class="strip">
+    <div><span class="l">가용성</span><span class="v num">99.96%</span><span class="d">목표 99.9%</span></div>
+    <div><span class="l">평균 응답시간</span><span class="v num">184ms</span><span class="d">-12ms</span></div>
+    <div><span class="l">배포 성공률</span><span class="v num">97.2%</span><span class="d">+1.1%p</span></div>
+    <div><span class="l">장애</span><span class="v num">4건</span><span class="d warn">전월 +1건</span></div>
+  </div>
+</header>
+
+<main>
+
+  <section class="grid g4">
+    <div class="card kpi">
+      <div class="t">일 평균 요청 수</div>
+      <div class="row"><div class="big num">2.4M</div><div class="chg">+9.3%</div></div>
+      <svg viewBox="0 0 200 44" preserveAspectRatio="none"><polyline points="0,34 28,30 57,27 85,28 114,19 142,15 171,9 200,4" fill="none" stroke="#1428A0" stroke-width="2.5" stroke-linejoin="round"/></svg>
+    </div>
+    <div class="card kpi">
+      <div class="t">오류율</div>
+      <div class="row"><div class="big num">0.21%</div><div class="chg">-0.05%p</div></div>
+      <svg viewBox="0 0 200 44" preserveAspectRatio="none"><polyline points="0,8 28,12 57,10 85,20 114,22 142,28 171,30 200,36" fill="none" stroke="#4B5CC0" stroke-width="2.5" stroke-linejoin="round"/></svg>
+    </div>
+    <div class="card kpi">
+      <div class="t">평균 복구 시간(MTTR)</div>
+      <div class="row"><div class="big num">38분</div><div class="chg bad">+6분</div></div>
+      <svg viewBox="0 0 200 44" preserveAspectRatio="none"><polyline points="0,30 28,28 57,32 85,26 114,24 142,20 171,14 200,10" fill="none" stroke="#B0472F" stroke-width="2.5" stroke-linejoin="round"/></svg>
+    </div>
+    <div class="card kpi" style="flex-direction: row; align-items: center; gap: 18px;">
+      <div style="width: 78px; height: 78px; border-radius: 50%; background: conic-gradient(#1428A0 0 68%, #E1E4EC 68% 100%); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+        <div class="num" style="width: 58px; height: 58px; border-radius: 50%; background: #fff; display: flex; align-items: center; justify-content: center; font-size: 17px; font-weight: 900;">68%</div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+        <div class="t">에러 버짓 소진</div>
+        <div style="font-size: 13px; font-weight: 500;">잔여 32%</div>
+        <div style="font-size: 12px; color: #8B92A2;">월말 예상 81%</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="grid g2">
+    <div class="card">
+      <div>
+        <h2>월별 배포 횟수</h2>
+        <div class="hint">단위: 건 · 2025년 10월~2026년 9월</div>
+      </div>
+      <div class="bars">
+        <div style="height: 34%"></div><div style="height: 38%"></div><div style="height: 36%"></div>
+        <div style="height: 44%"></div><div style="height: 48%"></div><div style="height: 52%" class="mid"></div>
+        <div style="height: 58%" class="mid"></div><div style="height: 62%" class="mid"></div><div style="height: 70%" class="mid"></div>
+        <div style="height: 78%" class="hi"></div><div style="height: 88%" class="hi"></div><div style="height: 100%" class="hi"></div>
+      </div>
+      <div class="months"><span>10</span><span>11</span><span>12</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span></div>
+      <div class="note">CI/CD 파이프라인 개편(6월) 이후 월 배포 횟수가 꾸준히 늘어 9월에는 전년 동월 대비 약 2.9배를 기록했습니다.</div>
+    </div>
+
+    <div class="card">
+      <div>
+        <h2>서비스별 부하</h2>
+        <div class="hint">CPU 평균 사용률 · 9월</div>
+      </div>
+      <div class="list" style="gap: 18px;">
+        <div class="meter"><div class="h"><span>API 게이트웨이</span><b>82%</b></div><div class="track"><i style="width: 82%"></i></div></div>
+        <div class="meter"><div class="h"><span>인증 서비스</span><b>64%</b></div><div class="track"><i style="width: 64%; background: #4B5CC0"></i></div></div>
+        <div class="meter"><div class="h"><span>검색 엔진</span><b>57%</b></div><div class="track"><i style="width: 57%; background: #7C9BFF"></i></div></div>
+        <div class="meter"><div class="h"><span>결제 처리</span><b>41%</b></div><div class="track"><i style="width: 41%; background: #7C9BFF"></i></div></div>
+        <div class="meter"><div class="h"><span>알림 워커</span><b>28%</b></div><div class="track"><i style="width: 28%; background: #C2C8E8"></i></div></div>
+      </div>
+      <div class="note">API 게이트웨이가 80%를 넘어 10월 중 오토스케일 임계값 조정이 필요합니다.</div>
+    </div>
+  </section>
+
+  <section class="grid g2" style="align-items: start;">
+    <div class="card" style="padding-bottom: 14px;">
+      <div>
+        <h2>서비스 상태</h2>
+        <div class="hint">가용성 · 응답시간 · 최근 배포</div>
+      </div>
+      <table>
+        <thead><tr><th>서비스</th><th>가용성</th><th>p95 응답</th><th>최근 배포</th><th>상태</th></tr></thead>
+        <tbody>
+          <tr><td>API 게이트웨이</td><td>99.98%</td><td>142ms</td><td>9월 28일</td><td><span class="pill ok">정상</span></td></tr>
+          <tr><td>인증 서비스</td><td>99.99%</td><td>96ms</td><td>9월 25일</td><td><span class="pill ok">정상</span></td></tr>
+          <tr><td>검색 엔진</td><td>99.91%</td><td>318ms</td><td>9월 22일</td><td><span class="pill wn">주의</span></td></tr>
+          <tr><td>결제 처리</td><td>99.87%</td><td>274ms</td><td>9월 29일</td><td><span class="pill er">점검</span></td></tr>
+          <tr><td>알림 워커</td><td>99.97%</td><td>88ms</td><td>9월 18일</td><td><span class="pill ok">정상</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card dark">
+      <h2>점검 필요</h2>
+      <div class="list">
+        <div class="alert"><i style="background: #E29A80"></i><div><b>결제 처리 가용성 목표 미달</b><span>99.87% · 9월 29일 배포 이후 지연 증가</span></div></div>
+        <div class="alert"><i style="background: #F0C36A"></i><div><b>검색 엔진 p95 응답 300ms 초과</b><span>인덱스 재구성 일정 협의 필요</span></div></div>
+        <div class="alert"><i style="background: #7C9BFF"></i><div><b>인증서 만료 예정 2건</b><span>10월 12일 · 자동 갱신 확인</span></div></div>
+      </div>
+      <div style="margin-top: auto; background: rgba(124,155,255,.14); border-radius: 8px; padding: 16px 18px;">
+        <div style="font-size: 11px; letter-spacing: .14em; color: #98A3D2; font-weight: 700; margin-bottom: 6px;">다음 조치</div>
+        <div style="font-size: 13px; line-height: 1.6; color: #fff;">결제 처리 9월 29일 배포 롤백 여부를 10월 1일 오전 회의에서 결정</div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+</body>
+</html>

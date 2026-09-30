@@ -1,0 +1,119 @@
+{
+  "alert_id": "alert-02",
+  "dag_id": "essd_ft_result_etl",
+  "task_id": "transform_ft_results",
+  "changed_file": "ft_result_transform.py",
+  "sample_file": "data/essd_ft_results_20260926_20260928.csv",
+  "per_date": [
+    {
+      "date": "2026-09-26",
+      "input_rows": 12,
+      "abort_rows": 0,
+      "before": {
+        "success": true,
+        "output_rows": 12,
+        "error": null
+      },
+      "after": {
+        "success": true,
+        "output_rows": 12,
+        "error": null
+      }
+    },
+    {
+      "date": "2026-09-27",
+      "input_rows": 14,
+      "abort_rows": 3,
+      "before": {
+        "success": false,
+        "output_rows": 0,
+        "error": "ValueError: could not convert string to float: 'NA'"
+      },
+      "after": {
+        "success": true,
+        "output_rows": 14,
+        "error": null
+      }
+    },
+    {
+      "date": "2026-09-28",
+      "input_rows": 14,
+      "abort_rows": 1,
+      "before": {
+        "success": false,
+        "output_rows": 0,
+        "error": "ValueError: could not convert string to float: 'NA'"
+      },
+      "after": {
+        "success": true,
+        "output_rows": 14,
+        "error": null
+      }
+    }
+  ],
+  "checks": [
+    {
+      "name": "2026-09-26: 수정 코드가 오류 없이 완료",
+      "pass": true
+    },
+    {
+      "name": "2026-09-26: 입력 행 수와 출력 행 수 일치(행 누락 없음)",
+      "pass": true
+    },
+    {
+      "name": "2026-09-26: 결측 측정값이 임의 값(0 등)으로 대체되지 않음",
+      "pass": true
+    },
+    {
+      "name": "2026-09-26: 정상 측정값이 입력과 동일",
+      "pass": true
+    },
+    {
+      "name": "2026-09-26(정상 일자): 수정 전/후 결과 동일",
+      "pass": true
+    },
+    {
+      "name": "2026-09-27: 수정 코드가 오류 없이 완료",
+      "pass": true
+    },
+    {
+      "name": "2026-09-27: 입력 행 수와 출력 행 수 일치(행 누락 없음)",
+      "pass": true
+    },
+    {
+      "name": "2026-09-27: 결측 측정값이 임의 값(0 등)으로 대체되지 않음",
+      "pass": true
+    },
+    {
+      "name": "2026-09-27: 정상 측정값이 입력과 동일",
+      "pass": true
+    },
+    {
+      "name": "2026-09-27: 수정 전 코드에서 fail 재현",
+      "pass": true
+    },
+    {
+      "name": "2026-09-28: 수정 코드가 오류 없이 완료",
+      "pass": true
+    },
+    {
+      "name": "2026-09-28: 입력 행 수와 출력 행 수 일치(행 누락 없음)",
+      "pass": true
+    },
+    {
+      "name": "2026-09-28: 결측 측정값이 임의 값(0 등)으로 대체되지 않음",
+      "pass": true
+    },
+    {
+      "name": "2026-09-28: 정상 측정값이 입력과 동일",
+      "pass": true
+    },
+    {
+      "name": "2026-09-28: 수정 전 코드에서 fail 재현",
+      "pass": true
+    }
+  ],
+  "passed": 15,
+  "total": 15,
+  "overall": "PASS"
+}

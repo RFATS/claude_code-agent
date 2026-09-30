@@ -1,0 +1,25 @@
+{
+  "alert_id": "alert-01",
+  "judgment": "가성",
+  "evidence": [
+    {"fact": "에러 유형은 ConnectionResetError([Errno 104] Connection reset by peer)로, sftp.get 호출 중 발생한 일시적 네트워크·서버 연결 단절 유형임", "source": "context.json: error_type, error_message, error_location"},
+    {"fact": "1차 시도만 실패(UP_FOR_RETRY)하고 2차 시도에서 SUCCESS로 종결됨(attempt_count 2, max 3). 실패 오류가 매 시도 반복되지 않음(same_error_every_attempt=false, 정정된 값)", "source": "context.json: attempts, attempt_count, final_outcome, retry_succeeded, same_error_every_attempt"},
+    {"fact": "1차 시도 로그에 ConnectionResetError 트레이스백과 UP_FOR_RETRY 표기가, 2차 시도 로그에 오류 없이 SUCCESS 표기가 있어 attempts 필드와 로그가 일치함", "source": "data/logs/log_01_ssd_tester_log_sync_fetch_tester_logs_20260927.txt: 1~9, 13행"},
+    {"fact": "2차 시도 로그에 'downloaded 3 files (FT-T01, FT-T02, FT-T03), 48.2 MB', 반환값 3이 기록됨. 접속 대상 라인 FT-T01,FT-T02,FT-T03 3개와 다운로드 파일 수가 일치함", "source": "data/logs/log_01_ssd_tester_log_sync_fetch_tester_logs_20260927.txt: 2, 10, 11, 12행"},
+    {"fact": "오류는 코드 위치(sftp_fetch.py:44)의 외부 SFTP 전송 호출에서 발생했고, 스키마·데이터 내용 관련 오류는 로그에 없음. 재시도 시 동일 코드가 그대로 성공함", "source": "context.json: error_location; 로그 4~7행, 11행"}
+  ],
+  "referenced_cases": [
+    {"case_id": "PC-037", "decision": "승인", "how_used": "동일 DAG/Task/에러에서 재시도 성공과 다운로드 파일 수 일치 확인으로 가성 종결이 승인됨. 같은 방식으로 파일 수 일치를 근거에 포함함"},
+    {"case_id": "PC-030", "decision": "승인", "how_used": "재시도 성공과 파일 수(테스터 수) 일치를 함께 확인해 종결한 방식을 참고함"},
+    {"case_id": "PC-083", "decision": "승인", "how_used": "에러 번호만 다르고(Errno 54) 같은 유형의 일시 단절 사례로, 재시도 성공과 파일 수 일치 확인 방식을 참고함"},
+    {"case_id": "PC-068", "decision": "불승인", "how_used": "재시도 성공만 보고 가성 종결했다가 파일 수 부족(3개 중 2개)이 확인되지 않아 불승인됨. 이번 건은 로그에서 3개 파일 다운로드를 확인한 뒤 판단함"},
+    {"case_id": "PC-001", "decision": "불승인", "how_used": "결과 파일 수·행 수 검증 없이 종결하면 안 된다는 검토 의견을 반영해 파일 수를 확인함. 행 수는 로그에서 확인 불가라 cautions에 남김"},
+    {"case_id": "PC-018", "decision": "불승인", "how_used": "다른 DAG(essd_ft_result_etl)의 사례이나 같은 검토 의견(재시도 성공만으로 종결 불가)을 반영함"}
+  ],
+  "cautions": [
+    "성공 후 결과 건수 검증은 로그에서 확인 불가: 파일 수(3개)는 로그로 확인했으나, 파일 내용의 행 수·완전성은 확인 불가",
+    "각 테스터 파일의 개별 크기(48.2 MB는 합계) 정상 여부는 확인 불가",
+    "1차 시도 실패 시점에 일부 파일이 부분 다운로드되었는지, 2차 시도가 이를 덮어썼는지는 로그에 없어 확인 불가",
+    "SFTP 서버 측 단절 원인은 입력에 없어 확인 불가"
+  ]
+}

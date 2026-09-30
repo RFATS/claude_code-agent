@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>fail 대응 리포트 - essd_ft_result_etl</title>
+<style>
+  :root {
+    --bg: #f4f6f9; --card: #ffffff; --ink: #1c2430; --muted: #5d6b7c; --line: #dde3ea;
+    --accent: #1f5fbf; --true: #c62828; --true-bg: #fdecea; --ok: #2e7d32; --ok-bg: #e8f5e9;
+    --warn-bg: #fff6e0; --warn: #a66300; --code-bg: #0f1722; --code-ink: #e6edf5;
+    --add-bg: #e6ffed; --del-bg: #ffeef0;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #10161e; --card: #18212c; --ink: #e6edf5; --muted: #98a6b8; --line: #2b3746;
+      --accent: #6aa5ff; --true: #ff8a80; --true-bg: #3a1e1e; --ok: #7bd88f; --ok-bg: #1c3324;
+      --warn-bg: #3a2e12; --warn: #ffc65c; --code-bg: #0a0f16; --code-ink: #e6edf5;
+      --add-bg: #143222; --del-bg: #3a1a20;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.6 "Pretendard", "Malgun Gothic", system-ui, sans-serif; }
+  .wrap { max-width: 920px; margin: 0 auto; padding: 24px 16px 56px; }
+  header { margin-bottom: 20px; }
+  .eyebrow { color: var(--muted); font-size: 13px; letter-spacing: .02em; }
+  h1 { font-size: 24px; margin: 4px 0 10px; }
+  .badges { display: flex; gap: 8px; flex-wrap: wrap; }
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 13px; font-weight: 600; border: 1px solid var(--line); background: var(--card); }
+  .badge.true { color: var(--true); background: var(--true-bg); border-color: transparent; }
+  .badge.ok { color: var(--ok); background: var(--ok-bg); border-color: transparent; }
+  .badge.warn { color: var(--warn); background: var(--warn-bg); border-color: transparent; }
+  section { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 20px 22px; margin-bottom: 16px; }
+  section h2 { font-size: 17px; margin: 0 0 14px; display: flex; align-items: center; gap: 10px; }
+  .num { width: 24px; height: 24px; border-radius: 50%; background: var(--accent); color: #fff; font-size: 13px; display: inline-flex; align-items: center; justify-content: center; }
+  h3 { font-size: 14px; margin: 18px 0 8px; color: var(--muted); }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; width: 130px; white-space: nowrap; }
+  table.grid th { width: auto; background: transparent; }
+  code { font: 13px Consolas, "D2Coding", monospace; }
+  .callout { border-left: 4px solid var(--true); background: var(--true-bg); padding: 12px 14px; border-radius: 6px; margin: 0 0 14px; }
+  .callout strong { color: var(--true); }
+  .callout.warn { border-left-color: var(--warn); background: var(--warn-bg); }
+  .callout.warn strong { color: var(--warn); }
+  ul { margin: 6px 0 0; padding-left: 20px; }
+  li { margin: 3px 0; }
+  pre { margin: 0; background: var(--code-bg); color: var(--code-ink); border-radius: 8px; padding: 12px 0; overflow-x: auto; font: 13px/1.55 Consolas, "D2Coding", monospace; }
+  pre .l { display: block; padding: 0 14px; white-space: pre; }
+  pre .add { background: var(--add-bg); color: inherit; }
+  pre .del { background: var(--del-bg); color: inherit; }
+  @media (prefers-color-scheme: light) { pre .add { background: #1d4d2c; } pre .del { background: #5a2229; } }
+  .file { font: 13px Consolas, monospace; color: var(--muted); margin: 0 0 6px; }
+  .checklist { list-style: none; padding: 0; }
+  .checklist li { display: flex; gap: 10px; align-items: flex-start; padding: 8px 0; border-bottom: 1px solid var(--line); }
+  .box { width: 18px; height: 18px; border: 2px solid var(--muted); border-radius: 4px; flex: none; margin-top: 3px; }
+  .box.done { background: var(--ok); border-color: var(--ok); position: relative; }
+  .box.done::after { content: ""; position: absolute; left: 4px; top: 0; width: 5px; height: 10px; border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg); }
+  .approve { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 14px; align-items: center; }
+  .btn { padding: 8px 18px; border-radius: 8px; border: 1px solid var(--line); font-weight: 600; background: var(--card); color: var(--ink); }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .num-r { text-align: right; font-variant-numeric: tabular-nums; }
+  footer { color: var(--muted); font-size: 12px; text-align: center; margin-top: 20px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Solution PE팀 · Airflow fail 대응 리포트 · 2026-09-30 생성</div>
+    <h1>essd_ft_result_etl / transform_ft_results</h1>
+    <div class="badges">
+      <span class="badge true">진성 fail</span>
+      <span class="badge">원인: ABORT 행 결측 표기 'NA' 미처리 (ValueError)</span>
+      <span class="badge ok">개발단 검증 통과 (15/15)</span>
+      <span class="badge warn">사람 승인 대기</span>
+      <span class="badge warn">보류 권장 · 미확인 항목 있음</span>
+    </div>
+  </header>
+
+  <section>
+    <h2><span class="num">1</span>알림 정보 및 진성/가성 판별</h2>
+    <table>
+      <tr><th>DAG</th><td>essd_ft_result_etl</td></tr>
+      <tr><th>Task</th><td>transform_ft_results</td></tr>
+      <tr><th>Logical date</th><td>2026-09-27 02:00 KST</td></tr>
+      <tr><th>최종 fail 시각</th><td>2026-09-28 02:25:07 KST (재시도 3/3 소진)</td></tr>
+      <tr><th>판별 결과</th><td><strong style="color:var(--true)">진성</strong></td></tr>
+    </table>
+    <h3>재시도 이력</h3>
+    <table class="grid">
+      <thead><tr><th>시도</th><th>시작 시각 (KST)</th><th>결과</th><th>에러</th></tr></thead>
+      <tbody>
+        <tr><td>1 / 3</td><td>2026-09-28 02:15:02</td><td>UP_FOR_RETRY</td><td><code>ValueError: could not convert string to float: 'NA'</code></td></tr>
+        <tr><td>2 / 3</td><td>2026-09-28 02:20:04</td><td>UP_FOR_RETRY</td><td><code>ValueError: could not convert string to float: 'NA'</code></td></tr>
+        <tr><td>3 / 3</td><td>2026-09-28 02:25:06</td><td>FAILED</td><td><code>ValueError: could not convert string to float: 'NA'</code></td></tr>
+      </tbody>
+    </table>
+    <h3>판별 근거</h3>
+    <ul>
+      <li>3회 시도가 모두 동일한 <code>ValueError</code>로 실패했고 재시도 성공 이력이 없습니다(<code>retry_succeeded=false</code>).</li>
+      <li>에러는 네트워크·서버 같은 일시적 오류가 아니라 데이터 값 변환 오류이며, <code>parse_metric</code>의 <code>return float(value)</code>(ft_result_transform.py 23행)에서 발생했습니다.</li>
+      <li>매 시도가 같은 입력 파일(<code>/data/raw/ft_results_2026-09-27.csv</code>)을 읽고 같은 위치에서 실패해, 재시도로 해소되지 않는 구조입니다.</li>
+      <li>재시도가 성공하지 않았으므로 성공 후 결과 건수 검증 대상은 없습니다.</li>
+      <li>같은 DAG/Task에서 결측 표기 문자열 변환 오류가 진성으로 승인된 사례(PC-047)와 동일 메시지 <code>'NA'</code> 사례(PC-088, PC-058)가 있습니다.</li>
+    </ul>
+    <h3>참고한 과거 사례</h3>
+    <table class="grid">
+      <thead><tr><th>case_id</th><th>결정</th><th>어떻게 참고했는지</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>PC-047<br><span style="color:var(--muted);font-size:12px">유사도 0.747 · 같은 DAG/Task</span></td>
+          <td><span class="badge ok">승인</span></td>
+          <td>결측 표기 문자열 변환 오류를 진성으로 본 판단 방식을 참고. 수정 시 결측을 None(NULL)으로 처리하고 ABORT 행 처리 기준을 명시한 방식을 참고. 다만 PC-047은 테스터 SW 업데이트가 원인이었으나 본 건은 ABORT 행에서만 NA가 나타나므로 원인을 SW 변경으로 단정하지 않음.</td>
+        </tr>
+        <tr>
+          <td>PC-088<br><span style="color:var(--muted);font-size:12px">유사도 0.6676 · burnin_summary</span></td>
+          <td><span class="badge ok">승인</span></td>
+          <td>동일 메시지 <code>'NA'</code>의 ValueError를 ABORT 드라이브 측정값 미출력으로 본 원인 유형을 참고(본 건의 CSV에서 NA가 모두 ABORT 행임을 직접 확인). 수정 시 ABORT 행을 유지하고 측정값만 NULL로 저장해 ABORT 건수 집계가 가능하게 한 방식을 참고.</td>
+        </tr>
+        <tr>
+          <td>PC-058<br><span style="color:var(--muted);font-size:12px">유사도 0.6672 · burnin_summary</span></td>
+          <td><span class="badge ok">승인</span></td>
+          <td>PC-088과 같은 유형(ABORT 행 측정값 미출력)과 같은 ABORT 행 NULL 저장 방식을 참고.</td>
+        </tr>
+        <tr>
+          <td>PC-005<br><span style="color:var(--muted);font-size:12px">유사도 0.7968 · 같은 DAG/Task</span></td>
+          <td><span class="badge true">불승인</span></td>
+          <td>동일 <code>'NA'</code> 메시지였으나 fail 일자만 건너뛰는 하드코딩이 불승인됨(데이터가 누락된 채 정상 표시). 일시적 오류로 넘기거나 일자를 우회하는 방식을 피함.</td>
+        </tr>
+        <tr>
+          <td>PC-049<br><span style="color:var(--muted);font-size:12px">유사도 0.7566 · 같은 DAG/Task</span></td>
+          <td><span class="badge true">불승인</span></td>
+          <td>try/except로 0 대체 시 평균 대역폭·지연 통계가 왜곡되어 불승인됨. 0 대체·오류 삼킴을 피하고 NULL 처리 방향으로 반영.</td>
+        </tr>
+        <tr>
+          <td>PC-056<br><span style="color:var(--muted);font-size:12px">유사도 0.7302 · 같은 DAG/Task</span></td>
+          <td><span class="badge true">불승인</span></td>
+          <td>try/except pass로 오류를 숨겨 불승인됨. 같은 이유로 가성 종결과 예외 무시 방식을 피함.</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2><span class="num">2</span>진성 fail 원인 분석</h2>
+    <div class="callout"><strong>근본 원인</strong> · FT 테스터(FT-T03)가 ABORT 판정 드라이브의 측정값 4개 컬럼을 <code>'NA'</code> 문자열로 출력하는데, <code>parse_metric</code>이 결측 표기를 처리하지 않고 <code>float(value)</code>를 그대로 호출해 ValueError가 발생합니다. 입력 파일이 매 재시도 동일해 3회 모두 실패했습니다.</div>
+    <table>
+      <tr><th>에러 발생 위치</th><td><code>ft_result_transform.py</code> 23행 <code>parse_metric()</code> — <code>return float(value)</code><br>호출 경로: <code>essd_ft_result_etl.py:22 run_transform</code> → <code>ft_result_transform.py:46 transform_ft_results</code>(첫 실패 컬럼 <code>read_bw_mbps</code>) → <code>:23 parse_metric</code>. 결함은 호출부의 ABORT 행 처리 부재까지 포함합니다.</td></tr>
+      <tr><th>fail 기간</th><td>logical date 2026-09-27 (실행 2026-09-28 02:15~02:25 KST, 3회 재시도 소진)<br>샘플 CSV 기준 NA 행: 2026-09-27 3건, 2026-09-28 1건. 09-28 데이터는 같은 코드로 다음 실행 시 같은 방식으로 실패할 가능성이 있습니다.</td></tr>
+      <tr><th>영향 테스터</th><td>FT-T03. NA 행 4건이 모두 <code>result=ABORT</code>, <code>bin_code=B99</code>이며 4개 측정 컬럼(read_bw_mbps, write_bw_mbps, read_p99_lat_us, temp_c)이 전부 NA입니다. PASS/FAIL 행 수치는 정상이라 테스터 전체 불량으로 단정할 수 없습니다.</td></tr>
+      <tr><th>영향 LOT</th><td>LOT0927A, LOT0928A (샘플 CSV 기준 NA 행 4건: CSV 14, 20, 22, 28행). 이번 실패 대상인 09-27 파일의 NA 3건은 LOT0927A입니다.</td></tr>
+      <tr><th>후속 영향</th><td>오류 발생 이후 행이 처리되지 않고 출력 파일도 쓰이지 않아, 2026-09-27 전체 14행(샘플 CSV 기준)이 stage에 적재되지 않은 것으로 판단됩니다. ABORT 건수 집계 누락 여부도 확인이 필요합니다.</td></tr>
+    </table>
+    <h3>원인 근거</h3>
+    <ul>
+      <li><code>parse_metric</code>은 검증·결측 처리 없이 <code>float(value)</code>만 호출하고, <code>transform_ft_results</code>는 ABORT 행 예외 분기 없이 4개 측정 컬럼을 모두 <code>parse_metric</code>에 넘깁니다.</li>
+      <li>스택트레이스 줄 번호(essd_ft_result_etl.py:22, ft_result_transform.py:46, :23)가 소스와 일치합니다.</li>
+      <li>샘플 CSV(40행) 검사 결과 ABORT가 아닌 행(PASS, FAIL)에는 비수치 값이 없습니다.</li>
+    </ul>
+    <h3>수정 방침</h3>
+    <ul>
+      <li>ABORT 행에 한해 결측 표기 <code>'NA'</code>를 None(NULL)으로 변환합니다. ABORT 행은 제외하지 않고 그대로 출력해 ABORT 건수 집계를 유지합니다.</li>
+      <li>PASS/FAIL 행의 비수치 값은 기존처럼 ValueError로 남겨 검증을 유지합니다.</li>
+      <li>0 대체, 오류 삼킴, 특정 일자 우회는 과거 불승인 사례(PC-049, PC-056, PC-005)와 같은 사유로 택하지 않습니다.</li>
+    </ul>
+    <h3>확인 불가 항목</h3>
+    <ul>
+      <li>'NA' 발생 원인(FT-T03 동작·테스터 SW 여부)과 ABORT 원인 자체는 확인 불가입니다.</li>
+      <li>실제 운영 원본(<code>/data/raw</code>)은 확인 불가이며, 위 수치는 샘플 CSV(<code>data/essd_ft_results_20260926_20260928.csv</code>) 기준입니다.</li>
+      <li>09-27 데이터의 stage 적재 결과는 로그상 확인 불가입니다(미적재로 판단).</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2><span class="num">3</span>수정 코드 변경 내역</h2>
+    <p class="file">dags/ft_result_transform.py (+16 / −6)</p>
+<pre><span class="l">@@ -3,6 +3,8 @@</span>
+<span class="l"> from datetime import datetime</span>
+<span class="l"> </span>
+<span class="l"> VALID_RESULT = {"PASS", "FAIL", "ABORT"}</span>
+<span class="l add">+# ABORT 드라이브는 측정값을 출력하지 못해 결측 표기 'NA'로 내보낸다.</span>
+<span class="l add">+MISSING_MARKERS = {"NA"}</span>
+<span class="l"> OUT_FIELDS = [</span>
+<span class="l">     "lot_id",</span>
+<span class="l">     "drive_sn",</span>
+<span class="l">@@ -18,9 +20,15 @@</span>
+<span class="l"> ]</span>
+<span class="l"> </span>
+<span class="l"> </span>
+<span class="l del">-def parse_metric(value):</span>
+<span class="l del">-    """테스트 측정값 문자열을 float로 변환한다."""</span>
+<span class="l add">+def parse_metric(value, allow_missing=False):</span>
+<span class="l add">+    """테스트 측정값 문자열을 float로 변환한다.</span>
+<span class="l add">+</span>
+<span class="l add">+    allow_missing=True(ABORT 행)일 때만 결측 표기('NA')를 None(NULL)으로 반환한다.</span>
+<span class="l add">+    그 외의 비수치 값은 기존과 같이 ValueError를 발생시킨다.</span>
+<span class="l add">+    """</span>
+<span class="l add">+    if allow_missing and value.strip() in MISSING_MARKERS:</span>
+<span class="l add">+        return None</span>
+<span class="l">     return float(value)</span>
+<span class="l"> </span>
+<span class="l"> </span>
+<span class="l"> def parse_test_date(value):</span>
+<span class="l">@@ -34,6 +42,8 @@ def transform_ft_results(input_path, output_path):</span>
+<span class="l">         for row in csv.DictReader(f):</span>
+<span class="l">             if row["result"] not in VALID_RESULT:</span>
+<span class="l">                 raise ValueError(f"unknown result: {row['result']}")</span>
+<span class="l add">+            # 결측(NA)은 ABORT 행에서만 NULL로 허용한다. PASS/FAIL의 결측은 계속 오류.</span>
+<span class="l add">+            allow_missing = row["result"] == "ABORT"</span>
+<span class="l">             rows.append(</span>
+<span class="l">                 {</span>
+<span class="l">                     "lot_id": row["lot_id"],</span>
+<span class="l">@@ -43,10 +53,10 @@ def transform_ft_results(input_path, output_path):</span>
+<span class="l">                     "test_date": parse_test_date(row["test_date"]).isoformat(),</span>
+<span class="l">                     "result": row["result"],</span>
+<span class="l">                     "bin_code": row["bin_code"],</span>
+<span class="l del">-                    "read_bw_mbps": parse_metric(row["read_bw_mbps"]),</span>
+<span class="l del">-                    "write_bw_mbps": parse_metric(row["write_bw_mbps"]),</span>
+<span class="l del">-                    "read_p99_lat_us": parse_metric(row["read_p99_lat_us"]),</span>
+<span class="l del">-                    "temp_c": parse_metric(row["temp_c"]),</span>
+<span class="l add">+                    "read_bw_mbps": parse_metric(row["read_bw_mbps"], allow_missing),</span>
+<span class="l add">+                    "write_bw_mbps": parse_metric(row["write_bw_mbps"], allow_missing),</span>
+<span class="l add">+                    "read_p99_lat_us": parse_metric(row["read_p99_lat_us"], allow_missing),</span>
+<span class="l add">+                    "temp_c": parse_metric(row["temp_c"], allow_missing),</span>
+<span class="l">                 }</span>
+<span class="l">             )</span>
+<span class="l"> </span></pre>
+    <h3>변경 요약</h3>
+    <ul>
+      <li><code>parse_metric(value, allow_missing=False)</code>: <code>allow_missing</code>이고 값이 <code>'NA'</code>(<code>MISSING_MARKERS</code>)이면 None을 반환하고, 그 외는 기존 <code>float(value)</code> 그대로입니다.</li>
+      <li><code>transform_ft_results</code>: <code>result == 'ABORT'</code>일 때만 4개 측정 컬럼에 <code>allow_missing</code>을 전달합니다. 기본값이 False이므로 PASS/FAIL 행과 수치가 있는 행의 처리 결과는 변경 없습니다.</li>
+    </ul>
+    <h3>택하지 않은 방식과 이유</h3>
+    <table class="grid">
+      <thead><tr><th>방식</th><th>택하지 않은 이유</th></tr></thead>
+      <tbody>
+        <tr><td>변환 실패 시 0으로 대체(try/except)</td><td>PC-049 불승인: 평균 대역폭·지연 통계 왜곡, 오류를 삼킴</td></tr>
+        <tr><td>try/except pass로 예외 무시 후 다음 행 진행</td><td>PC-056 불승인: 원인이 숨겨지고 검증에서도 드러나지 않음</td></tr>
+        <tr><td>fail 일자(2026-09-27)만 건너뛰는 하드코딩</td><td>PC-005 불승인: 데이터가 누락된 채 정상으로 표시됨</td></tr>
+        <tr><td>ABORT 행을 출력에서 조용히 제외</td><td>ABORT 건수 집계 누락 우려. 승인 사례 PC-088/PC-058은 행을 유지하고 NULL로 저장</td></tr>
+        <tr><td>result와 무관하게 모든 행의 'NA'를 None 처리</td><td>PASS/FAIL 행의 결측은 이상 징후이므로 검증을 완화하지 않고 계속 오류로 드러냄</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2><span class="num">4</span>검증 결과 및 배포 승인 요청</h2>
+    <h3>개발단 검증 (샘플 CSV로 수정 전/후 코드 실행)</h3>
+    <table class="grid">
+      <thead><tr><th>대상 일자</th><th class="num-r">입력 행 수</th><th class="num-r">ABORT 행</th><th>수정 전</th><th class="num-r">수정 후 출력 행 수</th><th>결과</th></tr></thead>
+      <tbody>
+        <tr><td>2026-09-26 (정상 일자)</td><td class="num-r">12</td><td class="num-r">0</td><td>정상 (출력 12행)</td><td class="num-r">12</td><td><span class="badge ok">통과</span></td></tr>
+        <tr><td>2026-09-27</td><td class="num-r">14</td><td class="num-r">3</td><td>ValueError 'NA' (출력 0행)</td><td class="num-r">14</td><td><span class="badge ok">통과</span></td></tr>
+        <tr><td>2026-09-28</td><td class="num-r">14</td><td class="num-r">1</td><td>ValueError 'NA' (출력 0행)</td><td class="num-r">14</td><td><span class="badge ok">통과</span></td></tr>
+      </tbody>
+    </table>
+    <ul>
+      <li>검증 항목 <strong>15 / 15 통과</strong> (전체 결과 PASS, 일자별 5/5).</li>
+      <li>수정 전 코드에서 09-27, 09-28의 fail이 재현되고, 수정 후에는 오류 없이 완료됩니다.</li>
+      <li>입력 행 수와 출력 행 수가 일치하며(행 누락 없음), 결측 측정값이 0 등 임의 값으로 대체되지 않고, 정상 측정값은 입력과 동일합니다.</li>
+      <li>정상 일자(09-26)의 수정 전/후 결과가 동일하여 기존 동작에 영향이 없습니다.</li>
+      <li>검증 입력은 샘플 CSV(<code>data/essd_ft_results_20260926_20260928.csv</code>)이며, 운영 원본(<code>/data/raw</code>) 기준 검증은 아닙니다.</li>
+    </ul>
+    <div class="callout warn" style="margin-top:14px"><strong>미확인 항목 (자동 검증 범위 밖)</strong>
+      <ul>
+        <li>출력 CSV에서 None은 빈 문자열로 기록됩니다(<code>csv.DictWriter</code> 동작). 하위 stage 적재 Task가 빈 값을 NULL로 해석하는지 <strong>확인 불가</strong>.</li>
+        <li>ABORT 건수의 별도 집계는 이 파일 범위 밖이므로 하위 집계 영향은 <strong>확인 불가</strong>.</li>
+        <li><code>'NA'</code> 이외 결측 표기(<code>'-'</code>, <code>'N/A'</code> 등)는 이번 원인이 아니어서 처리하지 않았습니다. 필요 시 별도 판단이 필요합니다.</li>
+      </ul>
+    </div>
+    <h3>PR 설명 요약</h3>
+    <table>
+      <tr><th>제목</th><td>fix: FT 결과 변환 시 ABORT 행의 'NA' 측정값을 NULL로 처리</td></tr>
+      <tr><th>변경 파일</th><td>dags/ft_result_transform.py</td></tr>
+      <tr><th>재처리 필요</th><td>merge 후 logical date 2026-09-27 DAG run Clear로 재실행 필요. 2026-09-28 데이터도 ABORT NA 1건(샘플 CSV 기준)이 있어 수정 반영 전에는 같은 방식으로 실패할 수 있습니다(해당 run의 운영 상태는 산출물로 확인 불가).</td></tr>
+    </table>
+    <h3>merge 승인 체크 항목</h3>
+    <ul class="checklist">
+      <li><span class="box done"></span><span>샘플 데이터(09-26, 09-27, 09-28) 검증 15/15가 모두 통과했다 (자동 검증 완료)</span></li>
+      <li><span class="box done"></span><span>ABORT 행의 결측 측정값이 0 등 임의 값으로 대체되지 않고 입력·출력 행 수가 일치한다 (자동 검증 완료)</span></li>
+      <li><span class="box done"></span><span>정상 일자(09-26) 결과가 수정 전 코드와 동일하다 (자동 검증 완료)</span></li>
+      <li><span class="box"></span><span>수정 코드가 fail 원인(ABORT 행의 'NA' 결측 표기)만 다루고 PASS/FAIL 행의 검증을 완화하지 않았음을 코드 리뷰로 확인했다</span></li>
+      <li><span class="box"></span><span>하위 stage 적재 Task가 빈 문자열을 NULL로 해석함을 확인했다 (확인 필요)</span></li>
+      <li><span class="box"></span><span>ABORT 건수 별도 집계에 영향이 없음을 확인했다 (확인 필요)</span></li>
+      <li><span class="box"></span><span>merge 후 2026-09-27 운영 DAG run 재실행과 2026-09-28 대상 확인 계획을 확인했다</span></li>
+    </ul>
+    <div class="approve">
+      <span class="badge warn">보류 권장</span>
+      <span class="btn primary">승인 (merge 진행)</span>
+      <span class="btn">보류 / 수정 요청</span>
+      <span style="color:var(--muted);font-size:13px">승인 상태: 승인 대기 · 승인 담당: Solution PE팀 담당자</span>
+    </div>
+    <p style="color:var(--muted);font-size:13px;margin:10px 0 0">보류 권장 사유: 하위 stage 적재 Task의 빈 값 해석과 ABORT 집계 영향이 확인되지 않았습니다. 최종 승인/보류 결정은 사람이 합니다.</p>
+  </section>
+
+  <footer>이 리포트는 Agent가 생성했으며, merge 및 운영 배포는 사람의 승인 후에만 진행됩니다.</footer>
+</div>
+</body>
+</html>

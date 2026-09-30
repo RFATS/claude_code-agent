@@ -1,0 +1,69 @@
+{
+  "alert_id": "alert-04",
+  "changed_file": "ft_result_transform.py",
+  "approach": "ABORT 판정 행에 한해 결측 표기 'NA'를 0이 아닌 None(NULL)으로 변환하도록 parse_metric에 명시적 옵션을 추가하고, 그 외 값·result에서는 기존처럼 ValueError가 나도록 유지한다.",
+  "changes": [
+    "parse_metric(value)를 parse_metric(value, allow_missing=False)로 확장: allow_missing=True이고 value == 'NA'일 때만 None을 반환하고, 그 외에는 기존과 동일하게 float(value)를 호출(기본값 False라 다른 호출부 동작 불변)",
+    "모듈 상수 추가: MISSING_MARKER = 'NA', NULLABLE_RESULTS = {'ABORT'}, METRIC_FIELDS(4개 측정 컬럼). 결측 허용 범위를 한 곳에서 명시",
+    "transform_ft_results에서 행마다 allow_missing = (result in NULLABLE_RESULTS)를 계산해 4개 측정 컬럼(read_bw_mbps, write_bw_mbps, read_p99_lat_us, temp_c) 모두 parse_metric에 전달. result 유효성 검사(unknown result ValueError)와 나머지 컬럼 변환 로직은 그대로",
+    "결측이 조용히 사라지지 않도록, NULL로 저장된 행이 있으면 건수를 logging.warning으로 남김(함수 반환값은 len(rows) 그대로라 DAG 파일 essd_ft_result_etl.py는 수정 불필요, ABORT 행도 제외하지 않고 출력에 포함)",
+    "NA 허용을 ABORT로만 한정한 이유: 샘플 CSV의 NA 4행은 모두 ABORT/B99/FT-T03이며 FAIL 행은 전부 숫자값이 있음. 승인 사례 PC-047은 'ABORT/FAIL이면 NULL 허용'이었으나, 근거 없이 범위를 넓히지 않고 FAIL/PASS 행의 NA는 계속 ValueError로 드러나게 함. 확장이 필요하면 NULLABLE_RESULTS에 'FAIL'을 추가하면 됨(사람 판단 필요)",
+    "'NA' 이외 결측 표기('-', 'N/A' 등 과거 사례에서 나온 표기)는 이번 fail 원인이 아니므로 처리 대상에 넣지 않음. 해당 표기가 오면 ValueError로 계속 드러남",
+    "검증 필요 항목 1: 09-28 원본 CSV(28행 ABORT/NA 1건 포함)로 transform_ft_results가 오류 없이 14행을 출력하고 해당 행의 4개 측정 컬럼이 빈 값(NULL)으로 저장되는지 확인",
+    "검증 필요 항목 2: 09-26(NA 없음)·09-27(ABORT NA 3건)·09-28 샘플 CSV에서, 비 ABORT 행의 출력 값이 수정 전 코드 결과와 동일한지(NA 없는 09-26 전체 출력 동일) 확인",
+    "검증 필요 항목 3: result가 PASS/FAIL인 행에 'NA'가 있는 입력이 여전히 ValueError('NA')를 내는지, 알 수 없는 result가 여전히 ValueError('unknown result')를 내는지 확인",
+    "검증 필요 항목 4: csv.DictWriter가 None을 빈 문자열로 쓰므로 stage CSV에서 NULL은 빈 값으로 표현됨. 실제 DW 적재(load_to_dw)가 빈 값을 NULL로 적재하는지, 평균 대역폭·지연 집계가 NULL을 제외하고 계산하는지는 제공된 코드(load_to_dw는 print만 수행)로 확인 불가",
+    "검증 필요 항목 5: PC-088/PC-058 승인 기준의 'ABORT 건수 별도 집계'는 이 변환 파일 범위 밖이라 구현하지 않고 경고 로그 건수만 남김. 별도 집계 필요 여부는 사람 판단 필요",
+    "검증 필요 항목 6: 2026-09-28 배치(logical_date 2026-09-28) 재처리 필요. 09-27 데이터의 NA 3행이 당시 어떻게 처리되었는지는 로그 부재로 확인 불가하므로 재처리 대상 일자 확인 필요"
+  ],
+  "referenced_cases": [
+    {
+      "case_id": "PC-047",
+      "decision": "승인",
+      "how_used": "동일 DAG/Task 사례. 결측 표기를 0이 아닌 None(NULL)으로 변환하고 ABORT 행에서만 허용하는 기준, 재처리 일자 정리 방식을 참고함. 허용 result 범위는 이번 데이터 근거에 맞춰 ABORT로 좁힘"
+    },
+    {
+      "case_id": "PC-088",
+      "decision": "승인",
+      "how_used": "동일 'NA' 메시지·ABORT 드라이브 측정값 미출력 유형. ABORT 행 측정값을 NULL로 저장하는 방식을 참고하고, ABORT 행을 제외하지 않고 건수를 경고 로그로 남김"
+    },
+    {
+      "case_id": "PC-058",
+      "decision": "승인",
+      "how_used": "PC-088과 같은 유형으로 ABORT 행 NULL 저장 방식의 근거를 보강"
+    },
+    {
+      "case_id": "PC-005",
+      "decision": "불승인",
+      "how_used": "특정 일자 하드코딩 우회 불승인 사유를 확인하고, 날짜 조건 없이 result/값 기준의 일반 규칙으로만 수정"
+    },
+    {
+      "case_id": "PC-049",
+      "decision": "불승인",
+      "how_used": "결측을 0으로 대체해 통계가 왜곡된 불승인 사유를 확인하고, 0 대체 없이 NULL로 저장. 검토 의견의 'NULL 처리' 방향과도 일치"
+    },
+    {
+      "case_id": "PC-056",
+      "decision": "불승인",
+      "how_used": "try/except: pass로 예외를 삼킨 불승인 사유를 확인하고, 예외 처리 없이 'NA' 값을 명시적으로 비교해 처리. 그 외 값은 ValueError가 그대로 발생"
+    }
+  ],
+  "avoided_approaches": [
+    {
+      "approach": "변환 실패 시 결측값을 0으로 대체(try/except로 float 실패 시 0.0)",
+      "reason": "PC-049 불승인: 결측을 0으로 채우면 평균 대역폭·지연 통계가 왜곡되고 오류가 숨겨짐"
+    },
+    {
+      "approach": "try/except: pass 등으로 예외를 무시하고 다음 행으로 진행(오류 행 조용히 제외)",
+      "reason": "PC-056 불승인: 오류를 삼키면 원인이 숨겨지고 검증에서도 드러나지 않음. 이번 수정은 ABORT 행을 제외하지 않고 NULL로 출력에 포함"
+    },
+    {
+      "approach": "fail 일자(2026-09-28) 또는 특정 테스터(FT-T03)/LOT만 건너뛰는 하드코딩 예외",
+      "reason": "PC-005 불승인: 특정 일자를 우회하면 데이터가 누락된 채 정상으로 표시됨. 09-27에도 동일 NA 패턴이 있어 일자 특이 문제도 아님"
+    },
+    {
+      "approach": "parse_metric에서 모든 result에 대해 'NA'(또는 변환 불가 값 전반)를 None으로 허용하거나, result 유효성 검사를 제거/완화",
+      "reason": "검증 제거에 해당. PASS/FAIL 행의 실제 데이터 이상은 계속 ValueError로 드러나야 하며, 근거는 ABORT 행에 한정됨"
+    }
+  ]
+}

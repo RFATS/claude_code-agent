@@ -1,0 +1,67 @@
+{
+  "alert_id": "alert-02",
+  "judgment": "진성",
+  "evidence": [
+    {
+      "fact": "3회 시도 모두 동일한 오류(ValueError: could not convert string to float: 'NA')로 실패했고 재시도는 소진됨(3 of 3, FAILED)",
+      "source": "context.json: attempts, same_error_every_attempt, final_outcome"
+    },
+    {
+      "fact": "재시도 성공 없음(retry_succeeded=false)",
+      "source": "context.json: retry_succeeded"
+    },
+    {
+      "fact": "오류는 네트워크·서버 등 일시적 오류가 아니라 데이터 값 변환 오류이며, parse_metric의 return float(value) (ft_result_transform.py 23행)에서 발생",
+      "source": "context.json: error_type, error_location"
+    },
+    {
+      "fact": "매 시도마다 같은 입력 파일(/data/raw/ft_results_2026-09-27.csv)을 읽고 같은 위치에서 실패함. 입력 데이터에 'NA' 값이 있어 재시도로 해소되지 않는 구조",
+      "source": "data/logs/log_02_essd_ft_result_etl_transform_ft_results_20260927.txt: 각 attempt의 read 라인 및 Traceback"
+    },
+    {
+      "fact": "동일 DAG/Task에서 측정 불가 값('-')이 변환 실패한 사례가 진성으로 승인됨",
+      "source": "similar_cases.json: approved PC-047"
+    },
+    {
+      "fact": "동일한 'NA' 메시지의 ValueError가 진성으로 승인된 사례 존재(ABORT 판정 드라이브의 측정값 미출력)",
+      "source": "similar_cases.json: approved PC-088, PC-058"
+    }
+  ],
+  "referenced_cases": [
+    {
+      "case_id": "PC-047",
+      "decision": "승인",
+      "how_used": "같은 DAG/Task에서 결측 표기 문자열로 인한 변환 오류를 진성으로 본 판단 방식을 참고. 조치가 0 대체가 아닌 NULL 처리였다는 점은 후속 조치 시 주의점으로만 참고(본 분류에서는 조치 제안 안 함)."
+    },
+    {
+      "case_id": "PC-088",
+      "decision": "승인",
+      "how_used": "동일 메시지('NA')의 ValueError를 데이터 표기 문제로 보고 진성 판정한 방식을 참고"
+    },
+    {
+      "case_id": "PC-058",
+      "decision": "승인",
+      "how_used": "동일 메시지('NA')의 ValueError를 데이터 표기 문제로 보고 진성 판정한 방식을 참고"
+    },
+    {
+      "case_id": "PC-005",
+      "decision": "불승인",
+      "how_used": "판정(진성) 자체는 같았으나 불승인 사유는 조치(특정 일자 우회)였음. 우회하면 데이터가 누락된 채 정상 표시될 수 있으므로 일시적 오류로 넘기거나 건너뛰는 판단을 하지 않고 신중히 진성으로 분류"
+    },
+    {
+      "case_id": "PC-049",
+      "decision": "불승인",
+      "how_used": "불승인 사유는 0 대체·오류 삼킴이 통계를 왜곡한다는 것. 재시도나 우회로 종결하지 않고 진성으로 분류하는 근거로 반영"
+    },
+    {
+      "case_id": "PC-056",
+      "decision": "불승인",
+      "how_used": "불승인 사유는 try/except pass로 오류를 숨긴 점. 같은 이유로 가성 종결을 피함"
+    }
+  ],
+  "cautions": [
+    "'NA' 값이 CSV의 어느 행/컬럼에서 나왔는지, 그리고 그 행의 result(ABORT/FAIL 등) 값은 로그에서 확인 불가. 로그에는 read_bw_mbps 컬럼 변환 중 실패했다는 것만 있음.",
+    "재시도가 성공하지 않았으므로 성공 후 결과 건수 검증 대상은 없음. 성공 후 결과 건수 검증은 로그에서 확인 불가.",
+    "'NA' 발생 원인(테스터 SW 변경, ABORT 행 등)은 입력 자료에서 확인 불가. 원인 분석은 본 단계 범위 밖이므로 사람이 확인 필요."
+  ]
+}

@@ -1,0 +1,37 @@
+[Airflow Alert] Task failed
+DAG: ssd_tester_log_sync
+Task: fetch_tester_logs
+Logical date: 2026-09-27 02:00 KST
+Failed at: 2026-09-27 02:10:43 KST
+Try: 1 of 3
+Log: http://airflow.example.internal/log?dag_id=ssd_tester_log_sync&task_id=fetch_tester_logs (logs/log_01_ssd_tester_log_sync_fetch_tester_logs_20260927.txt)
+
+--------------------------------------------------
+
+[Airflow Alert] Task failed
+DAG: essd_ft_result_etl
+Task: transform_ft_results
+Logical date: 2026-09-27 02:00 KST
+Failed at: 2026-09-28 02:25:07 KST
+Try: 3 of 3 (retries exhausted)
+Log: http://airflow.example.internal/log?dag_id=essd_ft_result_etl&task_id=transform_ft_results (logs/log_02_essd_ft_result_etl_transform_ft_results_20260927.txt)
+
+--------------------------------------------------
+
+[Airflow Alert] Task failed
+DAG: yield_report_mail
+Task: send_daily_yield_report
+Logical date: 2026-09-28 02:00 KST
+Failed at: 2026-09-28 07:30:12 KST
+Try: 1 of 3
+Log: http://airflow.example.internal/log?dag_id=yield_report_mail&task_id=send_daily_yield_report (logs/log_03_yield_report_mail_send_daily_yield_report_20260928.txt)
+
+--------------------------------------------------
+
+[Airflow Alert] Task failed
+DAG: essd_ft_result_etl
+Task: transform_ft_results
+Logical date: 2026-09-28 02:00 KST
+Failed at: 2026-09-29 02:25:07 KST
+Try: 3 of 3 (retries exhausted)
+Log: http://airflow.example.internal/log?dag_id=essd_ft_result_etl&task_id=transform_ft_results (logs/log_04_essd_ft_result_etl_transform_ft_results_20260928.txt)

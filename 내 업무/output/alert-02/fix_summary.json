@@ -1,0 +1,27 @@
+{
+  "alert_id": "alert-02",
+  "changed_file": "ft_result_transform.py",
+  "approach": "ABORT 행에 한해 측정값의 결측 표기 'NA'를 None(NULL)으로 변환하도록 parse_metric에 allow_missing 옵션을 추가하고, transform_ft_results가 result가 ABORT일 때만 이를 허용하게 했다. PASS/FAIL 행의 비수치 값은 기존처럼 ValueError로 남겨 검증을 유지한다.",
+  "changes": [
+    "parse_metric(value, allow_missing=False): allow_missing이고 값이 'NA'(MISSING_MARKERS)이면 None 반환, 그 외는 기존 float(value) 그대로",
+    "MISSING_MARKERS = {\"NA\"} 상수 추가",
+    "transform_ft_results: allow_missing = (result == 'ABORT')를 계산해 4개 측정 컬럼의 parse_metric 호출에 전달. ABORT 행은 제외하지 않고 result/bin_code 등과 함께 그대로 출력하여 ABORT 건수 집계가 유지됨",
+    "기본값 allow_missing=False이므로 PASS/FAIL 행 및 수치가 있는 행의 처리 결과는 변경 없음",
+    "검증 필요 항목: 출력 CSV에서 None은 빈 문자열로 기록됨(csv.DictWriter 동작). 하위 stage 적재 Task가 빈 값을 NULL로 해석하는지 확인 필요",
+    "검증 필요 항목: 2026-09-27, 09-28 파일 재실행 시 ABORT 행이 출력에 포함되고 행 수(09-27 샘플 14행)가 유지되는지, 정상 일자(09-26) 출력이 수정 전과 동일한지 확인 필요",
+    "검증 필요 항목: 'NA' 이외 결측 표기('-', 'N/A' 등)는 이번 원인이 아니므로 처리하지 않음. 필요 시 별도 판단",
+    "검증 필요 항목: ABORT 건수의 별도 집계는 이 파일 범위 밖이므로 하위 집계 영향 확인 필요"
+  ],
+  "referenced_cases": [
+    {"case_id": "PC-047", "decision": "승인", "how_used": "동일 DAG/Task에서 결측 표기를 None(NULL)으로 처리하고 ABORT 행 처리 기준을 명시한 방식을 참고"},
+    {"case_id": "PC-088", "decision": "승인", "how_used": "ABORT 행 측정값을 NULL로 저장하고 행을 유지해 ABORT 건수 집계가 가능하게 한 방식을 참고"},
+    {"case_id": "PC-058", "decision": "승인", "how_used": "PC-088과 동일한 ABORT 행 NULL 저장 방식 참고"}
+  ],
+  "avoided_approaches": [
+    {"approach": "변환 실패 시 0으로 대체(try/except)", "reason": "PC-049 불승인: 평균 대역폭·지연 통계 왜곡, 오류를 삼킴"},
+    {"approach": "try/except pass로 예외 무시 후 다음 행 진행", "reason": "PC-056 불승인: 원인이 숨겨지고 검증에서도 드러나지 않음"},
+    {"approach": "fail 일자(2026-09-27)만 건너뛰는 하드코딩", "reason": "PC-005 불승인: 데이터가 누락된 채 정상으로 표시됨"},
+    {"approach": "ABORT 행을 출력에서 조용히 제외", "reason": "ABORT 건수 집계 누락 우려. 승인 사례 PC-088/PC-058은 행을 유지하고 NULL로 저장"},
+    {"approach": "result와 무관하게 모든 행의 'NA'를 None 처리", "reason": "PASS/FAIL 행의 결측은 이상 징후이므로 검증을 완화하지 않고 계속 오류로 드러냄"}
+  ]
+}

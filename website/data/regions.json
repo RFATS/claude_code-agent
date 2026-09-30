@@ -1,0 +1,1018 @@
+{
+  "_note": "verified=true 는 법정동코드표(MCP 내장)와 실제 API(2026-09-30 실측)로 확인된 코드. 구가 있는 시의 상위 코드(수원·성남·안양·부천·안산·고양·용인·화성)와 폐지된 옛 인천 코드는 모든 달에 0건이라 unusable 로 분리했다 — 과거 거래도 새 구 코드로 재매핑되므로 항상 구 코드를 조회한다. 인천 제물포·영종·서해·검단구(2026-07 신설)는 MCP 내장 코드표에는 아직 없어 API 탐색으로 찾았다. 인천 옹진군은 조회한 6개 달 모두 0건(아파트 거래가 거의 없음)이라 verified:false.",
+  "sigungu": [
+    {
+      "code": "11110",
+      "name": "서울 종로구",
+      "group": "seoul",
+      "verified": true
+    },
+    {
+      "code": "11140",
+      "name": "서울 중구",
+      "group": "seoul",
+      "verified": true
+    },
+    {
+      "code": "11170",
+      "name": "서울 용산구",
+      "group": "seoul",
+      "verified": true
+    },
+    {
+      "code": "11200",
+      "name": "서울 성동구",
+      "group": "seoul",
+      "verified": true
+    },
+    {
+      "code": "11215",
+      "name": "서울 광진구",
+      "group": "seoul",
+      "verified": true
+    },
+    {
+      "code": "11230",
+      "name": "서울 동대문구",
+      "group": "seoul",
+      "verified": true
+    },
+    {
+      "code": "11260",
+      "name": "서울 중랑구",
+      "group": "seoul",
+      "verified": true
+    },
+    {
+      "code": "11290",
+      "name": "서울 성북구",
+      "group": "seoul",
+      "verified": true
+    },
+    {
+      "code": "11305",
+      "name": "서울 강북구",
+      "group": "seoul",
+      "verified": true
+    },
+    {
+      "code": "11320",
+      "name": "서울 도봉구",
+      "group": "seoul",
+      "verified": true
+    },
+    {
+      "code": "11350",
+      "name": "서울 노원구",
+      "group": "seoul",
+      "verified": true
+    },
+    {
+      "code": "11380",
+      "name": "서울 은평구",
+      "group": "seoul",
+      "verified": true
+    },
+    {
+      "code": "11410",
+      "name": "서울 서대문구",
+      "group": "seoul",
+      "verified": true
+    },
+    {
+      "code": "11440",
+      "name": "서울 마포구",
+      "group": "seoul",
+      "verified": true
+    },
+    {
+      "code": "11470",
+      "name": "서울 양천구",
+      "group": "seoul",
+      "verified": true
+    },
+    {
+      "code": "11500",
+      "name": "서울 강서구",
+      "group": "seoul",
+      "verified": true
+    },
+    {
+      "code": "11530",
+      "name": "서울 구로구",
+      "group": "seoul",
+      "verified": true
+    },
+    {
+      "code": "11545",
+      "name": "서울 금천구",
+      "group": "seoul",
+      "verified": true
+    },
+    {
+      "code": "11560",
+      "name": "서울 영등포구",
+      "group": "seoul",
+      "verified": true
+    },
+    {
+      "code": "11590",
+      "name": "서울 동작구",
+      "group": "seoul",
+      "verified": true
+    },
+    {
+      "code": "11620",
+      "name": "서울 관악구",
+      "group": "seoul",
+      "verified": true
+    },
+    {
+      "code": "11650",
+      "name": "서울 서초구",
+      "group": "seoul",
+      "verified": true
+    },
+    {
+      "code": "11680",
+      "name": "서울 강남구",
+      "group": "seoul",
+      "verified": true
+    },
+    {
+      "code": "11710",
+      "name": "서울 송파구",
+      "group": "seoul",
+      "verified": true
+    },
+    {
+      "code": "11740",
+      "name": "서울 강동구",
+      "group": "seoul",
+      "verified": true
+    },
+    {
+      "code": "28125",
+      "name": "인천 제물포구",
+      "group": "incheon",
+      "verified": true,
+      "note": "옛 중구 내륙 + 동구(송림·송현·만석·신흥동 등)"
+    },
+    {
+      "code": "28155",
+      "name": "인천 영종구",
+      "group": "incheon",
+      "verified": true,
+      "note": "옛 중구 영종도(중산·운남·운서동)"
+    },
+    {
+      "code": "28177",
+      "name": "인천 미추홀구",
+      "group": "incheon",
+      "verified": true
+    },
+    {
+      "code": "28185",
+      "name": "인천 연수구",
+      "group": "incheon",
+      "verified": true
+    },
+    {
+      "code": "28200",
+      "name": "인천 남동구",
+      "group": "incheon",
+      "verified": true
+    },
+    {
+      "code": "28237",
+      "name": "인천 부평구",
+      "group": "incheon",
+      "verified": true
+    },
+    {
+      "code": "28245",
+      "name": "인천 계양구",
+      "group": "incheon",
+      "verified": true
+    },
+    {
+      "code": "28275",
+      "name": "인천 서해구",
+      "group": "incheon",
+      "verified": true,
+      "note": "옛 서구 남부(청라·가정·신현·석남·검암동 등)"
+    },
+    {
+      "code": "28290",
+      "name": "인천 검단구",
+      "group": "incheon",
+      "verified": true,
+      "note": "옛 서구 북부(당하·원당·불로·마전·왕길동 등)"
+    },
+    {
+      "code": "28710",
+      "name": "인천 강화군",
+      "group": "incheon",
+      "verified": true
+    },
+    {
+      "code": "28720",
+      "name": "인천 옹진군",
+      "group": "incheon",
+      "verified": false,
+      "note": "법정동코드표에는 있으나 조회한 6개 달 모두 0건 — 확인 필요"
+    },
+    {
+      "code": "41111",
+      "name": "수원시 장안구",
+      "group": "gyeonggi-south",
+      "verified": true
+    },
+    {
+      "code": "41113",
+      "name": "수원시 권선구",
+      "group": "gyeonggi-south",
+      "verified": true
+    },
+    {
+      "code": "41115",
+      "name": "수원시 팔달구",
+      "group": "gyeonggi-south",
+      "verified": true
+    },
+    {
+      "code": "41117",
+      "name": "수원시 영통구",
+      "group": "gyeonggi-south",
+      "verified": true
+    },
+    {
+      "code": "41131",
+      "name": "성남시 수정구",
+      "group": "gyeonggi-south",
+      "verified": true
+    },
+    {
+      "code": "41133",
+      "name": "성남시 중원구",
+      "group": "gyeonggi-south",
+      "verified": true
+    },
+    {
+      "code": "41135",
+      "name": "성남시 분당구",
+      "group": "gyeonggi-south",
+      "verified": true
+    },
+    {
+      "code": "41171",
+      "name": "안양시 만안구",
+      "group": "gyeonggi-south",
+      "verified": true
+    },
+    {
+      "code": "41173",
+      "name": "안양시 동안구",
+      "group": "gyeonggi-south",
+      "verified": true
+    },
+    {
+      "code": "41192",
+      "name": "부천시 원미구",
+      "group": "gyeonggi-south",
+      "verified": true
+    },
+    {
+      "code": "41194",
+      "name": "부천시 소사구",
+      "group": "gyeonggi-south",
+      "verified": true
+    },
+    {
+      "code": "41196",
+      "name": "부천시 오정구",
+      "group": "gyeonggi-south",
+      "verified": true
+    },
+    {
+      "code": "41210",
+      "name": "광명시",
+      "group": "gyeonggi-south",
+      "verified": true
+    },
+    {
+      "code": "41220",
+      "name": "평택시",
+      "group": "gyeonggi-south",
+      "verified": true
+    },
+    {
+      "code": "41271",
+      "name": "안산시 상록구",
+      "group": "gyeonggi-south",
+      "verified": true
+    },
+    {
+      "code": "41273",
+      "name": "안산시 단원구",
+      "group": "gyeonggi-south",
+      "verified": true
+    },
+    {
+      "code": "41290",
+      "name": "과천시",
+      "group": "gyeonggi-south",
+      "verified": true
+    },
+    {
+      "code": "41370",
+      "name": "오산시",
+      "group": "gyeonggi-south",
+      "verified": true
+    },
+    {
+      "code": "41390",
+      "name": "시흥시",
+      "group": "gyeonggi-south",
+      "verified": true
+    },
+    {
+      "code": "41410",
+      "name": "군포시",
+      "group": "gyeonggi-south",
+      "verified": true
+    },
+    {
+      "code": "41430",
+      "name": "의왕시",
+      "group": "gyeonggi-south",
+      "verified": true
+    },
+    {
+      "code": "41461",
+      "name": "용인시 처인구",
+      "group": "gyeonggi-south",
+      "verified": true
+    },
+    {
+      "code": "41463",
+      "name": "용인시 기흥구",
+      "group": "gyeonggi-south",
+      "verified": true
+    },
+    {
+      "code": "41465",
+      "name": "용인시 수지구",
+      "group": "gyeonggi-south",
+      "verified": true
+    },
+    {
+      "code": "41500",
+      "name": "이천시",
+      "group": "gyeonggi-south",
+      "verified": true
+    },
+    {
+      "code": "41550",
+      "name": "안성시",
+      "group": "gyeonggi-south",
+      "verified": true
+    },
+    {
+      "code": "41591",
+      "name": "화성시 만세구",
+      "group": "gyeonggi-south",
+      "verified": true
+    },
+    {
+      "code": "41593",
+      "name": "화성시 효행구",
+      "group": "gyeonggi-south",
+      "verified": true
+    },
+    {
+      "code": "41595",
+      "name": "화성시 병점구",
+      "group": "gyeonggi-south",
+      "verified": true
+    },
+    {
+      "code": "41597",
+      "name": "화성시 동탄구",
+      "group": "gyeonggi-south",
+      "verified": true
+    },
+    {
+      "code": "41610",
+      "name": "광주시",
+      "group": "gyeonggi-south",
+      "verified": true
+    },
+    {
+      "code": "41670",
+      "name": "여주시",
+      "group": "gyeonggi-south",
+      "verified": true
+    },
+    {
+      "code": "41830",
+      "name": "양평군",
+      "group": "gyeonggi-south",
+      "verified": true
+    },
+    {
+      "code": "41150",
+      "name": "의정부시",
+      "group": "gyeonggi-north",
+      "verified": true
+    },
+    {
+      "code": "41250",
+      "name": "동두천시",
+      "group": "gyeonggi-north",
+      "verified": true
+    },
+    {
+      "code": "41281",
+      "name": "고양시 덕양구",
+      "group": "gyeonggi-north",
+      "verified": true
+    },
+    {
+      "code": "41285",
+      "name": "고양시 일산동구",
+      "group": "gyeonggi-north",
+      "verified": true
+    },
+    {
+      "code": "41287",
+      "name": "고양시 일산서구",
+      "group": "gyeonggi-north",
+      "verified": true
+    },
+    {
+      "code": "41310",
+      "name": "구리시",
+      "group": "gyeonggi-north",
+      "verified": true
+    },
+    {
+      "code": "41360",
+      "name": "남양주시",
+      "group": "gyeonggi-north",
+      "verified": true
+    },
+    {
+      "code": "41450",
+      "name": "하남시",
+      "group": "gyeonggi-north",
+      "verified": true
+    },
+    {
+      "code": "41480",
+      "name": "파주시",
+      "group": "gyeonggi-north",
+      "verified": true
+    },
+    {
+      "code": "41570",
+      "name": "김포시",
+      "group": "gyeonggi-north",
+      "verified": true
+    },
+    {
+      "code": "41630",
+      "name": "양주시",
+      "group": "gyeonggi-north",
+      "verified": true
+    },
+    {
+      "code": "41650",
+      "name": "포천시",
+      "group": "gyeonggi-north",
+      "verified": true
+    },
+    {
+      "code": "41800",
+      "name": "연천군",
+      "group": "gyeonggi-north",
+      "verified": true
+    },
+    {
+      "code": "41820",
+      "name": "가평군",
+      "group": "gyeonggi-north",
+      "verified": true
+    }
+  ],
+  "zones": [
+    {
+      "id": "gwanggyo",
+      "name": "광교신도시",
+      "note": "이의동·하동은 대부분 광교신도시. 원천동·상현동은 비광교 단지가 섞여 단지명 정규식으로 한정. 실데이터의 단지명 목록을 보고 최종 확정할 것.",
+      "parts": [
+        {
+          "sgg": "41117",
+          "dongs": [
+            "이의동",
+            "하동"
+          ]
+        },
+        {
+          "sgg": "41117",
+          "dongs": [
+            "원천동"
+          ],
+          "aptRegex": "광교|호반베르디움|더샵|중흥|아이파크"
+        },
+        {
+          "sgg": "41465",
+          "dongs": [
+            "상현동"
+          ],
+          "aptRegex": "광교"
+        }
+      ]
+    },
+    {
+      "id": "geumgok",
+      "name": "분당 금곡동",
+      "parts": [
+        {
+          "sgg": "41135",
+          "dongs": [
+            "금곡동"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cheolsan",
+      "name": "광명 철산동",
+      "note": "광명시 철산동(철산주공 재건축 대상 단지 + 철산래미안자이·푸르지오하늘채·롯데캐슬 등). 광명시 코드 41210 은 코드표와 API 로 확인.",
+      "parts": [
+        {
+          "sgg": "41210",
+          "dongs": [
+            "철산동"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "suji",
+      "name": "용인 수지구 전체",
+      "note": "수지구 전체(상현·풍덕천·죽전·성복·동천·신봉동 등). 상현동의 광교 지구 단지가 포함되므로 광교 권역과 겹친다 — 광교와 비교할 때는 '수지구(광교 제외)'를 쓴다.",
+      "parts": [
+        {
+          "sgg": "41465"
+        }
+      ]
+    },
+    {
+      "id": "suji-ex",
+      "name": "용인 수지구(광교 제외)",
+      "note": "수지구 중 단지명에 '광교'가 들어간 광교 지구 단지(상현동의 광교자이더클래스·광교경남아너스빌 등)를 뺀 나머지.",
+      "parts": [
+        {
+          "sgg": "41465",
+          "aptRegex": "^(?!.*광교)"
+        }
+      ]
+    },
+    {
+      "id": "dongtan",
+      "name": "화성 동탄(동탄구)",
+      "note": "동탄1·2신도시를 포함하는 화성시 동탄구 전체(능동·반송동·석우동·영천동·목동·산척동·여울동·장지동·청계동 등). 능동은 병점구에도 걸쳐 있어 구 코드 단위로 잡았다.",
+      "parts": [
+        {
+          "sgg": "41597"
+        }
+      ]
+    },
+    {
+      "id": "hwaseong",
+      "name": "화성시 전체",
+      "note": "4개 구(만세·효행·병점·동탄)를 모두 조회하므로 호출이 4배다.",
+      "parts": [
+        {
+          "sgg": "41591"
+        },
+        {
+          "sgg": "41593"
+        },
+        {
+          "sgg": "41595"
+        },
+        {
+          "sgg": "41597"
+        }
+      ]
+    },
+    {
+      "id": "gumi",
+      "name": "분당 구미동",
+      "parts": [
+        {
+          "sgg": "41135",
+          "dongs": [
+            "구미동"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "jeongja",
+      "name": "분당 정자동",
+      "parts": [
+        {
+          "sgg": "41135",
+          "dongs": [
+            "정자동"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pangyo",
+      "name": "판교신도시",
+      "note": "분당구 판교동(판교원마을)·삼평동(봇들마을)·백현동(백현마을) 전체 + 운중동의 산운마을. 대장동(대장지구)은 제외.",
+      "parts": [
+        {
+          "sgg": "41135",
+          "dongs": [
+            "판교동",
+            "삼평동",
+            "백현동"
+          ]
+        },
+        {
+          "sgg": "41135",
+          "dongs": [
+            "운중동"
+          ],
+          "aptRegex": "산운마을"
+        }
+      ]
+    },
+    {
+      "id": "hwaseo",
+      "name": "수원 화서(화서동)",
+      "note": "수원시 팔달구 화서동(화서역 일대: 꽃뫼마을·화서주공·화서역블루밍푸른숲 등).",
+      "parts": [
+        {
+          "sgg": "41115",
+          "dongs": [
+            "화서동"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "dongtan1",
+      "name": "1동탄 시범지구",
+      "note": "동탄구 반송동의 동탄 시범다은마을·시범한빛마을(단지명에 \"시범\" 포함, 2007~2008 입주 11개 단지).",
+      "parts": [
+        {
+          "sgg": "41597",
+          "dongs": [
+            "반송동"
+          ],
+          "aptRegex": "시범"
+        }
+      ]
+    },
+    {
+      "id": "dongtan2",
+      "name": "2동탄 시범지구(동탄역 시범단지)",
+      "note": "동탄구 청계동의 동탄역 시범단지 — 단지명에 동탄역·시범이 들어간 단지 + 더샵센트럴시티·롯데캐슬 알바트로스·KCC스위첸(2015~2018 입주). 단지명 규칙이라 일부 단지가 빠질 수 있다.",
+      "parts": [
+        {
+          "sgg": "41597",
+          "dongs": [
+            "청계동"
+          ],
+          "aptRegex": "동탄역|시범|더샵센트럴시티|롯데캐슬 ?알바트로스|KCC스위첸"
+        }
+      ]
+    },
+    {
+      "id": "wirye",
+      "name": "위례신도시",
+      "note": "서울 송파구 장지동·거여동의 위례 단지(단지명에 위례 + 송파더센트레·송파와이즈더샵) + 성남 수정구 창곡동 + 하남 학암동. 거여동 재개발 단지(송파시그니처롯데캐슬 등)는 위례가 아니므로 제외.",
+      "parts": [
+        {
+          "sgg": "11710",
+          "dongs": [
+            "장지동",
+            "거여동"
+          ],
+          "aptRegex": "위례|송파더센트레|송파와이즈더샵"
+        },
+        {
+          "sgg": "41131",
+          "dongs": [
+            "창곡동"
+          ]
+        },
+        {
+          "sgg": "41450",
+          "dongs": [
+            "학암동"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "seongnam-old",
+      "name": "구성남 원도심(수정·중원구)",
+      "note": "성남 수정구(신흥·태평·단대·수진·산성·양지동) + 중원구 전체. 위례(창곡동)와 판교밸리(고등동)는 제외.",
+      "parts": [
+        {
+          "sgg": "41131",
+          "dongs": [
+            "신흥동",
+            "태평동",
+            "단대동",
+            "수진동",
+            "산성동",
+            "양지동"
+          ]
+        },
+        {
+          "sgg": "41133"
+        }
+      ]
+    },
+    {
+      "id": "seongnam-redev",
+      "name": "구성남 재건축·재개발 신축(2016년 이후 준공)",
+      "note": "구성남 원도심 중 2016년 이후 준공 단지 = 산성역포레스티아·산성역자이푸르지오·신흥역하늘채랜더스원·금빛그랑메종·이안모란센트럴파크 등 재개발·재건축 신축. \"재건축 단지\"를 신축으로 해석한 것이며, 재건축 대상 구축(주공)을 보려면 원도심 전체와 비교한다.",
+      "parts": [
+        {
+          "sgg": "41131",
+          "dongs": [
+            "신흥동",
+            "태평동",
+            "단대동",
+            "수진동",
+            "산성동",
+            "양지동"
+          ],
+          "minBuildYear": 2016
+        },
+        {
+          "sgg": "41133",
+          "minBuildYear": 2016
+        }
+      ]
+    },
+    {
+      "id": "gusung",
+      "name": "구성·플랫폼시티(구성역 일대)",
+      "note": "기흥구 마북·보정·언남·청덕동 중 단지명에 \"구성\" 또는 \"플랫폼시티\"가 들어간 단지(구성역효성해링턴·e편한세상구성역플랫폼시티·힐스테이트구성·구성자이 등). 단지명 규칙이라 표본이 얇다.",
+      "parts": [
+        {
+          "sgg": "41463",
+          "dongs": [
+            "마북동",
+            "보정동",
+            "언남동",
+            "청덕동"
+          ],
+          "aptRegex": "구성|플랫폼시티"
+        }
+      ]
+    },
+    {
+      "id": "pyeongchon",
+      "name": "평촌(안양 동안구)",
+      "note": "평촌신도시가 동안구의 평촌·호계·비산·관양동에 걸쳐 있어 동안구 전체로 잡았다(인덕원 일대 포함).",
+      "parts": [
+        {
+          "sgg": "41173"
+        }
+      ]
+    },
+    {
+      "id": "sanbon",
+      "name": "산본신도시",
+      "note": "군포 산본동 전체 + 금정동 중 1992~1996년 준공 단지(산본신도시 주공·율곡·퇴계 등). 금정역 신축은 제외. 준공연도로 가른 근사 경계.",
+      "parts": [
+        {
+          "sgg": "41410",
+          "dongs": [
+            "산본동"
+          ]
+        },
+        {
+          "sgg": "41410",
+          "dongs": [
+            "금정동"
+          ],
+          "minBuildYear": 1992,
+          "maxBuildYear": 1996
+        }
+      ]
+    },
+    {
+      "id": "gwangmyeong-ktx",
+      "name": "KTX 광명역세권",
+      "note": "광명시 일직동 전체 + 소하동 중 2009년 이후 준공(광명역세권 휴먼시아·기아파크빌 등). 소하동 구축은 제외.",
+      "parts": [
+        {
+          "sgg": "41210",
+          "dongs": [
+            "일직동"
+          ]
+        },
+        {
+          "sgg": "41210",
+          "dongs": [
+            "소하동"
+          ],
+          "minBuildYear": 2009
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "id": "gwanggyo-geumgok",
+      "label": "광교 vs 금곡동",
+      "a": "zone:gwanggyo",
+      "b": "zone:geumgok"
+    },
+    {
+      "id": "gwanggyo-gumi",
+      "label": "광교 vs 구미동",
+      "a": "zone:gwanggyo",
+      "b": "zone:gumi"
+    },
+    {
+      "id": "gwanggyo-jeongja",
+      "label": "광교 vs 정자동",
+      "a": "zone:gwanggyo",
+      "b": "zone:jeongja"
+    },
+    {
+      "id": "gwanggyo-dongtan",
+      "label": "광교 vs 동탄",
+      "a": "zone:gwanggyo",
+      "b": "zone:dongtan"
+    },
+    {
+      "id": "dongtan-geumgok",
+      "label": "동탄 vs 금곡동",
+      "a": "zone:dongtan",
+      "b": "zone:geumgok"
+    },
+    {
+      "id": "gwanggyo-suji",
+      "label": "광교 vs 수지구(광교 제외)",
+      "a": "zone:gwanggyo",
+      "b": "zone:suji-ex"
+    },
+    {
+      "id": "cheolsan-geumgok",
+      "label": "철산동 vs 금곡동",
+      "a": "zone:cheolsan",
+      "b": "zone:geumgok"
+    },
+    {
+      "id": "pangyo-gwanggyo",
+      "label": "판교 vs 광교",
+      "a": "zone:pangyo",
+      "b": "zone:gwanggyo"
+    },
+    {
+      "id": "wirye-pangyo",
+      "label": "위례 vs 판교",
+      "a": "zone:wirye",
+      "b": "zone:pangyo"
+    },
+    {
+      "id": "dongtan1-dongtan2",
+      "label": "1동탄 시범 vs 2동탄 시범",
+      "a": "zone:dongtan1",
+      "b": "zone:dongtan2"
+    },
+    {
+      "id": "pyeongchon-sanbon",
+      "label": "평촌 vs 산본",
+      "a": "zone:pyeongchon",
+      "b": "zone:sanbon"
+    },
+    {
+      "id": "ktx-cheolsan",
+      "label": "광명역세권 vs 철산동",
+      "a": "zone:gwangmyeong-ktx",
+      "b": "zone:cheolsan"
+    },
+    {
+      "id": "sn-redev-old",
+      "label": "구성남 신축 vs 원도심",
+      "a": "zone:seongnam-redev",
+      "b": "zone:seongnam-old"
+    }
+  ],
+  "rankingGroups": [
+    {
+      "id": "default",
+      "label": "광교·동탄·분당·철산·수지",
+      "areas": [
+        "zone:gwanggyo",
+        "zone:dongtan",
+        "zone:geumgok",
+        "zone:gumi",
+        "zone:jeongja",
+        "zone:cheolsan",
+        "zone:suji-ex"
+      ]
+    },
+    {
+      "id": "gi1",
+      "label": "1기 신도시·재건축(평촌·산본·분당·철산·구성남)",
+      "areas": [
+        "zone:pyeongchon",
+        "zone:sanbon",
+        "zone:gumi",
+        "zone:jeongja",
+        "zone:geumgok",
+        "zone:cheolsan",
+        "zone:seongnam-old"
+      ]
+    },
+    {
+      "id": "newtown",
+      "label": "2기·신규 택지(판교·광교·위례·동탄·역세권)",
+      "areas": [
+        "zone:pangyo",
+        "zone:gwanggyo",
+        "zone:wirye",
+        "zone:dongtan1",
+        "zone:dongtan2",
+        "zone:gwangmyeong-ktx",
+        "zone:gusung",
+        "zone:seongnam-redev"
+      ]
+    }
+  ],
+  "unusable": [
+    {
+      "code": "41110",
+      "name": "수원시",
+      "reason": "구가 있는 시의 상위 코드 — API 가 모든 달에 0건. 구 코드를 사용"
+    },
+    {
+      "code": "41130",
+      "name": "성남시",
+      "reason": "구가 있는 시의 상위 코드 — API 가 모든 달에 0건. 구 코드를 사용"
+    },
+    {
+      "code": "41170",
+      "name": "안양시",
+      "reason": "구가 있는 시의 상위 코드 — API 가 모든 달에 0건. 구 코드를 사용"
+    },
+    {
+      "code": "41190",
+      "name": "부천시",
+      "reason": "구가 있는 시의 상위 코드 — API 가 모든 달에 0건. 구 코드를 사용"
+    },
+    {
+      "code": "41270",
+      "name": "안산시",
+      "reason": "구가 있는 시의 상위 코드 — API 가 모든 달에 0건. 구 코드를 사용"
+    },
+    {
+      "code": "41280",
+      "name": "고양시",
+      "reason": "구가 있는 시의 상위 코드 — API 가 모든 달에 0건. 구 코드를 사용"
+    },
+    {
+      "code": "41460",
+      "name": "용인시",
+      "reason": "구가 있는 시의 상위 코드 — API 가 모든 달에 0건. 구 코드를 사용"
+    },
+    {
+      "code": "41590",
+      "name": "화성시",
+      "reason": "구가 있는 시의 상위 코드 — API 가 모든 달에 0건. 구 코드를 사용"
+    },
+    {
+      "code": "28110",
+      "name": "인천 중구",
+      "reason": "2026-07-01 인천 행정체제 개편으로 폐지 — API 가 2011년 이후 모든 달에 0건(과거 거래도 새 구 코드로 재매핑). 제물포구·영종구·서해구·검단구를 사용"
+    },
+    {
+      "code": "28140",
+      "name": "인천 동구",
+      "reason": "2026-07-01 인천 행정체제 개편으로 폐지 — API 가 2011년 이후 모든 달에 0건(과거 거래도 새 구 코드로 재매핑). 제물포구·영종구·서해구·검단구를 사용"
+    },
+    {
+      "code": "28260",
+      "name": "인천 서구",
+      "reason": "2026-07-01 인천 행정체제 개편으로 폐지 — API 가 2011년 이후 모든 달에 0건(과거 거래도 새 구 코드로 재매핑). 제물포구·영종구·서해구·검단구를 사용"
+    }
+  ]
+}

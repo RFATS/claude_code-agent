@@ -1,0 +1,37 @@
+[2026-09-28, 02:15:02 KST] {taskinstance.py:1308} INFO - Starting attempt 1 of 3
+[2026-09-28, 02:15:02 KST] {logging_mixin.py:154} INFO - read /data/raw/ft_results_2026-09-27.csv
+[2026-09-28, 02:15:03 KST] {taskinstance.py:1826} ERROR - Task failed with exception
+Traceback (most recent call last):
+  File "/opt/airflow/dags/essd_ft_result_etl.py", line 22, in run_transform
+    count = transform_ft_results(f"/data/raw/ft_results_{ds}.csv", f"/data/stage/ft_results_{ds}.csv")
+  File "/opt/airflow/dags/ft_result_transform.py", line 46, in transform_ft_results
+    "read_bw_mbps": parse_metric(row["read_bw_mbps"]),
+  File "/opt/airflow/dags/ft_result_transform.py", line 23, in parse_metric
+    return float(value)
+ValueError: could not convert string to float: 'NA'
+[2026-09-28, 02:15:03 KST] {taskinstance.py:1346} INFO - Marking task as UP_FOR_RETRY. dag_id=essd_ft_result_etl, task_id=transform_ft_results
+[2026-09-28, 02:20:04 KST] {taskinstance.py:1308} INFO - Starting attempt 2 of 3
+[2026-09-28, 02:20:04 KST] {logging_mixin.py:154} INFO - read /data/raw/ft_results_2026-09-27.csv
+[2026-09-28, 02:20:05 KST] {taskinstance.py:1826} ERROR - Task failed with exception
+Traceback (most recent call last):
+  File "/opt/airflow/dags/essd_ft_result_etl.py", line 22, in run_transform
+    count = transform_ft_results(f"/data/raw/ft_results_{ds}.csv", f"/data/stage/ft_results_{ds}.csv")
+  File "/opt/airflow/dags/ft_result_transform.py", line 46, in transform_ft_results
+    "read_bw_mbps": parse_metric(row["read_bw_mbps"]),
+  File "/opt/airflow/dags/ft_result_transform.py", line 23, in parse_metric
+    return float(value)
+ValueError: could not convert string to float: 'NA'
+[2026-09-28, 02:20:05 KST] {taskinstance.py:1346} INFO - Marking task as UP_FOR_RETRY. dag_id=essd_ft_result_etl, task_id=transform_ft_results
+[2026-09-28, 02:25:06 KST] {taskinstance.py:1308} INFO - Starting attempt 3 of 3
+[2026-09-28, 02:25:06 KST] {logging_mixin.py:154} INFO - read /data/raw/ft_results_2026-09-27.csv
+[2026-09-28, 02:25:07 KST] {taskinstance.py:1826} ERROR - Task failed with exception
+Traceback (most recent call last):
+  File "/opt/airflow/dags/essd_ft_result_etl.py", line 22, in run_transform
+    count = transform_ft_results(f"/data/raw/ft_results_{ds}.csv", f"/data/stage/ft_results_{ds}.csv")
+  File "/opt/airflow/dags/ft_result_transform.py", line 46, in transform_ft_results
+    "read_bw_mbps": parse_metric(row["read_bw_mbps"]),
+  File "/opt/airflow/dags/ft_result_transform.py", line 23, in parse_metric
+    return float(value)
+ValueError: could not convert string to float: 'NA'
+[2026-09-28, 02:25:07 KST] {taskinstance.py:1346} INFO - Marking task as FAILED. dag_id=essd_ft_result_etl, task_id=transform_ft_results
+[2026-09-28, 02:25:07 KST] {standard_task_runner.py:104} ERROR - Failed to execute job 48211 for task transform_ft_results

@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>슬라이드 샘플 — 발표자료</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@500;700;900&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #05091F; font-family: "Noto Sans KR", "Malgun Gothic", sans-serif;
+         -webkit-font-smoothing: antialiased; }
+  table { border-collapse: collapse; }
+  /* 1920x1080 슬라이드를 화면 폭에 맞춰 축소 */
+  .deck { --w: 1920; --h: 1080;
+          display: flex; flex-direction: column; align-items: center; gap: 28px; padding: 28px 0; }
+  .deck > section {
+    width: 1920px; height: 1080px; flex: none;
+    transform: scale(var(--s, 1)); transform-origin: top center;
+    margin-bottom: calc((var(--s, 1) - 1) * 1080px);
+    box-shadow: 0 6px 30px rgba(0,0,0,.45);
+  }
+
+</style>
+</head>
+<body>
+<div class="deck">
+<section data-label="표지" data-screen-label="01" data-speaker-notes="표지 견본: 제목은 한 줄, 부제는 범위·대상을 명시. 로고 자리는 좌상단 고정." style="background: #0A1547; color: #F2F3F7; padding: 110px 120px 90px; display: grid; grid-template-rows: auto 1fr auto; font-family: 'Noto Sans KR', sans-serif;">
+    <div style="display: flex; align-items: center; gap: 20px;">
+      <div style="width: 14px; height: 14px; background: #7C9BFF;"></div>
+      <div style="font-size: 26px; letter-spacing: 0.22em; color: #98A3D2; font-weight: 500;">SAMSUNG ELECTRONICS · 사내 교육</div>
+    </div>
+    <div style="display: flex; flex-direction: column; justify-content: center; gap: 34px;">
+      <div style="font-size: 30px; color: #7C9BFF; font-weight: 700; letter-spacing: 0.04em;">실습 자료 · 슬라이드 견본</div>
+      <h1 style="margin: 0; font-family: 'Gothic A1', sans-serif; font-size: 104px; font-weight: 900; line-height: 1.14; letter-spacing: -0.02em; color: #FFFFFF; text-wrap: pretty;">생성형 AI 실무 활용<br>기본 과정</h1>
+      <p style="margin: 0; font-size: 36px; line-height: 1.55; color: #CFD6F0; max-width: 1180px; font-weight: 300;">실무 중간관리자 대상 · 장표 유형별 견본 11장 · 본 자료의 레이아웃을 그대로 활용하여 개인 실습 슬라이드 작성</p>
+    </div>
+    <div style="display: flex; justify-content: space-between; align-items: flex-end; border-top: 1px solid rgba(200,210,240,0.28); padding-top: 34px;">
+      <div style="font-size: 28px; color: #98A3D2;">교육생 실습용 템플릿</div>
+      <div style="font-size: 28px; color: #98A3D2;">2026. 09.</div>
+    </div>
+  </section>
+
+  <section data-label="목차" data-screen-label="02" data-speaker-notes="목차 견본: 항목 5개 이내, 각 항목은 명사형 한 줄. 이후 각 장의 제목과 문구를 일치시킨다." style="background: #FFFFFF; color: #0A1547; padding: 110px 120px 90px; display: grid; grid-template-rows: auto 1fr auto; gap: 56px; font-family: 'Noto Sans KR', sans-serif;">
+    <div style="display: flex; align-items: baseline; gap: 28px;">
+      <div style="font-family: 'Gothic A1', sans-serif; font-size: 30px; font-weight: 700; color: #1428A0;">01</div>
+      <h2 style="margin: 0; font-family: 'Gothic A1', sans-serif; font-size: 64px; font-weight: 700; letter-spacing: -0.02em;">목차</h2>
+    </div>
+    <div style="display: grid; grid-template-columns: 1.25fr 1fr; gap: 96px; align-items: start;">
+      <div style="display: grid;">
+        <div style="display: grid; grid-template-columns: 110px 1fr; gap: 28px; align-items: baseline; padding: 28px 0; border-bottom: 1px solid #E1E4EC;">
+          <div style="font-family: 'Gothic A1', sans-serif; font-size: 34px; font-weight: 900; color: #1428A0;">01</div>
+          <div style="font-size: 38px; font-weight: 500;">핵심 메시지</div>
+        </div>
+        <div style="display: grid; grid-template-columns: 110px 1fr; gap: 28px; align-items: baseline; padding: 28px 0; border-bottom: 1px solid #E1E4EC;">
+          <div style="font-family: 'Gothic A1', sans-serif; font-size: 34px; font-weight: 900; color: #1428A0;">02</div>
+          <div style="font-size: 38px; font-weight: 500;">업무 유형별 적용 기준</div>
+        </div>
+        <div style="display: grid; grid-template-columns: 110px 1fr; gap: 28px; align-items: baseline; padding: 28px 0; border-bottom: 1px solid #E1E4EC;">
+          <div style="font-family: 'Gothic A1', sans-serif; font-size: 34px; font-weight: 900; color: #1428A0;">03</div>
+          <div style="font-size: 38px; font-weight: 500;">도입 절차와 성과 지표</div>
+        </div>
+        <div style="display: grid; grid-template-columns: 110px 1fr; gap: 28px; align-items: baseline; padding: 28px 0; border-bottom: 1px solid #E1E4EC;">
+          <div style="font-family: 'Gothic A1', sans-serif; font-size: 34px; font-weight: 900; color: #1428A0;">04</div>
+          <div style="font-size: 38px; font-weight: 500;">현장 적용 사례</div>
+        </div>
+        <div style="display: grid; grid-template-columns: 110px 1fr; gap: 28px; align-items: baseline; padding: 28px 0;">
+          <div style="font-family: 'Gothic A1', sans-serif; font-size: 34px; font-weight: 900; color: #1428A0;">05</div>
+          <div style="font-size: 38px; font-weight: 500;">요약 및 실습 과제</div>
+        </div>
+      </div>
+      <div style="background: #F2F3F7; padding: 44px 48px; display: flex; flex-direction: column; gap: 22px;">
+        <div style="font-size: 26px; letter-spacing: 0.18em; color: #7D8493; font-weight: 500;">레이아웃 안내</div>
+        <div style="font-size: 32px; line-height: 1.6; color: #2D3A52; text-wrap: pretty;">목차는 발표 흐름의 지도입니다. 항목 제목은 이후 각 장의 제목과 동일한 문구로 유지합니다.</div>
+      </div>
+    </div>
+    <div style="font-size: 24px; color: #7D8493;">※ 항목 5개 이내, 명사형으로 통일.</div>
+  </section>
+
+  <section data-label="핵심 메시지" data-screen-label="03" data-speaker-notes="핵심 메시지 견본: 한 장에 주장 하나. 좌측 한 문장 + 우측 근거 숫자 3개. 숫자는 반드시 출처 표기." style="background: #F2F3F7; color: #0A1547; padding: 110px 120px 90px; display: grid; grid-template-rows: auto 1fr auto; gap: 56px; font-family: 'Noto Sans KR', sans-serif;">
+    <div style="display: flex; align-items: baseline; gap: 28px;">
+      <div style="font-family: 'Gothic A1', sans-serif; font-size: 30px; font-weight: 700; color: #1428A0;">02</div>
+      <h2 style="margin: 0; font-family: 'Gothic A1', sans-serif; font-size: 64px; font-weight: 700; letter-spacing: -0.02em;">핵심 메시지</h2>
+    </div>
+    <div style="display: grid; grid-template-columns: 1.15fr 1fr; gap: 90px; align-items: start;">
+      <div style="display: flex; flex-direction: column; gap: 40px;">
+        <p style="margin: 0; font-size: 52px; line-height: 1.42; font-weight: 500; letter-spacing: -0.01em; text-wrap: pretty;">반복 문서 업무를 AI로 이관, 팀 단위 검토 시간 확보</p>
+        <div style="width: 96px; height: 5px; background: #1428A0;"></div>
+        <p style="margin: 0; font-size: 34px; line-height: 1.62; color: #4A5568; font-weight: 300; text-wrap: pretty;">주장 한 문장, 근거 세 가지. 슬라이드 한 장에는 메시지 하나만 담는다.</p>
+      </div>
+      <div style="display: grid; gap: 34px;">
+        <div style="display: grid; grid-template-columns: 220px 1fr; gap: 32px; align-items: baseline; border-bottom: 1px solid #D5D9E3; padding-bottom: 30px;">
+          <div style="font-family: 'Gothic A1', sans-serif; font-size: 78px; font-weight: 900; color: #1428A0; line-height: 1;">32%</div>
+          <div style="font-size: 30px; line-height: 1.5; color: #2D3A52;">보고서 초안 작성 시간 단축</div>
+        </div>
+        <div style="display: grid; grid-template-columns: 220px 1fr; gap: 32px; align-items: baseline; border-bottom: 1px solid #D5D9E3; padding-bottom: 30px;">
+          <div style="font-family: 'Gothic A1', sans-serif; font-size: 78px; font-weight: 900; color: #1428A0; line-height: 1;">4.2h</div>
+          <div style="font-size: 30px; line-height: 1.5; color: #2D3A52;">주당 인당 절감 시간</div>
+        </div>
+        <div style="display: grid; grid-template-columns: 220px 1fr; gap: 32px; align-items: baseline;">
+          <div style="font-family: 'Gothic A1', sans-serif; font-size: 78px; font-weight: 900; color: #1428A0; line-height: 1;">18개</div>
+          <div style="font-size: 30px; line-height: 1.5; color: #2D3A52;">표준화 대상 반복 업무</div>
+        </div>
+      </div>
+    </div>
+    <div style="font-size: 24px; color: #7D8493;">※ 예시 수치입니다. 실습 시 본인 조직의 실측치로 교체하십시오.</div>
+  </section>
+
+  <section data-label="비교 표" data-screen-label="04" data-speaker-notes="비교 표 견본: 열 4개 이내, 행 4개 이내. 강조할 열 하나만 배경색으로 처리." style="background: #FFFFFF; color: #0A1547; padding: 110px 120px 90px; display: grid; grid-template-rows: auto 1fr auto; gap: 52px; font-family: 'Noto Sans KR', sans-serif;">
+    <div style="display: flex; align-items: baseline; gap: 28px;">
+      <div style="font-family: 'Gothic A1', sans-serif; font-size: 30px; font-weight: 700; color: #1428A0;">03</div>
+      <h2 style="margin: 0; font-family: 'Gothic A1', sans-serif; font-size: 64px; font-weight: 700; letter-spacing: -0.02em;">업무 유형별 적용 기준</h2>
+    </div>
+    <div style="display: grid; grid-template-columns: 1.3fr 1fr 1fr 1fr; align-content: start;">
+      <div style="padding: 26px 28px; font-size: 28px; font-weight: 700; color: #6B7280; border-bottom: 3px solid #0A1547;">업무 유형</div>
+      <div style="padding: 26px 28px; font-size: 28px; font-weight: 700; color: #6B7280; border-bottom: 3px solid #0A1547;">AI 초안</div>
+      <div style="padding: 26px 28px; font-size: 28px; font-weight: 700; color: #FFFFFF; background: #1428A0; border-bottom: 3px solid #0A1547;">사람 검토</div>
+      <div style="padding: 26px 28px; font-size: 28px; font-weight: 700; color: #6B7280; border-bottom: 3px solid #0A1547;">보안 등급</div>
+
+      <div style="padding: 34px 28px; font-size: 32px; font-weight: 500; border-bottom: 1px solid #E1E4EC;">주간 실적 보고</div>
+      <div style="padding: 34px 28px; font-size: 32px; color: #2D3A52; border-bottom: 1px solid #E1E4EC;">전면 활용</div>
+      <div style="padding: 34px 28px; font-size: 32px; color: #0A1547; font-weight: 500; background: #EDF0FB; border-bottom: 1px solid #E1E4EC;">수치 검증</div>
+      <div style="padding: 34px 28px; font-size: 32px; color: #2D3A52; border-bottom: 1px solid #E1E4EC;">사내 일반</div>
+
+      <div style="padding: 34px 28px; font-size: 32px; font-weight: 500; border-bottom: 1px solid #E1E4EC;">회의록 정리</div>
+      <div style="padding: 34px 28px; font-size: 32px; color: #2D3A52; border-bottom: 1px solid #E1E4EC;">전면 활용</div>
+      <div style="padding: 34px 28px; font-size: 32px; color: #0A1547; font-weight: 500; background: #EDF0FB; border-bottom: 1px solid #E1E4EC;">요약 확인</div>
+      <div style="padding: 34px 28px; font-size: 32px; color: #2D3A52; border-bottom: 1px solid #E1E4EC;">사내 일반</div>
+
+      <div style="padding: 34px 28px; font-size: 32px; font-weight: 500; border-bottom: 1px solid #E1E4EC;">기술 자료 요약</div>
+      <div style="padding: 34px 28px; font-size: 32px; color: #2D3A52; border-bottom: 1px solid #E1E4EC;">부분 활용</div>
+      <div style="padding: 34px 28px; font-size: 32px; color: #0A1547; font-weight: 500; background: #EDF0FB; border-bottom: 1px solid #E1E4EC;">전문가 확인</div>
+      <div style="padding: 34px 28px; font-size: 32px; color: #2D3A52; border-bottom: 1px solid #E1E4EC;">대외비</div>
+
+      <div style="padding: 34px 28px; font-size: 32px; font-weight: 500;">고객 대응 문안</div>
+      <div style="padding: 34px 28px; font-size: 32px; color: #2D3A52;">제한 활용</div>
+      <div style="padding: 34px 28px; font-size: 32px; color: #0A1547; font-weight: 500; background: #EDF0FB;">전건 승인</div>
+      <div style="padding: 34px 28px; font-size: 32px; color: #2D3A52;">대외비</div>
+    </div>
+    <div style="font-size: 24px; color: #7D8493;">※ 열은 3~4개, 행은 4개 이내로 유지. 강조 열은 한 개만 지정.</div>
+  </section>
+
+  <section data-label="프로세스 · 차트" data-screen-label="05" data-speaker-notes="도식+차트 견본: 좌측 4단계 프로세스, 우측 단순 막대 차트. 차트는 축 하나, 계열 하나만." style="background: #F2F3F7; color: #0A1547; padding: 110px 120px 90px; display: grid; grid-template-rows: auto 1fr auto; gap: 52px; font-family: 'Noto Sans KR', sans-serif;">
+    <div style="display: flex; align-items: baseline; gap: 28px;">
+      <div style="font-family: 'Gothic A1', sans-serif; font-size: 30px; font-weight: 700; color: #1428A0;">04</div>
+      <h2 style="margin: 0; font-family: 'Gothic A1', sans-serif; font-size: 64px; font-weight: 700; letter-spacing: -0.02em;">도입 절차와 단계별 효과</h2>
+    </div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 96px; align-items: start;">
+      <div style="display: grid; gap: 26px;">
+        <div style="display: grid; grid-template-columns: 78px 1fr; gap: 28px; align-items: center; background: #FFFFFF; padding: 30px 34px;">
+          <div style="font-family: 'Gothic A1', sans-serif; font-size: 40px; font-weight: 900; color: #1428A0;">1</div>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <div style="font-size: 34px; font-weight: 700;">업무 목록화</div>
+            <div style="font-size: 27px; color: #5A6478; font-weight: 300;">반복·정형 업무 식별</div>
+          </div>
+        </div>
+        <div style="display: grid; grid-template-columns: 78px 1fr; gap: 28px; align-items: center; background: #FFFFFF; padding: 30px 34px;">
+          <div style="font-family: 'Gothic A1', sans-serif; font-size: 40px; font-weight: 900; color: #1428A0;">2</div>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <div style="font-size: 34px; font-weight: 700;">프롬프트 표준화</div>
+            <div style="font-size: 27px; color: #5A6478; font-weight: 300;">팀 공용 양식 확정</div>
+          </div>
+        </div>
+        <div style="display: grid; grid-template-columns: 78px 1fr; gap: 28px; align-items: center; background: #FFFFFF; padding: 30px 34px;">
+          <div style="font-family: 'Gothic A1', sans-serif; font-size: 40px; font-weight: 900; color: #1428A0;">3</div>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <div style="font-size: 34px; font-weight: 700;">시범 적용</div>
+            <div style="font-size: 27px; color: #5A6478; font-weight: 300;">2주 단위 파일럿</div>
+          </div>
+        </div>
+        <div style="display: grid; grid-template-columns: 78px 1fr; gap: 28px; align-items: center; background: #0A1547; padding: 30px 34px;">
+          <div style="font-family: 'Gothic A1', sans-serif; font-size: 40px; font-weight: 900; color: #7C9BFF;">4</div>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <div style="font-size: 34px; font-weight: 700; color: #FFFFFF;">전사 확산</div>
+            <div style="font-size: 27px; color: #AEB8DE; font-weight: 300;">가이드 배포 및 교육</div>
+          </div>
+        </div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 30px;">
+        <div style="font-size: 30px; font-weight: 500; color: #2D3A52;">단계별 업무 시간 절감률 (%)</div>
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 40px; align-items: end; height: 380px; border-bottom: 2px solid #0A1547; padding: 0 12px;">
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 16px;">
+            <div style="font-family: 'Gothic A1', sans-serif; font-size: 34px; font-weight: 700; color: #1428A0;">8</div>
+            <div style="width: 100%; height: 74px; background: #C2C8E8;"></div>
+          </div>
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 16px;">
+            <div style="font-family: 'Gothic A1', sans-serif; font-size: 34px; font-weight: 700; color: #1428A0;">17</div>
+            <div style="width: 100%; height: 148px; background: #909BD6;"></div>
+          </div>
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 16px;">
+            <div style="font-family: 'Gothic A1', sans-serif; font-size: 34px; font-weight: 700; color: #1428A0;">26</div>
+            <div style="width: 100%; height: 224px; background: #4B5CC0;"></div>
+          </div>
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 16px;">
+            <div style="font-family: 'Gothic A1', sans-serif; font-size: 34px; font-weight: 700; color: #1428A0;">32</div>
+            <div style="width: 100%; height: 296px; background: #1428A0;"></div>
+          </div>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 40px; padding: 0 12px;">
+          <div style="font-size: 26px; color: #5A6478; text-align: center;">1단계</div>
+          <div style="font-size: 26px; color: #5A6478; text-align: center;">2단계</div>
+          <div style="font-size: 26px; color: #5A6478; text-align: center;">3단계</div>
+          <div style="font-size: 26px; color: #5A6478; text-align: center;">4단계</div>
+        </div>
+      </div>
+    </div>
+    <div style="font-size: 24px; color: #7D8493;">※ 차트는 계열 하나, 라벨은 막대 위에 직접 표기.</div>
+  </section>
+
+  <section data-label="성과 지표" data-screen-label="06" data-speaker-notes="지표 견본: 좌측 대표 지표 3개, 우측 부문별 가로 막대. 숫자는 크게, 설명은 한 줄." style="background: #0A1547; color: #F2F3F7; padding: 110px 120px 90px; display: grid; grid-template-rows: auto 1fr auto; gap: 52px; font-family: 'Noto Sans KR', sans-serif;">
+    <div style="display: flex; align-items: baseline; gap: 28px;">
+      <div style="font-family: 'Gothic A1', sans-serif; font-size: 30px; font-weight: 700; color: #7C9BFF;">05</div>
+      <h2 style="margin: 0; font-family: 'Gothic A1', sans-serif; font-size: 64px; font-weight: 700; letter-spacing: -0.02em; color: #FFFFFF;">도입 3개월 성과 지표</h2>
+    </div>
+    <div style="display: grid; grid-template-columns: 1fr 1.15fr; gap: 96px; align-items: start;">
+      <div style="display: grid; gap: 40px;">
+        <div style="display: flex; flex-direction: column; gap: 10px; border-bottom: 1px solid rgba(200,210,240,0.28); padding-bottom: 34px;">
+          <div style="font-family: 'Gothic A1', sans-serif; font-size: 88px; font-weight: 900; color: #FFFFFF; line-height: 1;">1,240</div>
+          <div style="font-size: 30px; color: #AEB8DE;">누적 절감 시간 (h)</div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 10px; border-bottom: 1px solid rgba(200,210,240,0.28); padding-bottom: 34px;">
+          <div style="font-family: 'Gothic A1', sans-serif; font-size: 88px; font-weight: 900; color: #FFFFFF; line-height: 1;">86%</div>
+          <div style="font-size: 30px; color: #AEB8DE;">교육 이수자 활용 지속률</div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <div style="font-family: 'Gothic A1', sans-serif; font-size: 88px; font-weight: 900; color: #FFFFFF; line-height: 1;">0건</div>
+          <div style="font-size: 30px; color: #AEB8DE;">보안 규정 위반 사례</div>
+        </div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 34px;">
+        <div style="font-size: 30px; font-weight: 500; color: #CFD6F0;">부문별 활용률 (%)</div>
+        <div style="display: grid; gap: 30px;">
+          <div style="display: grid; grid-template-columns: 200px 1fr 90px; gap: 28px; align-items: center;">
+            <div style="font-size: 30px; color: #E8EBFA;">개발</div>
+            <div style="height: 34px; background: rgba(200,210,240,0.16);"><div style="width: 92%; height: 34px; background: #7C9BFF;"></div></div>
+            <div style="font-family: 'Gothic A1', sans-serif; font-size: 32px; font-weight: 700; color: #FFFFFF; text-align: right;">92</div>
+          </div>
+          <div style="display: grid; grid-template-columns: 200px 1fr 90px; gap: 28px; align-items: center;">
+            <div style="font-size: 30px; color: #E8EBFA;">품질</div>
+            <div style="height: 34px; background: rgba(200,210,240,0.16);"><div style="width: 74%; height: 34px; background: #7C9BFF;"></div></div>
+            <div style="font-family: 'Gothic A1', sans-serif; font-size: 32px; font-weight: 700; color: #FFFFFF; text-align: right;">74</div>
+          </div>
+          <div style="display: grid; grid-template-columns: 200px 1fr 90px; gap: 28px; align-items: center;">
+            <div style="font-size: 30px; color: #E8EBFA;">영업·마케팅</div>
+            <div style="height: 34px; background: rgba(200,210,240,0.16);"><div style="width: 61%; height: 34px; background: #7C9BFF;"></div></div>
+            <div style="font-family: 'Gothic A1', sans-serif; font-size: 32px; font-weight: 700; color: #FFFFFF; text-align: right;">61</div>
+          </div>
+          <div style="display: grid; grid-template-columns: 200px 1fr 90px; gap: 28px; align-items: center;">
+            <div style="font-size: 30px; color: #E8EBFA;">경영지원</div>
+            <div style="height: 34px; background: rgba(200,210,240,0.16);"><div style="width: 48%; height: 34px; background: #7C9BFF;"></div></div>
+            <div style="font-family: 'Gothic A1', sans-serif; font-size: 32px; font-weight: 700; color: #FFFFFF; text-align: right;">48</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="font-size: 24px; color: #8590BC;">※ 대표 지표는 3개 이내. 목표 대비 실적을 함께 제시할 경우 두 색만 사용.</div>
+  </section>
+
+  <section data-label="개선 전후" data-screen-label="07" data-speaker-notes="대비 견본: 좌우 동일 항목 3개로 정렬. 개선 후 열만 강조하고 화살표는 하나만." style="background: #FFFFFF; color: #0A1547; padding: 110px 120px 90px; display: grid; grid-template-rows: auto 1fr auto; gap: 52px; font-family: 'Noto Sans KR', sans-serif;">
+    <div style="display: flex; align-items: baseline; gap: 28px;">
+      <div style="font-family: 'Gothic A1', sans-serif; font-size: 30px; font-weight: 700; color: #1428A0;">06</div>
+      <h2 style="margin: 0; font-family: 'Gothic A1', sans-serif; font-size: 64px; font-weight: 700; letter-spacing: -0.02em;">업무 방식 개선 전후</h2>
+    </div>
+    <div style="display: grid; grid-template-columns: 1fr 96px 1fr; align-items: center;">
+      <div style="background: #F2F3F7; padding: 48px 52px; display: flex; flex-direction: column; gap: 36px;">
+        <div style="font-size: 28px; letter-spacing: 0.18em; color: #7D8493; font-weight: 500;">개선 전</div>
+        <div style="display: flex; flex-direction: column; gap: 30px;">
+          <div style="font-size: 34px; line-height: 1.5; color: #4A5568;">보고서 초안 작성에 반일 소요</div>
+          <div style="font-size: 34px; line-height: 1.5; color: #4A5568;">담당자별 문서 양식 상이</div>
+          <div style="font-size: 34px; line-height: 1.5; color: #4A5568;">회의록 정리 후 공유까지 1일</div>
+        </div>
+      </div>
+      <div style="display: flex; align-items: center; justify-content: center;">
+        <div style="font-family: 'Gothic A1', sans-serif; font-size: 56px; font-weight: 900; color: #1428A0;">→</div>
+      </div>
+      <div style="background: #0A1547; padding: 48px 52px; display: flex; flex-direction: column; gap: 36px;">
+        <div style="font-size: 28px; letter-spacing: 0.18em; color: #98A3D2; font-weight: 500;">개선 후</div>
+        <div style="display: flex; flex-direction: column; gap: 30px;">
+          <div style="font-size: 34px; line-height: 1.5; color: #FFFFFF;">초안 30분, 검토에 시간 집중</div>
+          <div style="font-size: 34px; line-height: 1.5; color: #FFFFFF;">팀 공용 프롬프트 양식 단일화</div>
+          <div style="font-size: 34px; line-height: 1.5; color: #FFFFFF;">회의 종료 직후 요약 공유</div>
+        </div>
+      </div>
+    </div>
+    <div style="font-size: 24px; color: #7D8493;">※ 좌우 항목 수와 어순을 동일하게 맞춰야 대비가 읽힙니다.</div>
+  </section>
+
+  <section data-label="이미지 중심" data-screen-label="08" data-speaker-notes="이미지 견본: 화면 캡처·사진은 비율 유지로 배치하고 설명은 우측 한 단으로 몰아 쓴다." style="background: #F2F3F7; color: #0A1547; padding: 110px 120px 90px; display: grid; grid-template-rows: auto 1fr auto; gap: 52px; font-family: 'Noto Sans KR', sans-serif;">
+    <div style="display: flex; align-items: baseline; gap: 28px;">
+      <div style="font-family: 'Gothic A1', sans-serif; font-size: 30px; font-weight: 700; color: #1428A0;">07</div>
+      <h2 style="margin: 0; font-family: 'Gothic A1', sans-serif; font-size: 64px; font-weight: 700; letter-spacing: -0.02em;">현장 적용 화면</h2>
+    </div>
+    <div style="display: grid; grid-template-columns: 1.45fr 1fr; gap: 80px; align-items: stretch;">
+      <div style="background: #E4E7EF; border: 2px dashed #B4BAC9; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px;">
+        <div style="font-size: 34px; font-weight: 500; color: #6E7688;">이미지 영역 (16:9)</div>
+        <div style="font-size: 27px; color: #8B92A2;">실습 시 실제 화면 캡처 또는 사진 삽입</div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 32px; justify-content: center;">
+        <div style="font-size: 40px; font-weight: 700; line-height: 1.4; text-wrap: pretty;">표준 프롬프트 양식 적용 화면</div>
+        <div style="width: 96px; height: 5px; background: #1428A0;"></div>
+        <div style="font-size: 32px; line-height: 1.6; color: #4A5568; text-wrap: pretty;">이미지가 주인공인 장에서는 설명을 3줄 이내로 제한하고, 강조 지점은 이미지 위 번호 표시로 처리합니다.</div>
+        <div style="font-size: 27px; color: #7D8493;">출처: 사내 파일럿 운영 자료</div>
+      </div>
+    </div>
+    <div style="font-size: 24px; color: #7D8493;">※ 캡처·도면은 비율을 늘리지 말고, 배경색과 대비되도록 배치.</div>
+  </section>
+
+  <section data-label="인용" data-screen-label="09" data-speaker-notes="인용 견본: 한 장에 한 인용. 크게 쓰고 화자와 소속·시점을 하단에 표기." style="background: #0A1547; color: #F2F3F7; padding: 140px 160px 90px; display: grid; grid-template-rows: 1fr auto; gap: 60px; font-family: 'Noto Sans KR', sans-serif;">
+    <div style="display: flex; flex-direction: column; justify-content: center; gap: 48px; max-width: 1420px;">
+      <div style="width: 84px; height: 6px; background: #7C9BFF;"></div>
+      <blockquote style="margin: 0; font-family: 'Gothic A1', sans-serif; font-size: 62px; font-weight: 500; line-height: 1.45; letter-spacing: -0.02em; color: #FFFFFF; text-wrap: pretty;">초안을 도구가 쓰게 되니, 회의에서 다루는 주제가 문장에서 판단으로 옮겨졌습니다.</blockquote>
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <div style="font-size: 32px; font-weight: 500; color: #E8EBFA;">파일럿 참여 팀장</div>
+        <div style="font-size: 28px; color: #98A3D2; font-weight: 300;">품질보증그룹 · 2026년 6월 인터뷰</div>
+      </div>
+    </div>
+    <div style="border-top: 1px solid rgba(200,210,240,0.28); padding-top: 34px; font-size: 24px; color: #8590BC;">※ 인용은 원문 그대로. 편집이 필요하면 대괄호로 표시.</div>
+  </section>
+
+  <section data-label="일정" data-screen-label="10" data-speaker-notes="일정 견본: 마일스톤 4개, 축은 하나. 완료 구간만 진한 색으로 구분." style="background: #FFFFFF; color: #0A1547; padding: 110px 120px 90px; display: grid; grid-template-rows: auto 1fr auto; gap: 52px; font-family: 'Noto Sans KR', sans-serif;">
+    <div style="display: flex; align-items: baseline; gap: 28px;">
+      <div style="font-family: 'Gothic A1', sans-serif; font-size: 30px; font-weight: 700; color: #1428A0;">08</div>
+      <h2 style="margin: 0; font-family: 'Gothic A1', sans-serif; font-size: 64px; font-weight: 700; letter-spacing: -0.02em;">확산 일정</h2>
+    </div>
+    <div style="display: flex; flex-direction: column; justify-content: center;">
+      <div style="display: grid; grid-template-columns: repeat(4, 1fr);">
+        <div style="font-family: 'Gothic A1', sans-serif; font-size: 32px; font-weight: 700; color: #1428A0; padding-bottom: 26px;">3분기</div>
+        <div style="font-family: 'Gothic A1', sans-serif; font-size: 32px; font-weight: 700; color: #1428A0; padding-bottom: 26px;">4분기</div>
+        <div style="font-family: 'Gothic A1', sans-serif; font-size: 32px; font-weight: 700; color: #A8B4C8; padding-bottom: 26px;">1분기</div>
+        <div style="font-family: 'Gothic A1', sans-serif; font-size: 32px; font-weight: 700; color: #A8B4C8; padding-bottom: 26px;">2분기</div>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(4, 1fr); height: 8px;">
+        <div style="background: #1428A0;"></div>
+        <div style="background: #1428A0;"></div>
+        <div style="background: #DCE0E9;"></div>
+        <div style="background: #DCE0E9;"></div>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(4, 1fr); padding-top: 40px; gap: 40px;">
+        <div style="display: flex; flex-direction: column; gap: 16px;">
+          <div style="font-size: 34px; font-weight: 700;">파일럿 2팀</div>
+          <div style="font-size: 28px; line-height: 1.55; color: #5A6478;">표준 양식 확정, 절감 시간 측정</div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 16px;">
+          <div style="font-size: 34px; font-weight: 700;">부문 확대</div>
+          <div style="font-size: 28px; line-height: 1.55; color: #5A6478;">개발·품질 전 팀 적용</div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 16px;">
+          <div style="font-size: 34px; font-weight: 700;">교육 정례화</div>
+          <div style="font-size: 28px; line-height: 1.55; color: #5A6478;">월 1회 실습 과정 운영</div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 16px;">
+          <div style="font-size: 34px; font-weight: 700;">전사 표준</div>
+          <div style="font-size: 28px; line-height: 1.55; color: #5A6478;">가이드 개정 및 사내 배포</div>
+        </div>
+      </div>
+    </div>
+    <div style="font-size: 24px; color: #7D8493;">※ 마일스톤 4개 이내, 현재 시점은 색으로만 구분.</div>
+  </section>
+
+  <section data-label="요약" data-screen-label="11" data-speaker-notes="마무리 견본: 앞장의 결론을 세 줄로 회수하고 다음 행동 한 줄. 새 정보 추가 금지." style="background: #0A1547; color: #F2F3F7; padding: 110px 120px 90px; display: grid; grid-template-rows: auto 1fr auto; gap: 56px; font-family: 'Noto Sans KR', sans-serif;">
+    <div style="display: flex; align-items: baseline; gap: 28px;">
+      <div style="font-family: 'Gothic A1', sans-serif; font-size: 30px; font-weight: 700; color: #7C9BFF;">09</div>
+      <h2 style="margin: 0; font-family: 'Gothic A1', sans-serif; font-size: 64px; font-weight: 700; letter-spacing: -0.02em; color: #FFFFFF;">요약 및 실습 과제</h2>
+    </div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 96px; align-items: start;">
+      <div style="display: grid; gap: 38px;">
+        <div style="display: grid; grid-template-columns: 62px 1fr; gap: 24px; align-items: start;">
+          <div style="font-family: 'Gothic A1', sans-serif; font-size: 34px; font-weight: 900; color: #7C9BFF;">01</div>
+          <div style="font-size: 36px; line-height: 1.5; color: #E8EBFA;">반복 문서 업무 우선 이관</div>
+        </div>
+        <div style="display: grid; grid-template-columns: 62px 1fr; gap: 24px; align-items: start;">
+          <div style="font-family: 'Gothic A1', sans-serif; font-size: 34px; font-weight: 900; color: #7C9BFF;">02</div>
+          <div style="font-size: 36px; line-height: 1.5; color: #E8EBFA;">검토 책임은 사람에게 유지</div>
+        </div>
+        <div style="display: grid; grid-template-columns: 62px 1fr; gap: 24px; align-items: start;">
+          <div style="font-family: 'Gothic A1', sans-serif; font-size: 34px; font-weight: 900; color: #7C9BFF;">03</div>
+          <div style="font-size: 36px; line-height: 1.5; color: #E8EBFA;">2주 파일럿 후 확산 판단</div>
+        </div>
+      </div>
+      <div style="background: rgba(124,155,255,0.14); border-left: 5px solid #7C9BFF; padding: 44px 48px; display: flex; flex-direction: column; gap: 24px;">
+        <div style="font-size: 28px; letter-spacing: 0.18em; color: #98A3D2; font-weight: 500;">실습 과제</div>
+        <div style="font-size: 38px; line-height: 1.5; color: #FFFFFF; font-weight: 500; text-wrap: pretty;">본 자료의 장표 유형 중 5종을 선택하여, 담당 업무 중 AI 적용 대상 1건에 대한 슬라이드 작성</div>
+        <div style="font-size: 28px; line-height: 1.6; color: #CFD6F0; font-weight: 300;">제출 기한: 차시 교육 전일까지</div>
+      </div>
+    </div>
+    <div style="border-top: 1px solid rgba(200,210,240,0.28); padding-top: 34px; font-size: 26px; color: #98A3D2;">생성형 AI 실무 활용 기본 과정 · 교육생 실습용 템플릿</div>
+  </section>
+</div>
+<script>
+  function fitDeck(){
+    var pad = 56;
+    var s = Math.min(1, (window.innerWidth - pad) / 1920);
+    document.querySelector('.deck').style.setProperty('--s', s);
+  }
+  window.addEventListener('resize', fitDeck);
+  fitDeck();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,13 @@
+[2026-09-27, 02:10:20 KST] {taskinstance.py:1308} INFO - Starting attempt 1 of 3
+[2026-09-27, 02:10:21 KST] {sftp_fetch.py:31} INFO - connect sftp://tester-log.example.internal:22 (fab=P1, lines=FT-T01,FT-T02,FT-T03)
+[2026-09-27, 02:10:43 KST] {taskinstance.py:1826} ERROR - Task failed with exception
+Traceback (most recent call last):
+  File "/opt/airflow/dags/sftp_fetch.py", line 44, in fetch_tester_logs
+    sftp.get(remote_path, local_path)
+ConnectionResetError: [Errno 104] Connection reset by peer
+[2026-09-27, 02:10:43 KST] {taskinstance.py:1346} INFO - Marking task as UP_FOR_RETRY. dag_id=ssd_tester_log_sync, task_id=fetch_tester_logs
+[2026-09-27, 02:15:44 KST] {taskinstance.py:1308} INFO - Starting attempt 2 of 3
+[2026-09-27, 02:15:45 KST] {sftp_fetch.py:31} INFO - connect sftp://tester-log.example.internal:22 (fab=P1, lines=FT-T01,FT-T02,FT-T03)
+[2026-09-27, 02:15:52 KST] {sftp_fetch.py:52} INFO - downloaded 3 files (FT-T01, FT-T02, FT-T03), 48.2 MB
+[2026-09-27, 02:15:52 KST] {python.py:183} INFO - Done. Returned value was: 3
+[2026-09-27, 02:15:52 KST] {taskinstance.py:1346} INFO - Marking task as SUCCESS. dag_id=ssd_tester_log_sync, task_id=fetch_tester_logs

@@ -1,0 +1,74 @@
+{
+  "alert_id": "alert-03",
+  "query": "yield_report_mail send_daily_yield_report\n에러 유형: TimeoutError\n에러 메시지: timed out\n재시도 성공\n위치: send_daily_yield_report server = smtplib.SMTP(\"smtp.example.internal\", 587, timeout=20)",
+  "approved": [
+    {
+      "case_id": "PC-043",
+      "similarity": 0.891,
+      "date": "2026-03-24",
+      "dag_id": "yield_report_mail",
+      "task_id": "send_daily_yield_report",
+      "error_type": "TimeoutError",
+      "judgment": "가성",
+      "decision": "승인",
+      "content": "[PC-043 · 2026-03-24 · yield_report_mail / send_daily_yield_report]\n에러 유형: TimeoutError\n에러 메시지: timed out\n판별 결과: 가성\n원인: 사내 SMTP 서버 일시 지연\n조치 내용: 조치 없음(재시도 성공, 수신자 수까지 확인)\n사람의 결정: 승인\n검토 의견: 발송 결과까지 확인한 점 좋음"
+    },
+    {
+      "case_id": "PC-062",
+      "similarity": 0.8796,
+      "date": "2026-05-27",
+      "dag_id": "yield_report_mail",
+      "task_id": "send_daily_yield_report",
+      "error_type": "TimeoutError",
+      "judgment": "가성",
+      "decision": "승인",
+      "content": "[PC-062 · 2026-05-27 · yield_report_mail / send_daily_yield_report]\n에러 유형: TimeoutError\n에러 메시지: timed out\n판별 결과: 가성\n원인: 사내 SMTP 서버 일시 지연\n조치 내용: 조치 없음(재시도 성공, 메일 발송 확인)\n사람의 결정: 승인\n검토 의견: 수신자 수까지 확인한 점 좋음"
+    },
+    {
+      "case_id": "PC-045",
+      "similarity": 0.8614,
+      "date": "2026-04-01",
+      "dag_id": "yield_report_mail",
+      "task_id": "build_yield_report",
+      "error_type": "TimeoutError",
+      "judgment": "가성",
+      "decision": "승인",
+      "content": "[PC-045 · 2026-04-01 · yield_report_mail / build_yield_report]\n에러 유형: TimeoutError\n에러 메시지: [Errno 110] Connection timed out\n판별 결과: 가성\n원인: 사내 SMTP 서버 일시 지연\n조치 내용: 조치 없음(재시도 성공, 수신자 수까지 확인)\n사람의 결정: 승인\n검토 의견: 발송 결과까지 확인한 점 좋음"
+    }
+  ],
+  "rejected": [
+    {
+      "case_id": "PC-012",
+      "similarity": 0.6115,
+      "date": "2025-11-17",
+      "dag_id": "yield_report_mail",
+      "task_id": "send_daily_yield_report",
+      "error_type": "SMTPAuthenticationError",
+      "judgment": "진성",
+      "decision": "불승인",
+      "content": "[PC-012 · 2025-11-17 · yield_report_mail / send_daily_yield_report]\n에러 유형: SMTPAuthenticationError\n에러 메시지: 535 5.7.3 Authentication unsuccessful\n판별 결과: 진성\n원인: 메일 계정 비밀번호 만료\n조치 내용: 코드 수정 없이 계정 갱신 요청\n사람의 결정: 불승인\n검토 의견: 코드 수정이 필요한 건이 아님. 운영팀 요청으로 분류하고 코드 변경 PR은 올리지 않아야 함"
+    },
+    {
+      "case_id": "PC-092",
+      "similarity": 0.5865,
+      "date": "2026-09-03",
+      "dag_id": "yield_report_mail",
+      "task_id": "send_daily_yield_report",
+      "error_type": "SMTPAuthenticationError",
+      "judgment": "진성",
+      "decision": "불승인",
+      "content": "[PC-092 · 2026-09-03 · yield_report_mail / send_daily_yield_report]\n에러 유형: SMTPAuthenticationError\n에러 메시지: 535 Authentication failed\n판별 결과: 진성\n원인: 메일 계정 비밀번호 만료\n조치 내용: 코드 수정 없이 계정 갱신 요청\n사람의 결정: 불승인\n검토 의견: 코드 수정이 필요한 건이 아님. 운영팀 요청 사항으로 분류하고 코드 변경 PR은 올리지 않아야 함"
+    },
+    {
+      "case_id": "PC-013",
+      "similarity": 0.5622,
+      "date": "2025-11-18",
+      "dag_id": "yield_report_mail",
+      "task_id": "build_yield_report",
+      "error_type": "SMTPAuthenticationError",
+      "judgment": "진성",
+      "decision": "불승인",
+      "content": "[PC-013 · 2025-11-18 · yield_report_mail / build_yield_report]\n에러 유형: SMTPAuthenticationError\n에러 메시지: 535 Authentication failed\n판별 결과: 진성\n원인: 메일 계정 비밀번호 만료\n조치 내용: 코드 수정 없이 계정 갱신 요청\n사람의 결정: 불승인\n검토 의견: 코드 수정이 필요한 건이 아님. 운영팀 요청으로 분류하고 코드 변경 PR은 올리지 않아야 함"
+    }
+  ]
+}

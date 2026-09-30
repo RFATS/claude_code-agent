@@ -1,0 +1,24 @@
+{
+  "alert_id": "alert-03",
+  "judgment": "가성",
+  "evidence": [
+    {"fact": "에러 유형은 TimeoutError(timed out)이며, 발생 위치는 SMTP 서버(smtp.example.internal:587) 접속 코드(timeout=20)이다. 코드·데이터 스키마 오류가 아니라 접속 시 응답 지연 유형이다.", "source": "context.json: error_type, error_message, error_location.code; data/logs/log_03_yield_report_mail_send_daily_yield_report_20260928.txt 3-7행"},
+    {"fact": "실패는 1차 시도 1회뿐이다. 1차 시도(07:29:50)는 접속 시도(07:29:51) 21초 뒤 07:30:12에 timed out으로 실패해 UP_FOR_RETRY가 되었고, 2차 시도(07:35:13)는 같은 서버·같은 코드 경로로 접속해 SUCCESS로 끝났다.", "source": "context.json: attempts, attempt_count, final_outcome, retry_succeeded; 로그 1-12행"},
+    {"fact": "재시도 결과가 매번 같은 오류가 아니다. same_error_every_attempt는 false(정정값)이며, 2차 시도에는 오류가 없다. 같은 오류가 반복되는 결정적 결함으로 볼 근거가 없다.", "source": "context.json: same_error_every_attempt, attempts[1].error_type"},
+    {"fact": "성공을 뒷받침하는 정보로, 2차 시도 로그에 'mail sent to 12 recipients'가 기록되어 있다(발송 수신자 12명).", "source": "data/logs/log_03_yield_report_mail_send_daily_yield_report_20260928.txt 11행"},
+    {"fact": "로그에 인증 오류(SMTPAuthenticationError 등)나 스키마·코드 결함을 시사하는 다른 오류는 없다.", "source": "data/logs/log_03_yield_report_mail_send_daily_yield_report_20260928.txt 전체"}
+  ],
+  "referenced_cases": [
+    {"case_id": "PC-043", "decision": "승인", "how_used": "같은 DAG/Task의 TimeoutError(timed out)를 SMTP 일시 지연으로 보고, 재시도 성공과 수신자 수 확인 후 가성 판정한 방식을 따랐다. 이번에도 수신자 수(12명)를 로그에서 확인해 근거에 넣었다."},
+    {"case_id": "PC-062", "decision": "승인", "how_used": "동일 Task의 TimeoutError를 재시도 성공과 메일 발송 확인으로 가성 처리한 방식을 참고했다."},
+    {"case_id": "PC-045", "decision": "승인", "how_used": "Task는 다르지만(build_yield_report) SMTP 지연 TimeoutError를 발송 결과 확인 후 가성으로 본 판단 방식을 참고했다."},
+    {"case_id": "PC-012", "decision": "불승인", "how_used": "SMTPAuthenticationError를 진성으로 분류했다가 불승인된 사례(검토 의견: 코드 수정이 필요한 건이 아님)다. 에러 유형이 달라 직접 대응하지는 않는다. 다만 에러 유형을 확인하지 않고 판단하지 않도록, 이번 건이 인증 오류가 아님을 로그에서 확인했다."},
+    {"case_id": "PC-092", "decision": "불승인", "how_used": "PC-012와 같은 이유(인증 오류, 코드 수정 불필요)로 불승인된 사례다. 에러 유형 확인 시에만 참고했다."},
+    {"case_id": "PC-013", "decision": "불승인", "how_used": "PC-012와 같은 이유(인증 오류, 코드 수정 불필요)로 불승인된 사례다. 에러 유형 확인 시에만 참고했다."}
+  ],
+  "cautions": [
+    "성공 후 결과 건수 검증은 로그에서 확인 불가. 로그에는 'mail sent to 12 recipients'만 있고, 12명이 정상 수신자 수인지, 실제 수신 여부는 확인 불가.",
+    "SMTP 서버 지연의 원인은 로그로 확인 불가. 같은 DAG/Task의 TimeoutError가 과거에도 있었으므로(PC-043, PC-062) 발생 빈도는 사람이 볼 필요가 있다.",
+    "이 판별은 same_error_every_attempt가 false로 정정된 context.json 기준이다. 정정 전 값(true)을 근거로 한 기존 판별 내용은 덮어썼다."
+  ]
+}

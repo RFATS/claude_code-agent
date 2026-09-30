@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>fail 대응 리포트 - ssd_tester_log_sync</title>
+<style>
+  :root {
+    --bg: #f4f6f9; --card: #ffffff; --ink: #1c2430; --muted: #5d6b7c; --line: #dde3ea;
+    --accent: #1f5fbf; --true: #c62828; --true-bg: #fdecea; --ok: #2e7d32; --ok-bg: #e8f5e9;
+    --warn-bg: #fff6e0; --warn: #a66300; --code-bg: #0f1722; --code-ink: #e6edf5;
+    --add-bg: #e6ffed; --del-bg: #ffeef0;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #10161e; --card: #18212c; --ink: #e6edf5; --muted: #98a6b8; --line: #2b3746;
+      --accent: #6aa5ff; --true: #ff8a80; --true-bg: #3a1e1e; --ok: #7bd88f; --ok-bg: #1c3324;
+      --warn-bg: #3a2e12; --warn: #ffc65c; --code-bg: #0a0f16; --code-ink: #e6edf5;
+      --add-bg: #143222; --del-bg: #3a1a20;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.6 "Pretendard", "Malgun Gothic", system-ui, sans-serif; }
+  .wrap { max-width: 920px; margin: 0 auto; padding: 24px 16px 56px; }
+  header { margin-bottom: 20px; }
+  .eyebrow { color: var(--muted); font-size: 13px; letter-spacing: .02em; }
+  h1 { font-size: 24px; margin: 4px 0 10px; }
+  .badges { display: flex; gap: 8px; flex-wrap: wrap; }
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 13px; font-weight: 600; border: 1px solid var(--line); background: var(--card); }
+  .badge.true { color: var(--true); background: var(--true-bg); border-color: transparent; }
+  .badge.ok { color: var(--ok); background: var(--ok-bg); border-color: transparent; }
+  .badge.warn { color: var(--warn); background: var(--warn-bg); border-color: transparent; }
+  section { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 20px 22px; margin-bottom: 16px; }
+  section h2 { font-size: 17px; margin: 0 0 14px; display: flex; align-items: center; gap: 10px; }
+  .num { width: 24px; height: 24px; border-radius: 50%; background: var(--accent); color: #fff; font-size: 13px; display: inline-flex; align-items: center; justify-content: center; }
+  h3 { font-size: 14px; margin: 18px 0 8px; color: var(--muted); }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; width: 130px; white-space: nowrap; }
+  table.grid th { width: auto; background: transparent; }
+  .callout { border-left: 4px solid var(--true); background: var(--true-bg); padding: 12px 14px; border-radius: 6px; margin: 0 0 14px; }
+  .callout strong { color: var(--true); }
+  .callout.ok { border-left-color: var(--ok); background: var(--ok-bg); }
+  .callout.ok strong { color: var(--ok); }
+  .na { color: var(--muted); margin: 0; }
+  ul { margin: 6px 0 0; padding-left: 20px; }
+  li { margin: 3px 0; }
+  pre { margin: 0; background: var(--code-bg); color: var(--code-ink); border-radius: 8px; padding: 12px 0; overflow-x: auto; font: 13px/1.55 Consolas, "D2Coding", monospace; }
+  pre .l { display: block; padding: 0 14px; white-space: pre; }
+  pre .add { background: var(--add-bg); color: inherit; }
+  pre .del { background: var(--del-bg); color: inherit; }
+  @media (prefers-color-scheme: light) { pre .add { background: #1d4d2c; } pre .del { background: #5a2229; } }
+  .file { font: 13px Consolas, monospace; color: var(--muted); margin: 0 0 6px; }
+  .checklist { list-style: none; padding: 0; }
+  .checklist li { display: flex; gap: 10px; align-items: flex-start; padding: 8px 0; border-bottom: 1px solid var(--line); }
+  .box { width: 18px; height: 18px; border: 2px solid var(--muted); border-radius: 4px; flex: none; margin-top: 3px; }
+  .box.done { background: var(--ok); border-color: var(--ok); position: relative; }
+  .box.done::after { content: ""; position: absolute; left: 4px; top: 0; width: 5px; height: 10px; border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg); }
+  .approve { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 14px; align-items: center; }
+  .btn { padding: 8px 18px; border-radius: 8px; border: 1px solid var(--line); font-weight: 600; background: var(--card); color: var(--ink); }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .num-r { text-align: right; font-variant-numeric: tabular-nums; }
+  .src { color: var(--muted); font-size: 12px; }
+  footer { color: var(--muted); font-size: 12px; text-align: center; margin-top: 20px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Solution PE팀 · Airflow fail 대응 리포트 · 2026-09-30 생성</div>
+    <h1>ssd_tester_log_sync / fetch_tester_logs</h1>
+    <div class="badges">
+      <span class="badge ok">가성 fail</span>
+      <span class="badge">원인: SFTP 일시 연결 단절 (ConnectionResetError)</span>
+      <span class="badge warn">사람 승인 대기</span>
+    </div>
+  </header>
+
+  <section>
+    <h2><span class="num">1</span>알림 정보 및 진성/가성 판별</h2>
+    <table>
+      <tr><th>DAG</th><td>ssd_tester_log_sync</td></tr>
+      <tr><th>Task</th><td>fetch_tester_logs</td></tr>
+      <tr><th>Logical date</th><td>2026-09-27 02:00 KST</td></tr>
+      <tr><th>최종 fail 시각</th><td>2026-09-27 02:10:43 KST (1차 시도 실패, UP_FOR_RETRY. 2차 시도에서 SUCCESS로 종결)</td></tr>
+      <tr><th>판별 결과</th><td><strong style="color:var(--ok)">가성</strong></td></tr>
+    </table>
+
+    <h3>재시도 이력</h3>
+    <table class="grid">
+      <thead><tr><th>시도</th><th>시작 시각</th><th>결과</th><th>에러</th></tr></thead>
+      <tbody>
+        <tr><td>1 / 3</td><td>2026-09-27, 02:10:20</td><td><span class="badge warn">UP_FOR_RETRY</span></td><td><code>ConnectionResetError: [Errno 104] Connection reset by peer</code></td></tr>
+        <tr><td>2 / 3</td><td>2026-09-27, 02:15:44</td><td><span class="badge ok">SUCCESS</span></td><td>없음</td></tr>
+      </tbody>
+    </table>
+
+    <h3>판별 근거</h3>
+    <ul>
+      <li>에러 유형이 <code>ConnectionResetError</code>([Errno 104] Connection reset by peer)로, <code>sftp.get</code> 호출 중 발생한 일시적 네트워크·서버 연결 단절 유형입니다. 발생 위치는 <code>/opt/airflow/dags/sftp_fetch.py</code> 44행 <code>fetch_tester_logs</code>입니다.</li>
+      <li>1차 시도만 실패하고 2차 시도에서 SUCCESS로 종결됐습니다(시도 2회, 최대 3회). 같은 오류가 매 시도 반복되지 않았습니다.</li>
+      <li>1차 시도 로그에는 트레이스백과 UP_FOR_RETRY가, 2차 시도 로그에는 오류 없이 SUCCESS가 기록되어 재시도 이력과 로그가 일치합니다.</li>
+      <li>2차 시도 로그에 <code>downloaded 3 files (FT-T01, FT-T02, FT-T03), 48.2 MB</code>, 반환값 3이 기록되어 접속 대상 라인 3개와 다운로드 파일 수가 일치합니다.</li>
+      <li>스키마·데이터 내용 관련 오류는 로그에 없고, 재시도 시 동일 코드가 그대로 성공했습니다.</li>
+    </ul>
+
+    <h3>참고한 과거 사례</h3>
+    <table class="grid">
+      <thead><tr><th>case_id</th><th>일자</th><th>결정</th><th class="num-r">유사도</th><th>참고 방식</th></tr></thead>
+      <tbody>
+        <tr><td>PC-037</td><td>2026-03-04</td><td><span class="badge ok">승인</span></td><td class="num-r">0.8249</td><td>동일 DAG/Task/에러에서 재시도 성공과 다운로드 파일 수 일치 확인으로 가성 종결이 승인됨. 같은 방식으로 파일 수 일치를 근거에 포함함</td></tr>
+        <tr><td>PC-030</td><td>2026-01-31</td><td><span class="badge ok">승인</span></td><td class="num-r">0.8243</td><td>재시도 성공과 파일 수(테스터 수) 일치를 함께 확인해 종결한 방식을 참고함</td></tr>
+        <tr><td>PC-083</td><td>2026-07-21</td><td><span class="badge ok">승인</span></td><td class="num-r">0.8205</td><td>에러 번호만 다르고(Errno 54) 같은 유형의 일시 단절 사례로, 재시도 성공과 파일 수 일치 확인 방식을 참고함</td></tr>
+        <tr><td>PC-068</td><td>2026-06-11</td><td><span class="badge true">불승인</span></td><td class="num-r">0.7799</td><td>재시도 성공만 보고 가성 종결했다가 파일 수 부족(3개 중 2개)이 확인되지 않아 불승인됨. 이번 건은 로그에서 3개 파일 다운로드를 확인한 뒤 판단함</td></tr>
+        <tr><td>PC-001</td><td>2025-10-06</td><td><span class="badge true">불승인</span></td><td class="num-r">0.7602</td><td>결과 파일 수·행 수 검증 없이 종결하면 안 된다는 검토 의견을 반영해 파일 수를 확인함. 행 수는 로그에서 확인 불가라 아래 확인 필요 항목에 남김</td></tr>
+        <tr><td>PC-018</td><td>2025-11-26</td><td><span class="badge true">불승인</span></td><td class="num-r">0.6862</td><td>다른 DAG(essd_ft_result_etl)의 사례이나 같은 검토 의견(재시도 성공만으로 종결 불가)을 반영함</td></tr>
+      </tbody>
+    </table>
+
+    <h3>조치 없음 종결 확인</h3>
+    <ul class="checklist">
+      <li><span class="box done"></span><span>재시도 성공 확인 — 2차 시도 SUCCESS, 최종 상태 SUCCESS <span class="src">(로그로 확인)</span></span></li>
+      <li><span class="box done"></span><span>결과 건수(파일 수) 확인 — 다운로드 3개(FT-T01, FT-T02, FT-T03), 접속 대상 3개와 일치, 반환값 3 <span class="src">(로그로 확인)</span></span></li>
+      <li><span class="box"></span><span><span class="badge warn">확인 필요</span> 파일 내용의 행 수·완전성 — 로그에서 확인 불가</span></li>
+      <li><span class="box"></span><span><span class="badge warn">확인 필요</span> 테스터 파일별 크기 정상 여부 — 48.2 MB는 합계값이라 개별 확인 불가</span></li>
+      <li><span class="box"></span><span><span class="badge warn">확인 필요</span> 1차 시도 실패 시점의 부분 다운로드 여부와 2차 시도의 덮어쓰기 여부 — 로그에 없어 확인 불가</span></li>
+    </ul>
+    <p class="src" style="margin:10px 0 0">참고: SFTP 서버 측 단절 원인은 입력 자료에 없어 확인 불가입니다. 최종 종결 여부는 사람이 결정하며, 승인 상태는 "승인 대기"입니다.</p>
+  </section>
+
+  <section>
+    <h2><span class="num">2</span>진성 fail 원인 분석</h2>
+    <p class="na">해당 없음 (가성 fail로 판별되어 조치 대상이 아님)</p>
+  </section>
+
+  <section>
+    <h2><span class="num">3</span>수정 코드 변경 내역</h2>
+    <p class="na">해당 없음 (가성 fail로 판별되어 조치 대상이 아님)</p>
+  </section>
+
+  <section>
+    <h2><span class="num">4</span>검증 결과 및 배포 승인 요청</h2>
+    <p class="na">해당 없음 (가성 fail로 판별되어 조치 대상이 아님)</p>
+  </section>
+
+  <footer>이 리포트는 Agent가 생성했으며, 종결 확정 및 이력 기록은 사람의 확인 후에만 진행됩니다.</footer>
+</div>
+</body>
+</html>
