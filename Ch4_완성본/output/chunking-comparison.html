@@ -1,0 +1,975 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chunking 방식 비교</title>
+<style>
+  :root {
+    --bg: #f6f5f2; --surface: #ffffff; --surface-2: #f0efeb; --border: #e2e0da;
+    --text: #1d1c1a; --muted: #6b6862; --accent: #2f5bd3; --accent-bg: #e8eefc;
+    --warn: #a4520b; --warn-bg: #fbeede;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #161615; --surface: #1f1f1d; --surface-2: #282826; --border: #353431;
+      --text: #ecebe7; --muted: #a09d96; --accent: #8aa8f5; --accent-bg: #23304f;
+      --warn: #f0b27a; --warn-bg: #3d2b1a;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #161615; --surface: #1f1f1d; --surface-2: #282826; --border: #353431;
+    --text: #ecebe7; --muted: #a09d96; --accent: #8aa8f5; --accent-bg: #23304f;
+    --warn: #f0b27a; --warn-bg: #3d2b1a;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font: 15px/1.6 "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  }
+  main { max-width: 1400px; margin: 0 auto; padding: 32px 16px 64px; }
+  h1 { font-size: 26px; margin: 0 0 4px; letter-spacing: -0.01em; }
+  .sub { color: var(--muted); margin: 0 0 24px; }
+  table { border-collapse: collapse; width: 100%; max-width: 640px; margin-bottom: 32px;
+          background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  th, td { padding: 10px 14px; border-bottom: 1px solid var(--border); text-align: left; }
+  thead th { font-size: 13px; color: var(--muted); font-weight: 600; background: var(--surface-2); }
+  tbody tr:last-child > * { border-bottom: 0; }
+  .num { text-align: right; font-variant-numeric: tabular-nums; }
+  .strong { font-weight: 700; color: var(--accent); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; align-items: start; }
+  .col { min-width: 0; }
+  .col-head { position: sticky; top: 0; z-index: 1; background: var(--bg); padding: 8px 0 12px; }
+  .col-head h2 { font-size: 18px; margin: 0; }
+  .col-head p { margin: 2px 0 0; color: var(--muted); font-size: 13px; }
+  .col-head .col-count { color: var(--text); font-weight: 600; }
+  .chunks { display: flex; flex-direction: column; gap: 10px; }
+  .chunk { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; }
+  .chunk-head { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+  .chunk-no { font-weight: 700; color: var(--text); }
+  .tags { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 6px; }
+  .tag { font-size: 11px; padding: 1px 8px; border-radius: 999px; background: var(--surface-2); color: var(--muted); }
+  .tag-accent { background: var(--accent-bg); color: var(--accent); }
+  .tag-warn { background: var(--warn-bg); color: var(--warn); }
+  pre { margin: 0; white-space: pre-wrap; word-break: break-word; font: 13px/1.6 inherit;
+        font-family: inherit; background: var(--surface-2); border-radius: 6px; padding: 8px 10px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Chunking 방식 비교</h1>
+  <p class="sub">원본: 설비운영매뉴얼_통합본.txt</p>
+  <table>
+    <thead><tr><th>방식</th><th class="num">Chunk 수</th><th class="num">평균 길이</th><th class="num">최소</th><th class="num">최대</th></tr></thead>
+    <tbody>
+        <tr>
+          <th scope="row">1. 고정 길이</th>
+          <td class="num strong">13</td>
+          <td class="num">282</td>
+          <td class="num">62</td>
+          <td class="num">300</td>
+        </tr>
+        <tr>
+          <th scope="row">2. 구조 경계</th>
+          <td class="num strong">28</td>
+          <td class="num">90</td>
+          <td class="num">17</td>
+          <td class="num">262</td>
+        </tr>
+        <tr>
+          <th scope="row">3. 문단</th>
+          <td class="num strong">29</td>
+          <td class="num">124</td>
+          <td class="num">17</td>
+          <td class="num">382</td>
+        </tr>
+    </tbody>
+  </table>
+  <div class="grid">
+      <section class="col" id="fixed">
+        <header class="col-head">
+          <h2>1. 고정 길이</h2>
+          <p>300자씩 기계적으로 자름</p>
+          <p class="col-count">13개 · 평균 282자</p>
+        </header>
+        <div class="chunks">
+        <article class="chunk">
+          <header class="chunk-head">
+            <span class="chunk-no">#1</span>
+            <span class="chunk-len">300자</span>
+          </header>
+          
+          <pre>설비 운영 매뉴얼 (통합본)
+문서번호: MAN-EQ-000
+개정일: 2026-01-15
+적용 범위: 전 공정 설비 (식각, 박막증착, 금속증착, 연마, 세정, 포토, 이온주입, 검사)
+
+이 매뉴얼은 공정별 설비의 주요 관리 파라미터, 정상 운영 기준, 이상 징후
+발생 시 점검 순서를 정리한 것이다. 각 장은 공정 영역별로 구성되어
+있으며, 마지막 장에는 전 공정 공통 유의사항을 담았다.
+
+===========================================================
+제1장 식각(ETCH) 설비 — 챔버 </pre>
+        </article>
+        <article class="chunk">
+          <header class="chunk-head">
+            <span class="chunk-no">#2</span>
+            <span class="chunk-len">300자</span>
+          </header>
+          
+          <pre>온도 및 히터 관리 기준
+===========================================================
+대상 설비: ETCH-01, ETCH-02, ETCH-03 (L1 라인)
+
+1.1 챔버 온도 관리
+- 정상 운영 온도 범위: 설정값 대비 ±0.5도 이내
+- 온도가 설정값 대비 ±1도를 초과하여 10분 이상 지속될 경우 1차 경고
+  알람 발생
+- 챔버 히터는 존(zone)별로 독립 제어되며, 존간 온도 편차가 1.5도를
+  초과할 경우 히터 컨트롤러 점검이 필요함
+
+1.2 점검 순서
+온도 이상 알람 </pre>
+        </article>
+        <article class="chunk">
+          <header class="chunk-head">
+            <span class="chunk-no">#3</span>
+            <span class="chunk-len">300자</span>
+          </header>
+          <div class="tags"><span class="tag tag-warn">단어 중간 잘림</span></div>
+          <pre>발생 시 다음 순서로 점검할 것을 권고함.
+  1) 냉각수 유량 확인
+  2) 냉각수 순환 펌프 상태 확인
+  3) 온도 센서 캘리브레이션 이력 확인
+  4) 히터 컨트롤러 존별 출력 편차 확인
+
+1.3 관련 불량 유형
+온도 이상은 식각 속도 산포를 유발하여 주로 박막두께불량, 패턴불량으로
+이어짐.
+
+===========================================================
+제2장 박막증착(CVD) 설비 — 챔버 압력 및 파티클 관리 기준
+==================================</pre>
+        </article>
+        <article class="chunk">
+          <header class="chunk-head">
+            <span class="chunk-no">#4</span>
+            <span class="chunk-len">300자</span>
+          </header>
+          
+          <pre>=========================
+대상 설비: CVD-01, CVD-02, CVD-03 (L2 라인)
+
+2.1 챔버 압력 관리
+- 정상 운영 압력 허용 오차: 설정값 대비 ±3% 이내 (2026년 9월 개정,
+  기존 ±5%에서 강화)
+- 압력 편차가 허용 오차를 초과하여 2회 이상 반복될 경우 설비를
+  일시 정지하고 압력 조절 밸브 및 MFC(Mass Flow Controller) 점검 필요
+
+2.2 파티클 관리
+- 파티클 필터는 권장 교체 주기(월 1회)를 반드시 준수할 것. 필터
+  막힘은 파티클성 불량의 주요 </pre>
+        </article>
+        <article class="chunk">
+          <header class="chunk-head">
+            <span class="chunk-no">#5</span>
+            <span class="chunk-len">300자</span>
+          </header>
+          <div class="tags"><span class="tag tag-warn">단어 중간 잘림</span></div>
+          <pre>원인이 됨
+- 압력 불안정은 반응 부산물의 챔버 내벽 축적을 가속화하여 파티클성
+  불량으로 이어질 수 있으므로, 압력 편차 발생 시 챔버 내벽 오염 상태도
+  함께 확인할 것
+
+2.3 관련 불량 유형
+파티클, 표면오염
+
+===========================================================
+제3장 금속증착(PVD) 설비 — 챔버 진동 및 회전계통 관리 기준
+===========================================================
+대상 설비: PVD-01, PVD</pre>
+        </article>
+        <article class="chunk">
+          <header class="chunk-head">
+            <span class="chunk-no">#6</span>
+            <span class="chunk-len">300자</span>
+          </header>
+          <div class="tags"><span class="tag tag-warn">단어 중간 잘림</span></div>
+          <pre>-02 (L3 라인)
+
+3.1 진동 관리
+- 스퍼터링 챔버 회전 베어링은 분기별 진동 측정을 실시하며, 진동값이
+  기준치를 초과할 경우 베어링 교체를 검토할 것
+- 진동 증가는 박막두께 불균일의 주요 원인이 되므로 조기 발견이 중요함
+
+3.2 관련 불량 유형
+박막두께불량
+
+===========================================================
+제4장 연마(CMP) 설비 — 연마압력 및 소모품 관리 기준
+====================================================</pre>
+        </article>
+        <article class="chunk">
+          <header class="chunk-head">
+            <span class="chunk-no">#7</span>
+            <span class="chunk-len">300자</span>
+          </header>
+          <div class="tags"><span class="tag tag-warn">단어 중간 잘림</span></div>
+          <pre>=======
+대상 설비: CMP-01, CMP-02 (L4 라인)
+
+4.1 소모품 관리
+- 연마벨트/패드 장력과 마모 상태를 주기적으로 점검할 것
+- 연마압력 불균일은 스크래치성 불량의 주요 원인이 되므로, 소모품
+  교체 주기를 철저히 준수할 것
+
+4.2 관련 불량 유형
+미세스크래치
+
+===========================================================
+제5장 세정(CLN) 설비 — 가스 유량 및 배관 관리 기준
+============================================</pre>
+        </article>
+        <article class="chunk">
+          <header class="chunk-head">
+            <span class="chunk-no">#8</span>
+            <span class="chunk-len">300자</span>
+          </header>
+          <div class="tags"><span class="tag tag-warn">단어 중간 잘림</span></div>
+          <pre>===============
+대상 설비: CLN-01, CLN-02, CLN-03 (L5 라인)
+
+5.1 가스 유량 관리
+- 질소 퍼지 라인 필터는 분기별로 점검하며, 유량 저하 시 즉시 필터
+  교체를 진행할 것
+- 유량 저하는 세정 불량(잔류물, 표면오염)으로 이어질 수 있음
+
+5.2 관련 불량 유형
+표면오염
+
+===========================================================
+제6장 포토(PHOTO) 설비 — 클린룸 환경 및 렌즈 관리 기준
+==========================</pre>
+        </article>
+        <article class="chunk">
+          <header class="chunk-head">
+            <span class="chunk-no">#9</span>
+            <span class="chunk-len">300자</span>
+          </header>
+          <div class="tags"><span class="tag tag-warn">단어 중간 잘림</span></div>
+          <pre>=================================
+대상 설비: PHOTO-01, PHOTO-02 (L6 라인)
+
+6.1 환경 관리
+- 노광 챔버 주변 습도는 40~50% 범위로 유지되어야 하며, 국소 습도
+  상승 시 렌즈 오염 여부를 점검할 것
+- 렌즈 오염은 패턴 불량의 주요 원인이 되므로 정기 클리닝을 준수할 것
+
+6.2 관련 불량 유형
+패턴불량
+
+===========================================================
+제7장 이온주입(IMP) 설비 — 파워서플라이 및 도즈 제어 관</pre>
+        </article>
+        <article class="chunk">
+          <header class="chunk-head">
+            <span class="chunk-no">#10</span>
+            <span class="chunk-len">300자</span>
+          </header>
+          
+          <pre>리 기준
+===========================================================
+대상 설비: IMP-01, IMP-02 (L7 라인)
+
+7.1 파워서플라이 관리
+- 파워서플라이 출력 전압은 정기적으로 점검하며, 노후 장비는 예방
+  교체를 검토할 것
+- 전압 불안정은 도즈 편차로 이어져 치수불량을 유발할 수 있음
+
+7.2 관련 불량 유형
+치수불량
+
+===========================================================
+제8장 검사(INSP) 설비 — 비전 카메라</pre>
+        </article>
+        <article class="chunk">
+          <header class="chunk-head">
+            <span class="chunk-no">#11</span>
+            <span class="chunk-len">300자</span>
+          </header>
+          <div class="tags"><span class="tag tag-warn">단어 중간 잘림</span></div>
+          <pre> 캘리브레이션 관리 기준
+===========================================================
+대상 설비: INSP-01, INSP-02, INSP-03 (L8 라인)
+
+8.1 캘리브레이션 관리
+- 비전 카메라는 권장 캘리브레이션 주기(월 1회)를 준수해야 하며, 주기
+  초과 시 측정 오차가 발생할 수 있음
+- 캘리브레이션 이력은 품질시스템에 등록하여 주기 초과 시 자동 경고가
+  발생하도록 관리할 것
+
+8.2 관련 불량 유형
+치수불량 (오검출/미검출)
+
+=====================</pre>
+        </article>
+        <article class="chunk">
+          <header class="chunk-head">
+            <span class="chunk-no">#12</span>
+            <span class="chunk-len">300자</span>
+          </header>
+          <div class="tags"><span class="tag tag-warn">단어 중간 잘림</span></div>
+          <pre>======================================
+제9장 전 공정 공통 유의사항
+===========================================================
+- 온도, 압력, 진동, 유량 등 주요 공정 파라미터의 &quot;경미한 이상&quot;이라도
+  2회 이상 반복될 경우 방치하지 말고 설비기술팀에 즉시 보고할 것
+- 관련 조치 및 원인 분석 결과는 품질 이슈 보고서 양식(QIR)으로 작성
+  하여 사내 품질시스템에 등록할 것
+- 예방정비(PM) 주기는 설비기술팀 승인 없이 임의로 변경할 수 없</pre>
+        </article>
+        <article class="chunk">
+          <header class="chunk-head">
+            <span class="chunk-no">#13</span>
+            <span class="chunk-len">62자</span>
+          </header>
+          
+          <pre>음
+- 공정 파라미터 트렌드 모니터링 대시보드에서 임계값 초과 시 자동
+  알림이 발생하도록 설정을 유지할 것
+</pre>
+        </article>
+        </div>
+      </section>
+      <section class="col" id="structure">
+        <header class="col-head">
+          <h2>2. 구조 경계</h2>
+          <p>장 제목(제N장) · 소제목(N.N) 기준</p>
+          <p class="col-count">28개 · 평균 90자</p>
+        </header>
+        <div class="chunks">
+        <article class="chunk">
+          <header class="chunk-head">
+            <span class="chunk-no">#1</span>
+            <span class="chunk-len">217자</span>
+          </header>
+          <div class="tags"><span class="tag tag-accent">머리말</span></div>
+          <pre>설비 운영 매뉴얼 (통합본)
+문서번호: MAN-EQ-000
+개정일: 2026-01-15
+적용 범위: 전 공정 설비 (식각, 박막증착, 금속증착, 연마, 세정, 포토, 이온주입, 검사)
+
+이 매뉴얼은 공정별 설비의 주요 관리 파라미터, 정상 운영 기준, 이상 징후
+발생 시 점검 순서를 정리한 것이다. 각 장은 공정 영역별로 구성되어
+있으며, 마지막 장에는 전 공정 공통 유의사항을 담았다.</pre>
+        </article>
+        <article class="chunk">
+          <header class="chunk-head">
+            <span class="chunk-no">#2</span>
+            <span class="chunk-len">75자</span>
+          </header>
+          <div class="tags"><span class="tag tag-accent">제1장 식각(ETCH) 설비 — 챔버 온도 및 히터 관리 기준</span></div>
+          <pre>제1장 식각(ETCH) 설비 — 챔버 온도 및 히터 관리 기준
+대상 설비: ETCH-01, ETCH-02, ETCH-03 (L1 라인)</pre>
+        </article>
+        <article class="chunk">
+          <header class="chunk-head">
+            <span class="chunk-no">#3</span>
+            <span class="chunk-len">163자</span>
+          </header>
+          <div class="tags"><span class="tag">제1장 식각(ETCH) 설비</span><span class="tag tag-accent">1.1 챔버 온도 관리</span></div>
+          <pre>1.1 챔버 온도 관리
+- 정상 운영 온도 범위: 설정값 대비 ±0.5도 이내
+- 온도가 설정값 대비 ±1도를 초과하여 10분 이상 지속될 경우 1차 경고
+  알람 발생
+- 챔버 히터는 존(zone)별로 독립 제어되며, 존간 온도 편차가 1.5도를
+  초과할 경우 히터 컨트롤러 점검이 필요함</pre>
+        </article>
+        <article class="chunk">
+          <header class="chunk-head">
+            <span class="chunk-no">#4</span>
+            <span class="chunk-len">127자</span>
+          </header>
+          <div class="tags"><span class="tag">제1장 식각(ETCH) 설비</span><span class="tag tag-accent">1.2 점검 순서</span></div>
+          <pre>1.2 점검 순서
+온도 이상 알람 발생 시 다음 순서로 점검할 것을 권고함.
+  1) 냉각수 유량 확인
+  2) 냉각수 순환 펌프 상태 확인
+  3) 온도 센서 캘리브레이션 이력 확인
+  4) 히터 컨트롤러 존별 출력 편차 확인</pre>
+        </article>
+        <article class="chunk">
+          <header class="chunk-head">
+            <span class="chunk-no">#5</span>
+            <span class="chunk-len">57자</span>
+          </header>
+          <div class="tags"><span class="tag">제1장 식각(ETCH) 설비</span><span class="tag tag-accent">1.3 관련 불량 유형</span></div>
+          <pre>1.3 관련 불량 유형
+온도 이상은 식각 속도 산포를 유발하여 주로 박막두께불량, 패턴불량으로
+이어짐.</pre>
+        </article>
+        <article class="chunk">
+          <header class="chunk-head">
+            <span class="chunk-no">#6</span>
+            <span class="chunk-len">74자</span>
+          </header>
+          <div class="tags"><span class="tag tag-accent">제2장 박막증착(CVD) 설비 — 챔버 압력 및 파티클 관리 기준</span></div>
+          <pre>제2장 박막증착(CVD) 설비 — 챔버 압력 및 파티클 관리 기준
+대상 설비: CVD-01, CVD-02, CVD-03 (L2 라인)</pre>
+        </article>
+        <article class="chunk">
+          <header class="chunk-head">
+            <span class="chunk-no">#7</span>
+            <span class="chunk-len">164자</span>
+          </header>
+          <div class="tags"><span class="tag">제2장 박막증착(CVD) 설비</span><span class="tag tag-accent">2.1 챔버 압력 관리</span></div>
+          <pre>2.1 챔버 압력 관리
+- 정상 운영 압력 허용 오차: 설정값 대비 ±3% 이내 (2026년 9월 개정,
+  기존 ±5%에서 강화)
+- 압력 편차가 허용 오차를 초과하여 2회 이상 반복될 경우 설비를
+  일시 정지하고 압력 조절 밸브 및 MFC(Mass Flow Controller) 점검 필요</pre>
+        </article>
+        <article class="chunk">
+          <header class="chunk-head">
+            <span class="chunk-no">#8</span>
+            <span class="chunk-len">167자</span>
+          </header>
+          <div class="tags"><span class="tag">제2장 박막증착(CVD) 설비</span><span class="tag tag-accent">2.2 파티클 관리</span></div>
+          <pre>2.2 파티클 관리
+- 파티클 필터는 권장 교체 주기(월 1회)를 반드시 준수할 것. 필터
+  막힘은 파티클성 불량의 주요 원인이 됨
+- 압력 불안정은 반응 부산물의 챔버 내벽 축적을 가속화하여 파티클성
+  불량으로 이어질 수 있으므로, 압력 편차 발생 시 챔버 내벽 오염 상태도
+  함께 확인할 것</pre>
+        </article>
+        <article class="chunk">
+          <header class="chunk-head">
+            <span class="chunk-no">#9</span>
+            <span class="chunk-len">22자</span>
+          </header>
+          <div class="tags"><span class="tag">제2장 박막증착(CVD) 설비</span><span class="tag tag-accent">2.3 관련 불량 유형</span></div>
+          <pre>2.3 관련 불량 유형
+파티클, 표면오염</pre>
+        </article>
+        <article class="chunk">
+          <header class="chunk-head">
+            <span class="chunk-no">#10</span>
+            <span class="chunk-len">67자</span>
+          </header>
+          <div class="tags"><span class="tag tag-accent">제3장 금속증착(PVD) 설비 — 챔버 진동 및 회전계통 관리 기준</span></div>
+          <pre>제3장 금속증착(PVD) 설비 — 챔버 진동 및 회전계통 관리 기준
+대상 설비: PVD-01, PVD-02 (L3 라인)</pre>
+        </article>
+        <article class="chunk">
+          <header class="chunk-head">
+            <span class="chunk-no">#11</span>
+            <span class="chunk-len">118자</span>
+          </header>
+          <div class="tags"><span class="tag">제3장 금속증착(PVD) 설비</span><span class="tag tag-accent">3.1 진동 관리</span></div>
+          <pre>3.1 진동 관리
+- 스퍼터링 챔버 회전 베어링은 분기별 진동 측정을 실시하며, 진동값이
+  기준치를 초과할 경우 베어링 교체를 검토할 것
+- 진동 증가는 박막두께 불균일의 주요 원인이 되므로 조기 발견이 중요함</pre>
+        </article>
+        <article class="chunk">
+          <header class="chunk-head">
+            <span class="chunk-no">#12</span>
+            <span class="chunk-len">19자</span>
+          </header>
+          <div class="tags"><span class="tag">제3장 금속증착(PVD) 설비</span><span class="tag tag-accent">3.2 관련 불량 유형</span></div>
+          <pre>3.2 관련 불량 유형
+박막두께불량</pre>
+        </article>
+        <article class="chunk">
+          <header class="chunk-head">
+            <span class="chunk-no">#13</span>
+            <span class="chunk-len">63자</span>
+          </header>
+          <div class="tags"><span class="tag tag-accent">제4장 연마(CMP) 설비 — 연마압력 및 소모품 관리 기준</span></div>
+          <pre>제4장 연마(CMP) 설비 — 연마압력 및 소모품 관리 기준
+대상 설비: CMP-01, CMP-02 (L4 라인)</pre>
+        </article>
+        <article class="chunk">
+          <header class="chunk-head">
+            <span class="chunk-no">#14</span>
+            <span class="chunk-len">100자</span>
+          </header>
+          <div class="tags"><span class="tag">제4장 연마(CMP) 설비</span><span class="tag tag-accent">4.1 소모품 관리</span></div>
+          <pre>4.1 소모품 관리
+- 연마벨트/패드 장력과 마모 상태를 주기적으로 점검할 것
+- 연마압력 불균일은 스크래치성 불량의 주요 원인이 되므로, 소모품
+  교체 주기를 철저히 준수할 것</pre>
+        </article>
+        <article class="chunk">
+          <header class="chunk-head">
+            <span class="chunk-no">#15</span>
+            <span class="chunk-len">19자</span>
+          </header>
+          <div class="tags"><span class="tag">제4장 연마(CMP) 설비</span><span class="tag tag-accent">4.2 관련 불량 유형</span></div>
+          <pre>4.2 관련 불량 유형
+미세스크래치</pre>
+        </article>
+        <article class="chunk">
+          <header class="chunk-head">
+            <span class="chunk-no">#16</span>
+            <span class="chunk-len">71자</span>
+          </header>
+          <div class="tags"><span class="tag tag-accent">제5장 세정(CLN) 설비 — 가스 유량 및 배관 관리 기준</span></div>
+          <pre>제5장 세정(CLN) 설비 — 가스 유량 및 배관 관리 기준
+대상 설비: CLN-01, CLN-02, CLN-03 (L5 라인)</pre>
+        </article>
+        <article class="chunk">
+          <header class="chunk-head">
+            <span class="chunk-no">#17</span>
+            <span class="chunk-len">101자</span>
+          </header>
+          <div class="tags"><span class="tag">제5장 세정(CLN) 설비</span><span class="tag tag-accent">5.1 가스 유량 관리</span></div>
+          <pre>5.1 가스 유량 관리
+- 질소 퍼지 라인 필터는 분기별로 점검하며, 유량 저하 시 즉시 필터
+  교체를 진행할 것
+- 유량 저하는 세정 불량(잔류물, 표면오염)으로 이어질 수 있음</pre>
+        </article>
+        <article class="chunk">
+          <header class="chunk-head">
+            <span class="chunk-no">#18</span>
+            <span class="chunk-len">17자</span>
+          </header>
+          <div class="tags"><span class="tag">제5장 세정(CLN) 설비</span><span class="tag tag-accent">5.2 관련 불량 유형</span></div>
+          <pre>5.2 관련 불량 유형
+표면오염</pre>
+        </article>
+        <article class="chunk">
+          <header class="chunk-head">
+            <span class="chunk-no">#19</span>
+            <span class="chunk-len">70자</span>
+          </header>
+          <div class="tags"><span class="tag tag-accent">제6장 포토(PHOTO) 설비 — 클린룸 환경 및 렌즈 관리 기준</span></div>
+          <pre>제6장 포토(PHOTO) 설비 — 클린룸 환경 및 렌즈 관리 기준
+대상 설비: PHOTO-01, PHOTO-02 (L6 라인)</pre>
+        </article>
+        <article class="chunk">
+          <header class="chunk-head">
+            <span class="chunk-no">#20</span>
+            <span class="chunk-len">115자</span>
+          </header>
+          <div class="tags"><span class="tag">제6장 포토(PHOTO) 설비</span><span class="tag tag-accent">6.1 환경 관리</span></div>
+          <pre>6.1 환경 관리
+- 노광 챔버 주변 습도는 40~50% 범위로 유지되어야 하며, 국소 습도
+  상승 시 렌즈 오염 여부를 점검할 것
+- 렌즈 오염은 패턴 불량의 주요 원인이 되므로 정기 클리닝을 준수할 것</pre>
+        </article>
+        <article class="chunk">
+          <header class="chunk-head">
+            <span class="chunk-no">#21</span>
+            <span class="chunk-len">17자</span>
+          </header>
+          <div class="tags"><span class="tag">제6장 포토(PHOTO) 설비</span><span class="tag tag-accent">6.2 관련 불량 유형</span></div>
+          <pre>6.2 관련 불량 유형
+패턴불량</pre>
+        </article>
+        <article class="chunk">
+          <header class="chunk-head">
+            <span class="chunk-no">#22</span>
+            <span class="chunk-len">69자</span>
+          </header>
+          <div class="tags"><span class="tag tag-accent">제7장 이온주입(IMP) 설비 — 파워서플라이 및 도즈 제어 관리 기준</span></div>
+          <pre>제7장 이온주입(IMP) 설비 — 파워서플라이 및 도즈 제어 관리 기준
+대상 설비: IMP-01, IMP-02 (L7 라인)</pre>
+        </article>
+        <article class="chunk">
+          <header class="chunk-head">
+            <span class="chunk-no">#23</span>
+            <span class="chunk-len">99자</span>
+          </header>
+          <div class="tags"><span class="tag">제7장 이온주입(IMP) 설비</span><span class="tag tag-accent">7.1 파워서플라이 관리</span></div>
+          <pre>7.1 파워서플라이 관리
+- 파워서플라이 출력 전압은 정기적으로 점검하며, 노후 장비는 예방
+  교체를 검토할 것
+- 전압 불안정은 도즈 편차로 이어져 치수불량을 유발할 수 있음</pre>
+        </article>
+        <article class="chunk">
+          <header class="chunk-head">
+            <span class="chunk-no">#24</span>
+            <span class="chunk-len">17자</span>
+          </header>
+          <div class="tags"><span class="tag">제7장 이온주입(IMP) 설비</span><span class="tag tag-accent">7.2 관련 불량 유형</span></div>
+          <pre>7.2 관련 불량 유형
+치수불량</pre>
+        </article>
+        <article class="chunk">
+          <header class="chunk-head">
+            <span class="chunk-no">#25</span>
+            <span class="chunk-len">78자</span>
+          </header>
+          <div class="tags"><span class="tag tag-accent">제8장 검사(INSP) 설비 — 비전 카메라 캘리브레이션 관리 기준</span></div>
+          <pre>제8장 검사(INSP) 설비 — 비전 카메라 캘리브레이션 관리 기준
+대상 설비: INSP-01, INSP-02, INSP-03 (L8 라인)</pre>
+        </article>
+        <article class="chunk">
+          <header class="chunk-head">
+            <span class="chunk-no">#26</span>
+            <span class="chunk-len">132자</span>
+          </header>
+          <div class="tags"><span class="tag">제8장 검사(INSP) 설비</span><span class="tag tag-accent">8.1 캘리브레이션 관리</span></div>
+          <pre>8.1 캘리브레이션 관리
+- 비전 카메라는 권장 캘리브레이션 주기(월 1회)를 준수해야 하며, 주기
+  초과 시 측정 오차가 발생할 수 있음
+- 캘리브레이션 이력은 품질시스템에 등록하여 주기 초과 시 자동 경고가
+  발생하도록 관리할 것</pre>
+        </article>
+        <article class="chunk">
+          <header class="chunk-head">
+            <span class="chunk-no">#27</span>
+            <span class="chunk-len">27자</span>
+          </header>
+          <div class="tags"><span class="tag">제8장 검사(INSP) 설비</span><span class="tag tag-accent">8.2 관련 불량 유형</span></div>
+          <pre>8.2 관련 불량 유형
+치수불량 (오검출/미검출)</pre>
+        </article>
+        <article class="chunk">
+          <header class="chunk-head">
+            <span class="chunk-no">#28</span>
+            <span class="chunk-len">262자</span>
+          </header>
+          <div class="tags"><span class="tag tag-accent">제9장 전 공정 공통 유의사항</span></div>
+          <pre>제9장 전 공정 공통 유의사항
+- 온도, 압력, 진동, 유량 등 주요 공정 파라미터의 &quot;경미한 이상&quot;이라도
+  2회 이상 반복될 경우 방치하지 말고 설비기술팀에 즉시 보고할 것
+- 관련 조치 및 원인 분석 결과는 품질 이슈 보고서 양식(QIR)으로 작성
+  하여 사내 품질시스템에 등록할 것
+- 예방정비(PM) 주기는 설비기술팀 승인 없이 임의로 변경할 수 없음
+- 공정 파라미터 트렌드 모니터링 대시보드에서 임계값 초과 시 자동
+  알림이 발생하도록 설정을 유지할 것</pre>
+        </article>
+        </div>
+      </section>
+      <section class="col" id="paragraph">
+        <header class="col-head">
+          <h2>3. 문단</h2>
+          <p>빈 줄로 구분된 문단 기준</p>
+          <p class="col-count">29개 · 평균 124자</p>
+        </header>
+        <div class="chunks">
+        <article class="chunk">
+          <header class="chunk-head">
+            <span class="chunk-no">#1</span>
+            <span class="chunk-len">102자</span>
+          </header>
+          
+          <pre>설비 운영 매뉴얼 (통합본)
+문서번호: MAN-EQ-000
+개정일: 2026-01-15
+적용 범위: 전 공정 설비 (식각, 박막증착, 금속증착, 연마, 세정, 포토, 이온주입, 검사)</pre>
+        </article>
+        <article class="chunk">
+          <header class="chunk-head">
+            <span class="chunk-no">#2</span>
+            <span class="chunk-len">113자</span>
+          </header>
+          
+          <pre>이 매뉴얼은 공정별 설비의 주요 관리 파라미터, 정상 운영 기준, 이상 징후
+발생 시 점검 순서를 정리한 것이다. 각 장은 공정 영역별로 구성되어
+있으며, 마지막 장에는 전 공정 공통 유의사항을 담았다.</pre>
+        </article>
+        <article class="chunk">
+          <header class="chunk-head">
+            <span class="chunk-no">#3</span>
+            <span class="chunk-len">195자</span>
+          </header>
+          
+          <pre>===========================================================
+제1장 식각(ETCH) 설비 — 챔버 온도 및 히터 관리 기준
+===========================================================
+대상 설비: ETCH-01, ETCH-02, ETCH-03 (L1 라인)</pre>
+        </article>
+        <article class="chunk">
+          <header class="chunk-head">
+            <span class="chunk-no">#4</span>
+            <span class="chunk-len">163자</span>
+          </header>
+          
+          <pre>1.1 챔버 온도 관리
+- 정상 운영 온도 범위: 설정값 대비 ±0.5도 이내
+- 온도가 설정값 대비 ±1도를 초과하여 10분 이상 지속될 경우 1차 경고
+  알람 발생
+- 챔버 히터는 존(zone)별로 독립 제어되며, 존간 온도 편차가 1.5도를
+  초과할 경우 히터 컨트롤러 점검이 필요함</pre>
+        </article>
+        <article class="chunk">
+          <header class="chunk-head">
+            <span class="chunk-no">#5</span>
+            <span class="chunk-len">127자</span>
+          </header>
+          
+          <pre>1.2 점검 순서
+온도 이상 알람 발생 시 다음 순서로 점검할 것을 권고함.
+  1) 냉각수 유량 확인
+  2) 냉각수 순환 펌프 상태 확인
+  3) 온도 센서 캘리브레이션 이력 확인
+  4) 히터 컨트롤러 존별 출력 편차 확인</pre>
+        </article>
+        <article class="chunk">
+          <header class="chunk-head">
+            <span class="chunk-no">#6</span>
+            <span class="chunk-len">57자</span>
+          </header>
+          
+          <pre>1.3 관련 불량 유형
+온도 이상은 식각 속도 산포를 유발하여 주로 박막두께불량, 패턴불량으로
+이어짐.</pre>
+        </article>
+        <article class="chunk">
+          <header class="chunk-head">
+            <span class="chunk-no">#7</span>
+            <span class="chunk-len">194자</span>
+          </header>
+          
+          <pre>===========================================================
+제2장 박막증착(CVD) 설비 — 챔버 압력 및 파티클 관리 기준
+===========================================================
+대상 설비: CVD-01, CVD-02, CVD-03 (L2 라인)</pre>
+        </article>
+        <article class="chunk">
+          <header class="chunk-head">
+            <span class="chunk-no">#8</span>
+            <span class="chunk-len">164자</span>
+          </header>
+          
+          <pre>2.1 챔버 압력 관리
+- 정상 운영 압력 허용 오차: 설정값 대비 ±3% 이내 (2026년 9월 개정,
+  기존 ±5%에서 강화)
+- 압력 편차가 허용 오차를 초과하여 2회 이상 반복될 경우 설비를
+  일시 정지하고 압력 조절 밸브 및 MFC(Mass Flow Controller) 점검 필요</pre>
+        </article>
+        <article class="chunk">
+          <header class="chunk-head">
+            <span class="chunk-no">#9</span>
+            <span class="chunk-len">167자</span>
+          </header>
+          
+          <pre>2.2 파티클 관리
+- 파티클 필터는 권장 교체 주기(월 1회)를 반드시 준수할 것. 필터
+  막힘은 파티클성 불량의 주요 원인이 됨
+- 압력 불안정은 반응 부산물의 챔버 내벽 축적을 가속화하여 파티클성
+  불량으로 이어질 수 있으므로, 압력 편차 발생 시 챔버 내벽 오염 상태도
+  함께 확인할 것</pre>
+        </article>
+        <article class="chunk">
+          <header class="chunk-head">
+            <span class="chunk-no">#10</span>
+            <span class="chunk-len">22자</span>
+          </header>
+          
+          <pre>2.3 관련 불량 유형
+파티클, 표면오염</pre>
+        </article>
+        <article class="chunk">
+          <header class="chunk-head">
+            <span class="chunk-no">#11</span>
+            <span class="chunk-len">187자</span>
+          </header>
+          
+          <pre>===========================================================
+제3장 금속증착(PVD) 설비 — 챔버 진동 및 회전계통 관리 기준
+===========================================================
+대상 설비: PVD-01, PVD-02 (L3 라인)</pre>
+        </article>
+        <article class="chunk">
+          <header class="chunk-head">
+            <span class="chunk-no">#12</span>
+            <span class="chunk-len">118자</span>
+          </header>
+          
+          <pre>3.1 진동 관리
+- 스퍼터링 챔버 회전 베어링은 분기별 진동 측정을 실시하며, 진동값이
+  기준치를 초과할 경우 베어링 교체를 검토할 것
+- 진동 증가는 박막두께 불균일의 주요 원인이 되므로 조기 발견이 중요함</pre>
+        </article>
+        <article class="chunk">
+          <header class="chunk-head">
+            <span class="chunk-no">#13</span>
+            <span class="chunk-len">19자</span>
+          </header>
+          
+          <pre>3.2 관련 불량 유형
+박막두께불량</pre>
+        </article>
+        <article class="chunk">
+          <header class="chunk-head">
+            <span class="chunk-no">#14</span>
+            <span class="chunk-len">183자</span>
+          </header>
+          
+          <pre>===========================================================
+제4장 연마(CMP) 설비 — 연마압력 및 소모품 관리 기준
+===========================================================
+대상 설비: CMP-01, CMP-02 (L4 라인)</pre>
+        </article>
+        <article class="chunk">
+          <header class="chunk-head">
+            <span class="chunk-no">#15</span>
+            <span class="chunk-len">100자</span>
+          </header>
+          
+          <pre>4.1 소모품 관리
+- 연마벨트/패드 장력과 마모 상태를 주기적으로 점검할 것
+- 연마압력 불균일은 스크래치성 불량의 주요 원인이 되므로, 소모품
+  교체 주기를 철저히 준수할 것</pre>
+        </article>
+        <article class="chunk">
+          <header class="chunk-head">
+            <span class="chunk-no">#16</span>
+            <span class="chunk-len">19자</span>
+          </header>
+          
+          <pre>4.2 관련 불량 유형
+미세스크래치</pre>
+        </article>
+        <article class="chunk">
+          <header class="chunk-head">
+            <span class="chunk-no">#17</span>
+            <span class="chunk-len">191자</span>
+          </header>
+          
+          <pre>===========================================================
+제5장 세정(CLN) 설비 — 가스 유량 및 배관 관리 기준
+===========================================================
+대상 설비: CLN-01, CLN-02, CLN-03 (L5 라인)</pre>
+        </article>
+        <article class="chunk">
+          <header class="chunk-head">
+            <span class="chunk-no">#18</span>
+            <span class="chunk-len">101자</span>
+          </header>
+          
+          <pre>5.1 가스 유량 관리
+- 질소 퍼지 라인 필터는 분기별로 점검하며, 유량 저하 시 즉시 필터
+  교체를 진행할 것
+- 유량 저하는 세정 불량(잔류물, 표면오염)으로 이어질 수 있음</pre>
+        </article>
+        <article class="chunk">
+          <header class="chunk-head">
+            <span class="chunk-no">#19</span>
+            <span class="chunk-len">17자</span>
+          </header>
+          
+          <pre>5.2 관련 불량 유형
+표면오염</pre>
+        </article>
+        <article class="chunk">
+          <header class="chunk-head">
+            <span class="chunk-no">#20</span>
+            <span class="chunk-len">190자</span>
+          </header>
+          
+          <pre>===========================================================
+제6장 포토(PHOTO) 설비 — 클린룸 환경 및 렌즈 관리 기준
+===========================================================
+대상 설비: PHOTO-01, PHOTO-02 (L6 라인)</pre>
+        </article>
+        <article class="chunk">
+          <header class="chunk-head">
+            <span class="chunk-no">#21</span>
+            <span class="chunk-len">115자</span>
+          </header>
+          
+          <pre>6.1 환경 관리
+- 노광 챔버 주변 습도는 40~50% 범위로 유지되어야 하며, 국소 습도
+  상승 시 렌즈 오염 여부를 점검할 것
+- 렌즈 오염은 패턴 불량의 주요 원인이 되므로 정기 클리닝을 준수할 것</pre>
+        </article>
+        <article class="chunk">
+          <header class="chunk-head">
+            <span class="chunk-no">#22</span>
+            <span class="chunk-len">17자</span>
+          </header>
+          
+          <pre>6.2 관련 불량 유형
+패턴불량</pre>
+        </article>
+        <article class="chunk">
+          <header class="chunk-head">
+            <span class="chunk-no">#23</span>
+            <span class="chunk-len">189자</span>
+          </header>
+          
+          <pre>===========================================================
+제7장 이온주입(IMP) 설비 — 파워서플라이 및 도즈 제어 관리 기준
+===========================================================
+대상 설비: IMP-01, IMP-02 (L7 라인)</pre>
+        </article>
+        <article class="chunk">
+          <header class="chunk-head">
+            <span class="chunk-no">#24</span>
+            <span class="chunk-len">99자</span>
+          </header>
+          
+          <pre>7.1 파워서플라이 관리
+- 파워서플라이 출력 전압은 정기적으로 점검하며, 노후 장비는 예방
+  교체를 검토할 것
+- 전압 불안정은 도즈 편차로 이어져 치수불량을 유발할 수 있음</pre>
+        </article>
+        <article class="chunk">
+          <header class="chunk-head">
+            <span class="chunk-no">#25</span>
+            <span class="chunk-len">17자</span>
+          </header>
+          
+          <pre>7.2 관련 불량 유형
+치수불량</pre>
+        </article>
+        <article class="chunk">
+          <header class="chunk-head">
+            <span class="chunk-no">#26</span>
+            <span class="chunk-len">198자</span>
+          </header>
+          
+          <pre>===========================================================
+제8장 검사(INSP) 설비 — 비전 카메라 캘리브레이션 관리 기준
+===========================================================
+대상 설비: INSP-01, INSP-02, INSP-03 (L8 라인)</pre>
+        </article>
+        <article class="chunk">
+          <header class="chunk-head">
+            <span class="chunk-no">#27</span>
+            <span class="chunk-len">132자</span>
+          </header>
+          
+          <pre>8.1 캘리브레이션 관리
+- 비전 카메라는 권장 캘리브레이션 주기(월 1회)를 준수해야 하며, 주기
+  초과 시 측정 오차가 발생할 수 있음
+- 캘리브레이션 이력은 품질시스템에 등록하여 주기 초과 시 자동 경고가
+  발생하도록 관리할 것</pre>
+        </article>
+        <article class="chunk">
+          <header class="chunk-head">
+            <span class="chunk-no">#28</span>
+            <span class="chunk-len">27자</span>
+          </header>
+          
+          <pre>8.2 관련 불량 유형
+치수불량 (오검출/미검출)</pre>
+        </article>
+        <article class="chunk">
+          <header class="chunk-head">
+            <span class="chunk-no">#29</span>
+            <span class="chunk-len">382자</span>
+          </header>
+          
+          <pre>===========================================================
+제9장 전 공정 공통 유의사항
+===========================================================
+- 온도, 압력, 진동, 유량 등 주요 공정 파라미터의 &quot;경미한 이상&quot;이라도
+  2회 이상 반복될 경우 방치하지 말고 설비기술팀에 즉시 보고할 것
+- 관련 조치 및 원인 분석 결과는 품질 이슈 보고서 양식(QIR)으로 작성
+  하여 사내 품질시스템에 등록할 것
+- 예방정비(PM) 주기는 설비기술팀 승인 없이 임의로 변경할 수 없음
+- 공정 파라미터 트렌드 모니터링 대시보드에서 임계값 초과 시 자동
+  알림이 발생하도록 설정을 유지할 것</pre>
+        </article>
+        </div>
+      </section>
+  </div>
+</main>
+</body>
+</html>

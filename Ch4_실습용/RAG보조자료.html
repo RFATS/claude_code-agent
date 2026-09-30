@@ -1,0 +1,1261 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RAG 무코드 체험 데모 — 리뷰 기반 AI Q&A</title>
+<style>
+  :root {
+    color-scheme: light;
+    --surface-1: #fcfcfb;
+    --page: #f9f9f7;
+    --ink-1: #0b0b0b;
+    --ink-2: #52514e;
+    --ink-muted: #898781;
+    --grid: #e1e0d9;
+    --baseline: #c3c2b7;
+    --border: rgba(11,11,11,0.10);
+    --series-1: #2a78d6;  /* 시간 */
+    --series-2: #eb6834;  /* 포장 */
+    --series-3: #1baf7a;  /* 친절 */
+    --status-good: #0ca30c;
+    --status-critical: #d03b3b;
+    --accent-wash: rgba(42,120,214,0.08);
+    /* 탭5 청킹 비교 */
+    --c1:#2f63c9; --c1-soft:#e8eefb;
+    --c2:#1d8456; --c2-soft:#e4f3eb;
+    --c3:#b25418; --c3-soft:#f9ece1;
+    --rel:#fff1b8; --rel-line:#d9a900; --warn:#b3261e;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --surface-1: #1a1a19;
+      --page: #0d0d0d;
+      --ink-1: #ffffff;
+      --ink-2: #c3c2b7;
+      --ink-muted: #898781;
+      --grid: #2c2c2a;
+      --baseline: #383835;
+      --border: rgba(255,255,255,0.10);
+      --series-1: #3987e5;
+      --series-2: #d95926;
+      --series-3: #199e70;
+      --accent-wash: rgba(57,135,229,0.14);
+      --c1:#86aaf2; --c1-soft:#1d2940;
+      --c2:#63c396; --c2-soft:#18301f;
+      --c3:#eb9d66; --c3-soft:#3a2819;
+      --rel:#3d3517; --rel-line:#d9b233; --warn:#f2877e;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    background: var(--page); color: var(--ink-1);
+    line-height: 1.6; padding-bottom: 80px;
+  }
+  body > header { max-width: 880px; margin: 0 auto; padding: 36px 20px 8px; }
+  body > header h1 { font-size: 22px; font-weight: 700; }
+  body > header p { color: var(--ink-2); font-size: 14px; margin-top: 4px; }
+  /* 청킹 비교 탭은 3열이라 넓게 */
+  body.wide > header, body.wide nav, body.wide main { max-width: 1480px; }
+  nav {
+    max-width: 880px; margin: 20px auto 0; padding: 0 20px;
+    display: flex; gap: 6px; flex-wrap: wrap;
+  }
+  nav button {
+    font: inherit; font-size: 13.5px; font-weight: 600;
+    padding: 8px 14px; border-radius: 999px; cursor: pointer;
+    border: 1px solid var(--border); background: var(--surface-1); color: var(--ink-2);
+  }
+  nav button.active { background: var(--ink-1); color: var(--page); border-color: var(--ink-1); }
+  main { max-width: 880px; margin: 18px auto 0; padding: 0 20px; }
+  section.tab { display: none; }
+  section.tab.active { display: block; }
+  .card {
+    background: var(--surface-1); border: 1px solid var(--border);
+    border-radius: 14px; padding: 22px; margin-bottom: 16px;
+  }
+  .card h2 { font-size: 17px; margin-bottom: 4px; }
+  .card .sub { color: var(--ink-2); font-size: 13.5px; margin-bottom: 16px; }
+  .chips { display: flex; gap: 8px; flex-wrap: wrap; margin: 10px 0; }
+  .chip {
+    font: inherit; font-size: 13px; padding: 6px 12px; border-radius: 999px;
+    border: 1px solid var(--border); background: var(--page); color: var(--ink-1);
+    cursor: pointer;
+  }
+  .chip:hover { background: var(--accent-wash); }
+  .chip.sel { border-color: var(--series-1); background: var(--accent-wash); font-weight: 600; }
+  .btn {
+    font: inherit; font-size: 14px; font-weight: 600; padding: 9px 18px;
+    border-radius: 10px; border: none; cursor: pointer;
+    background: var(--ink-1); color: var(--page);
+  }
+  .btn.secondary { background: var(--surface-1); color: var(--ink-1); border: 1px solid var(--border); }
+  .note {
+    font-size: 12.5px; color: var(--ink-muted); margin-top: 12px;
+    padding-top: 10px; border-top: 1px solid var(--grid);
+  }
+  input[type="text"] {
+    font: inherit; font-size: 14px; padding: 9px 12px; width: 100%;
+    border: 1px solid var(--baseline); border-radius: 10px;
+    background: var(--page); color: var(--ink-1);
+  }
+  /* ── 탭5 청킹 비교 ── */
+  #t6 .ck-btn {
+    font: inherit; font-size: 14px; border: 1px solid var(--baseline); background: var(--surface-1); color: var(--ink-1);
+    padding: 7px 12px; border-radius: 8px; cursor: pointer;
+  }
+  #t6 .ck-btn:hover { background: var(--page); }
+  #t6 .ck-btn.primary { background: var(--ink-1); color: var(--page); border-color: var(--ink-1); }
+  #t6 .ck-btn.primary:hover { opacity: .88; }
+  #t6 .panel { background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px; }
+  #t6 .drop {
+    padding: 32px 20px; text-align: center; border: 2px dashed var(--baseline); border-radius: 12px;
+    background: var(--page); transition: border-color .15s, background .15s;
+  }
+  #t6 .drop.over { border-color: var(--c1); background: var(--c1-soft); }
+  #t6 .drop strong { display: block; font-size: 17px; margin-bottom: 6px; }
+  #t6 .drop p { margin: 0 0 14px; color: var(--ink-2); font-size: 14px; }
+  #t6 .drop .actions { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+  #t6 details.paste { margin-top: 14px; text-align: left; max-width: 760px; margin-inline: auto; }
+  #t6 details.paste summary { cursor: pointer; color: var(--ink-2); font-size: 14px; text-align: center; }
+  #t6 details.paste textarea {
+    width: 100%; min-height: 160px; margin-top: 10px; padding: 10px; font: 13px/1.5 ui-monospace, Consolas, monospace;
+    background: var(--surface-1); color: var(--ink-1); border: 1px solid var(--grid); border-radius: 8px; resize: vertical;
+  }
+  #t6 .filebar { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; padding: 12px 16px; margin-bottom: 16px; }
+  #t6 .filebar .name { font-weight: 600; word-break: break-all; }
+  #t6 .filebar .meta { color: var(--ink-2); font-size: 13px; }
+  #t6 .filebar .spacer { flex: 1; }
+  #t6 .ctrl { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; font-size: 13px; color: var(--ink-2); }
+  #t6 .ctrl label { display: flex; gap: 6px; align-items: center; }
+  #t6 .ctrl input[type=number] {
+    width: 72px; font: inherit; font-size: 13px; padding: 4px 6px; border-radius: 6px; border: 1px solid var(--baseline);
+    background: var(--surface-1); color: var(--ink-1);
+  }
+  #t6 .summary { padding: 6px 0; margin-bottom: 16px; overflow-x: auto; }
+  #t6 .summary table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 640px; }
+  #t6 .summary th, #t6 .summary td { padding: 10px 16px; text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  #t6 .summary th { font-size: 12px; color: var(--ink-2); font-weight: 500; border-bottom: 1px solid var(--grid); }
+  #t6 .summary th:first-child, #t6 .summary td:first-child { text-align: left; }
+  #t6 .summary tr + tr td { border-top: 1px solid var(--grid); }
+  #t6 .summary td.big { font-size: 22px; font-weight: 700; }
+  #t6 .summary td.dist { width: 38%; min-width: 220px; padding-top: 6px; padding-bottom: 6px; }
+  #t6 .mname { display: flex; align-items: center; gap: 8px; font-weight: 600; }
+  #t6 .dot { width: 10px; height: 10px; border-radius: 3px; flex: none; }
+  #t6 .strip { position: relative; display: flex; align-items: flex-end; gap: 1px; height: 40px; }
+  #t6 .strip i { flex: 1 1 0; min-width: 1px; max-width: 14px; border-radius: 2px 2px 0 0; cursor: pointer; opacity: .85; }
+  #t6 .strip i:hover { opacity: 1; }
+  #t6 .strip .ref { position: absolute; left: 0; right: 0; border-top: 1px dashed var(--ink-muted); pointer-events: none; }
+  #t6 .strip .ref span { position: absolute; right: 0; top: -15px; font-size: 10px; color: var(--ink-muted); }
+  #t6 .ck-tabs { display: none; gap: 6px; margin-bottom: 10px; }
+  #t6 .ck-tabs button { flex: 1; padding: 8px 6px; font-size: 13px; }
+  #t6 .ck-tabs button.on { background: var(--ink-1); color: var(--page); border-color: var(--ink-1); }
+  #t6 .ck-cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+  #t6 .col { display: flex; flex-direction: column; min-width: 0; overflow: hidden; }
+  #t6 .col-head { padding: 14px 16px 12px; border-bottom: 1px solid var(--grid); border-top: 4px solid var(--mc); }
+  #t6 .col-head h2 { margin: 0; font-size: 16px; display: flex; align-items: baseline; gap: 8px; }
+  #t6 .col-head h2 .n { margin-left: auto; font-size: 13px; color: var(--ink-2); font-weight: 500; }
+  #t6 .col-head h2 .n b { font-size: 20px; color: var(--mc); font-variant-numeric: tabular-nums; }
+  #t6 .col-head .rule { margin: 4px 0 0; font-size: 12.5px; color: var(--ink-2); }
+  #t6 .list { padding: 10px; display: flex; flex-direction: column; gap: 8px; max-height: calc(100vh - 140px); min-height: 320px; overflow: auto; scroll-behavior: smooth; }
+  #t6 .chunk {
+    border: 1px solid var(--grid); border-left: 3px solid var(--mc); border-radius: 8px; background: var(--surface-1);
+    padding: 8px 10px 10px; cursor: pointer; transition: background .12s, box-shadow .12s;
+  }
+  #t6 .chunk:hover { background: var(--page); }
+  #t6 .chunk.rel { background: var(--rel); border-color: var(--rel-line); border-left-color: var(--rel-line); }
+  #t6 .chunk.pin { box-shadow: 0 0 0 2px var(--mc); }
+  #t6 .chunk header { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--ink-2); margin-bottom: 6px; }
+  #t6 .chunk .idx { font-weight: 700; color: var(--mc); font-variant-numeric: tabular-nums; }
+  #t6 .chunk .path { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; flex: 1; }
+  #t6 .chunk .len { margin-left: auto; flex: none; font-variant-numeric: tabular-nums; background: var(--msoft); color: var(--mc); padding: 1px 7px; border-radius: 99px; font-weight: 600; }
+  #t6 .chunk .len small { font-weight: 400; opacity: .8; }
+  #t6 .lenbar { height: 3px; background: var(--page); border-radius: 2px; margin-bottom: 8px; overflow: hidden; }
+  #t6 .lenbar i { display: block; height: 100%; background: var(--mc); opacity: .7; }
+  #t6 .ck-body { margin: 0; white-space: pre-wrap; word-break: break-word; font: 13px/1.6 ui-monospace, "D2Coding", Consolas, "Malgun Gothic", monospace; color: var(--ink-1); }
+  #t6 .ck-body .h { font-weight: 700; color: var(--mc); }
+  #t6 .ck-body .sep { color: var(--ink-muted); }
+  #t6 .cut { color: var(--warn); font-weight: 700; font-family: system-ui, sans-serif; }
+  #t6 .flags { margin-top: 6px; font-size: 11.5px; color: var(--warn); }
+  #t6 .hint { color: var(--ink-2); font-size: 12.5px; margin: 0 0 10px; }
+  #t6 .empty { padding: 24px; text-align: center; }
+  #t6 .hidden { display: none !important; }
+  @media (max-width: 1000px) {
+    #t6 .ck-tabs { display: flex; }
+    #t6 .ck-cols { grid-template-columns: 1fr; }
+    #t6 .col:not(.active) { display: none; }
+    #t6 .list { max-height: none; }
+  }
+  /* ── 탭1 지도 ── */
+  .scn-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+  @media (max-width: 720px) { .scn-grid { grid-template-columns: 1fr; } }
+  .scn-item { background: var(--page); border: 1px solid var(--grid); border-radius: 10px; padding: 12px 14px; }
+  .scn-item .k { font-size: 12px; font-weight: 700; color: var(--ink-muted); }
+  .scn-item .v { font-size: 14px; margin-top: 2px; }
+  .scn-mech { font-size: 12.5px; color: var(--ink-2); background: var(--surface-1); border: 1px solid var(--border); border-radius: 999px; padding: 3px 10px; }
+  .map-wrap { position: relative; }
+  svg.map { width: 100%; height: auto; display: block; background: var(--surface-1); border: 1px solid var(--grid); border-radius: 10px; }
+  .legend { display: flex; gap: 18px; margin: 10px 2px; font-size: 13px; color: var(--ink-2); flex-wrap: wrap; }
+  .legend .sw { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; }
+  .tooltip {
+    position: absolute; pointer-events: none; background: var(--ink-1); color: var(--page);
+    font-size: 12.5px; padding: 6px 10px; border-radius: 8px; max-width: 240px;
+    opacity: 0; transition: opacity .12s; z-index: 5; line-height: 1.4;
+  }
+  .nn-list { margin-top: 14px; }
+  .nn-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--grid); font-size: 14px; }
+  .nn-item:last-child { border-bottom: none; }
+  .sim-track { width: 120px; height: 8px; background: var(--page); border-radius: 4px; flex-shrink: 0; }
+  .sim-fill { height: 100%; border-radius: 4px; background: var(--series-1); }
+  .sim-num { width: 48px; font-size: 12.5px; color: var(--ink-2); font-variant-numeric: tabular-nums; flex-shrink: 0; }
+  /* ── 탭2 검색 비교 ── */
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px; }
+  @media (max-width: 640px) { .cols { grid-template-columns: 1fr; } }
+  .col-box { background: var(--page); border: 1px solid var(--grid); border-radius: 10px; padding: 14px; }
+  .col-box h3 { font-size: 14px; margin-bottom: 8px; }
+  .result-item { font-size: 13.5px; padding: 7px 0; border-bottom: 1px solid var(--grid); }
+  .result-item:last-child { border-bottom: none; }
+  .result-item mark { background: rgba(237,161,0,0.35); color: inherit; border-radius: 2px; padding: 0 1px; }
+  .empty { color: var(--ink-muted); font-size: 13px; padding: 10px 0; }
+  /* ── 탭3 파이프라인 ── */
+  .step {
+    border: 1px solid var(--grid); border-radius: 12px; padding: 14px 16px;
+    margin-bottom: 10px; opacity: .35; transition: opacity .3s, border-color .3s;
+  }
+  .step.on { opacity: 1; border-color: var(--series-1); }
+  .step.done { opacity: 1; }
+  .step h3 { font-size: 14px; display: flex; align-items: center; gap: 8px; }
+  .step .badge {
+    font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px;
+    background: var(--accent-wash); color: var(--series-1);
+  }
+  .step .body { font-size: 13.5px; color: var(--ink-2); margin-top: 6px; }
+  .prompt-box {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px;
+    background: var(--page); border: 1px solid var(--grid); border-radius: 8px;
+    padding: 12px; white-space: pre-wrap; margin-top: 8px; color: var(--ink-1); line-height: 1.5;
+  }
+  .answer-box {
+    font-size: 15px; background: var(--page); border: 1px solid var(--grid);
+    border-radius: 10px; padding: 14px 16px; margin-top: 8px; min-height: 52px;
+  }
+  .answer-box .cite { color: var(--series-1); font-weight: 700; font-size: 12px; }
+  .shield {
+    display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 700;
+    padding: 4px 10px; border-radius: 999px; margin-top: 8px;
+  }
+  .shield.ok { background: rgba(12,163,12,0.12); color: var(--status-good); }
+  .shield.bad { background: rgba(208,59,59,0.12); color: var(--status-critical); }
+  .toggle-row { display: flex; align-items: center; gap: 10px; margin: 12px 0; font-size: 14px; }
+  .switch { position: relative; width: 44px; height: 24px; flex-shrink: 0; }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .switch .track {
+    position: absolute; inset: 0; background: var(--baseline); border-radius: 999px;
+    cursor: pointer; transition: background .2s;
+  }
+  .switch .track::after {
+    content: ""; position: absolute; width: 18px; height: 18px; border-radius: 50%;
+    background: #fff; top: 3px; left: 3px; transition: transform .2s;
+  }
+  .switch input:checked + .track { background: var(--status-critical); }
+  .switch input:checked + .track::after { transform: translateX(20px); }
+  .mech-card {
+    display: flex; gap: 10px; align-items: center; padding: 10px 14px;
+    border: 1px solid var(--border); border-radius: 12px; cursor: pointer;
+    background: var(--page); font-size: 13.5px;
+  }
+  .mech-card.sel { border-color: var(--series-1); background: var(--accent-wash); }
+  .mech-card .avatar { font-size: 24px; }
+  .mech-row { display: flex; gap: 10px; flex-wrap: wrap; margin: 8px 0 4px; }
+  /* ── 탭4 속도 ── */
+  .bench-row { display: flex; gap: 12px; align-items: center; margin-top: 14px; flex-wrap: wrap; }
+  .bench-result { display: flex; gap: 14px; margin-top: 16px; flex-wrap: wrap; }
+  .stat-tile {
+    flex: 1; min-width: 180px; background: var(--page); border: 1px solid var(--grid);
+    border-radius: 12px; padding: 14px 16px;
+  }
+  .stat-tile .k { font-size: 12.5px; color: var(--ink-2); }
+  .stat-tile .v { font-size: 26px; font-weight: 700; margin-top: 2px; }
+  .stat-tile .d { font-size: 12px; color: var(--ink-muted); margin-top: 2px; }
+  canvas#benchCanvas { width: 100%; border: 1px solid var(--grid); border-radius: 10px; background: var(--surface-1); margin-top: 14px; }
+  .scan-bar { height: 10px; background: var(--page); border-radius: 5px; margin-top: 12px; overflow: hidden; }
+  .scan-fill { height: 100%; width: 0%; background: var(--series-1); border-radius: 5px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🧭 RAG 무코드 체험 데모</h1>
+  <p>리뷰 기반 AI Q&A(RAG + 벡터DB)의 원리를 코드 없이 직접 만져보는 데모입니다. 설치·로그인 불필요.</p>
+</header>
+
+<nav id="tabs">
+  <button data-tab="t2" class="active">① 임베딩 지도</button>
+  <button data-tab="t3">② 검색 비교</button>
+  <button data-tab="t4">③ RAG 파이프라인</button>
+  <button data-tab="t5">④ 속도 비교 (심화)</button>
+  <button data-tab="t6">⑤ 청킹 비교</button>
+</nav>
+
+<main>
+
+<!-- ═══════ 탭 1: 임베딩 지도 ═══════ -->
+<section class="tab active" id="t2">
+  <div class="card scenario">
+    <h2>📦 이번 데모의 상황 — 택배 기사님 리뷰 Q&A</h2>
+    <p class="sub">모든 탭은 같은 상황을 다룹니다. 고객이 남긴 <b>택배 기사님 리뷰</b>를 바탕으로, AI가 기사님에 대한 질문에 답하는 서비스를 만든다고 가정합니다.</p>
+    <div class="scn-grid">
+      <div class="scn-item">
+        <div class="k">데이터</div>
+        <div class="v">기사님 2명에 대한 고객 리뷰 19건</div>
+        <div class="mech-row" style="margin:6px 0 0">
+          <span class="scn-mech">👨‍🔧 <b>김반장</b> · 시간·친절 좋음, 포장 아쉬움</span>
+          <span class="scn-mech">🧑‍🔧 <b>박기사</b> · 포장 좋음, 시간 아쉬움</span>
+        </div>
+      </div>
+      <div class="scn-item">
+        <div class="k">리뷰 주제</div>
+        <div class="v">
+          <span style="color:var(--series-1); font-weight:700">시간</span> 약속 ·
+          <span style="color:var(--series-2); font-weight:700">포장</span> 상태 ·
+          <span style="color:var(--series-3); font-weight:700">친절</span>도
+        </div>
+      </div>
+      <div class="scn-item">
+        <div class="k">목표</div>
+        <div class="v">"이 기사님 시간 약속 잘 지켜요?" 같은 질문에 <b>실제 리뷰를 근거로</b> 답하기</div>
+      </div>
+    </div>
+    <p class="note">아래 지도의 점 하나하나가 이 리뷰 한 건입니다. 먼저 리뷰를 의미 지도 위에 올려놓고(①), 질문과 가까운 리뷰를 찾은 뒤(②), 찾은 리뷰로 답을 만듭니다(③).</p>
+  </div>
+  <div class="card">
+    <h2>임베딩 — 문장을 "의미 지도" 위의 점으로</h2>
+    <p class="sub">의미가 비슷한 문장은 가까이 모입니다. 점에 마우스를 올려 문장을 읽어보고, 질문을 던져 어디에 찍히는지 보세요.</p>
+    <div class="legend">
+      <span><span class="sw" style="background:var(--series-1)"></span>시간 관련</span>
+      <span><span class="sw" style="background:var(--series-2)"></span>포장 관련</span>
+      <span><span class="sw" style="background:var(--series-3)"></span>친절 관련</span>
+      <span><span class="sw" style="background:var(--ink-1); border-radius:2px"></span>내 질문</span>
+    </div>
+    <div class="map-wrap">
+      <svg class="map" id="mapSvg" viewBox="0 0 800 520"></svg>
+      <div class="tooltip" id="mapTip"></div>
+    </div>
+    <div class="chips" id="mapChips" style="margin-top:14px"></div>
+    <div style="display:flex; gap:8px; margin-top:6px">
+      <input type="text" id="mapInput" placeholder="직접 입력해보세요 — 예: 박스 튼튼하게 싸줬어요">
+      <button class="btn" id="mapGo">지도에 찍기</button>
+    </div>
+    <div class="nn-list" id="nnList"></div>
+    <p class="note">⚠️ 교육용 간이 모형입니다. 실제 임베딩은 1,536차원 좌표를 AI 모델이 계산하지만, "의미가 비슷하면 가깝다"는 성질은 완전히 동일합니다. 이 화면은 그것을 2차원으로 눌러 보여줍니다.</p>
+  </div>
+</section>
+
+<!-- ═══════ 탭 2: 검색 비교 ═══════ -->
+<section class="tab" id="t3">
+  <div class="card">
+    <h2>키워드 검색 vs 의미(임베딩) 검색</h2>
+    <p class="sub">같은 검색어로 두 방식을 동시에 실행합니다. 글자가 안 겹쳐도 의미가 같으면 찾아내는 것이 임베딩 검색입니다.</p>
+    <div style="display:flex; gap:8px">
+      <input type="text" id="searchInput" placeholder="검색어 — 예: 정시">
+      <button class="btn" id="searchGo">검색</button>
+    </div>
+    <div class="chips" id="searchChips"></div>
+    <div class="cols">
+      <div class="col-box">
+        <h3>🔡 키워드 검색 <span style="font-weight:400; color:var(--ink-muted); font-size:12px">(글자 포함 여부)</span></h3>
+        <div id="kwResults"><div class="empty">검색어를 입력하세요</div></div>
+      </div>
+      <div class="col-box">
+        <h3>🧭 의미 검색 <span style="font-weight:400; color:var(--ink-muted); font-size:12px">(좌표가 가까운 순)</span></h3>
+        <div id="semResults"><div class="empty">검색어를 입력하세요</div></div>
+      </div>
+    </div>
+    <p class="note">"정시"로 검색해보세요. 키워드 쪽은 "정시"라는 글자가 든 리뷰만, 의미 쪽은 "제때 왔어요" 같은 표현까지 찾습니다.</p>
+  </div>
+</section>
+
+<!-- ═══════ 탭 3: RAG 파이프라인 ═══════ -->
+<section class="tab" id="t4">
+  <div class="card">
+    <h2>RAG 파이프라인 — 검색 → 증강 → 생성</h2>
+    <p class="sub">기사님과 질문을 고르면, 실제 서비스가 내부에서 하는 4단계를 순서대로 보여줍니다.</p>
+    <div class="mech-row" id="mechRow"></div>
+    <div class="chips" id="qChips"></div>
+    <div class="toggle-row">
+      <label class="switch"><input type="checkbox" id="ragOff"><span class="track"></span></label>
+      <span><b>RAG 끄기</b> — 검색 없이 LLM 혼자 답하게 하기 <span style="color:var(--ink-muted); font-size:12.5px">(환각 체험)</span></span>
+    </div>
+    <div id="pipeline">
+      <div class="step" id="s1"><h3><span class="badge">1</span> 질문을 벡터(좌표)로 변환</h3><div class="body" id="s1b"></div></div>
+      <div class="step" id="s2"><h3><span class="badge">2</span> 벡터DB에서 유사도 검색 <span style="font-weight:400; color:var(--ink-muted); font-size:12px">— 그 기사님 리뷰 중 가까운 순 top 3</span></h3><div class="body" id="s2b"></div></div>
+      <div class="step" id="s3"><h3><span class="badge">3</span> 프롬프트 조립 (증강)</h3><div class="body" id="s3b"></div></div>
+      <div class="step" id="s4"><h3><span class="badge">4</span> 근거 기반 답변 생성 (스트리밍)</h3><div class="body"><div class="answer-box" id="ragAnswer">기사님과 질문을 선택하세요</div><div id="ragBadge"></div></div></div>
+    </div>
+    <p class="note">신뢰 장치 두 가지 — ① 근거가 없으면 AI를 부르지 않고 "없다"고 답한다 ② 프롬프트로 "자료만 근거로, 지어내지 말 것"을 강제한다. "반려동물" 질문과 RAG 끄기 토글로 두 장치를 모두 체험해보세요.</p>
+  </div>
+</section>
+
+<!-- ═══════ 탭 4: 속도 비교 ═══════ -->
+<section class="tab" id="t5">
+  <div class="card">
+    <h2>리뷰가 6만 건이라면? — 전체 스캔 vs 벡터 인덱스</h2>
+    <p class="sub">전체 스캔은 모든 점과 거리를 하나하나 잽니다. 인덱스는 "동네(클러스터)"를 먼저 고른 뒤 그 안에서만 잽니다.</p>
+    <canvas id="benchCanvas" width="800" height="360"></canvas>
+    <div class="scan-bar"><div class="scan-fill" id="scanFill"></div></div>
+    <div class="bench-row">
+      <button class="btn" id="benchFull">전체 스캔 (Seq Scan)</button>
+      <button class="btn secondary" id="benchIdx">인덱스 검색 (HNSW)</button>
+    </div>
+    <div class="bench-result">
+      <div class="stat-tile"><div class="k">전체 스캔</div><div class="v" id="fullMs">—</div><div class="d">60,000건 전부와 거리 계산</div></div>
+      <div class="stat-tile"><div class="k">인덱스 검색</div><div class="v" id="idxMs">—</div><div class="d">가까운 동네만 골라서 계산</div></div>
+    </div>
+    <p class="note">⚠️ 수치는 실제 측정 사례(약 6만 건, 로컬 Postgres + pgvector)를 재현한 시뮬레이션입니다. 인덱스 검색은 <b>근사 검색</b>이라 아주 가끔 진짜 1등을 놓칠 수 있는 대신 수십 배 빠릅니다 — 속도 ↔ 정확도 트레이드오프.</p>
+  </div>
+</section>
+
+<!-- ═══════ 탭 5: 청킹 비교 ═══════ -->
+<section class="tab" id="t6">
+  <div class="card">
+    <h2>Chunking 방식 비교</h2>
+    <p class="sub">TXT 문서를 고정 길이 · 구조 경계 · 문단 기준으로 나눠 결과를 나란히 비교합니다. 모든 처리는 브라우저 안에서만 이뤄집니다.</p>
+    <div id="uploadView">
+      <div class="drop" id="drop">
+        <strong>TXT 파일을 여기에 끌어다 놓으세요</strong>
+        <p>UTF-8 / EUC-KR(CP949) 인코딩을 자동으로 인식합니다.</p>
+        <div class="actions">
+          <label class="ck-btn primary">
+            파일 선택<input type="file" id="fileInput" accept=".txt,.md,text/plain" hidden>
+          </label>
+          <button type="button" class="ck-btn" id="sampleBtn">예시 문서로 보기</button>
+        </div>
+        <details class="paste">
+          <summary>또는 텍스트 직접 붙여넣기</summary>
+          <textarea id="pasteArea" placeholder="여기에 텍스트를 붙여넣고 아래 버튼을 누르세요"></textarea>
+          <div style="text-align:right;margin-top:8px"><button type="button" class="ck-btn primary" id="pasteBtn">이 텍스트로 비교</button></div>
+        </details>
+      </div>
+    </div>
+  </div>
+
+  <div id="resultView" class="hidden">
+    <div class="panel filebar">
+      <span class="name" id="fName"></span>
+      <span class="meta" id="fMeta"></span>
+      <span class="spacer"></span>
+      <div class="ctrl">
+        <label>고정 길이 <input type="number" id="sizeIn" min="20" max="5000" step="10" value="300"> 자</label>
+        <label>오버랩 <input type="number" id="overlapIn" min="0" max="2000" step="10" value="0"> 자</label>
+        <label class="ck-btn" style="font-size:13px;padding:5px 10px">다른 파일<input type="file" id="fileInput2" accept=".txt,.md,text/plain" hidden></label>
+      </div>
+    </div>
+
+    <div class="panel summary">
+      <table>
+        <thead><tr><th>방식</th><th>Chunk 수</th><th>평균</th><th>최소</th><th>최대</th><th>표준편차</th><th>Chunk별 글자 수 분포 (막대 클릭 → 이동)</th></tr></thead>
+        <tbody id="sumBody"></tbody>
+      </table>
+    </div>
+
+    <p class="hint">Chunk에 마우스를 올리면 다른 방식에서 <b>같은 원문 범위</b>를 포함하는 Chunk가 노란색으로 표시됩니다. 클릭하면 다른 열도 해당 위치로 스크롤됩니다.</p>
+    <div class="ck-tabs" id="ckTabs"></div>
+    <div class="ck-cols" id="ckCols"></div>
+  </div>
+</section>
+
+</main>
+
+<script>
+"use strict";
+/* ───────────── 공통: 탭 ───────────── */
+document.querySelectorAll("#tabs button").forEach(b => {
+  b.addEventListener("click", () => {
+    document.querySelectorAll("#tabs button").forEach(x => x.classList.remove("active"));
+    document.querySelectorAll("section.tab").forEach(x => x.classList.remove("active"));
+    b.classList.add("active");
+    document.getElementById(b.dataset.tab).classList.add("active");
+    document.body.classList.toggle("wide", b.dataset.tab === "t6");
+    if (b.dataset.tab === "t5") drawBench();
+  });
+});
+
+/* ───────────── 탭 5: 청킹 비교 ───────────── */
+(() => {
+  const METHODS = [
+    { key:'fixed',  name:'고정 길이', color:'--c1', soft:'--c1-soft',
+      rule: s => `원문을 ${s.size}자 단위로 자름${s.overlap ? ` (오버랩 ${s.overlap}자)` : ''} · 의미 경계 무시` },
+    { key:'struct', name:'구조 경계', color:'--c2', soft:'--c2-soft',
+      rule: () => '제목·소제목 줄에서 분할 · 제N장, N., N.N, #, [..], ■ 등 인식' },
+    { key:'para',   name:'문단',     color:'--c3', soft:'--c3-soft',
+      rule: () => '빈 줄(공백만 있는 줄 포함)을 기준으로 분할' },
+  ];
+
+  /* ---------- helpers ---------- */
+  const $ = id => document.getElementById(id);
+  const esc = s => s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const clen = s => Array.from(s).length;                     // 글자 수 (공백 포함)
+  const clenNoWs = s => Array.from(s.replace(/\s+/g,'')).length; // 공백 제외
+  const fmt = n => n.toLocaleString('ko-KR');
+
+  function trimRange(text, a, b) {
+    while (a < b && /\s/.test(text[a])) a++;
+    while (b > a && /\s/.test(text[b-1])) b--;
+    return a < b ? [a, b] : null;
+  }
+
+  /* ---------- heading detection ---------- */
+  const SEP = /^\s*([=\-─━_*~])\1{4,}\s*$/;
+  function headingLevel(line) {
+    if (/^\s/.test(line)) return 0;            // 들여쓴 줄은 목록으로 간주
+    const t = line.trim();
+    if (!t || t.length > 80) return 0;
+    let m;
+    if ((m = t.match(/^(#{1,6})\s+\S/))) return m[1].length;
+    if (/^제\s*\d+\s*[장편부]/.test(t)) return 1;
+    if (/^[IVX]{1,5}\.\s+\S/.test(t)) return 1;
+    if (/^제\s*\d+\s*절/.test(t)) return 2;
+    if ((m = t.match(/^(\d{1,2}(?:\.\d{1,2})+)\.?\s+\S/))) return 1 + m[1].split('.').length; // 1.1 → 3
+    if (/^\d{1,2}\.\s+\S/.test(t)) return 2;
+    if (/^\[[^\]]{1,40}\]$/.test(t)) return 4;
+    if (/^[■□◆◇▶▷]\s*\S/.test(t)) return 4;
+    return 0;
+  }
+
+  /* ---------- 1. 고정 길이 ---------- */
+  function chunkFixed(text, size, overlap) {
+    const out = [];
+    const step = Math.max(1, size - overlap);
+    for (let a = 0; a < text.length; a += step) {
+      let b = Math.min(text.length, a + size);
+      if (b < text.length && /[\uDC00-\uDFFF]/.test(text[b])) b++; // 서로게이트 쌍 보호
+      const t = text.slice(a, b);
+      if (t.trim()) {
+        out.push({
+          start:a, end:b, text:t,
+          cutStart: a > 0 && !/\s/.test(text[a-1]) && !/\s/.test(text[a]),
+          cutEnd:   b < text.length && !/\s/.test(text[b-1]) && !/\s/.test(text[b]),
+        });
+      }
+      if (b >= text.length) break;
+    }
+    return out;
+  }
+
+  /* ---------- 2. 구조 경계 ---------- */
+  function chunkStruct(text) {
+    const lines = [];
+    let pos = 0;
+    for (const t of text.split('\n')) { lines.push({ s:pos, t }); pos += t.length + 1; }
+
+    // 제목 줄 찾기 (바로 위의 구분선 ===== 은 해당 제목에 포함)
+    const heads = [];
+    for (let i = 0; i < lines.length; i++) {
+      const lv = headingLevel(lines[i].t);
+      if (!lv) continue;
+      let st = i;
+      while (st > 0 && SEP.test(lines[st-1].t)) st--;
+      if (heads.length && st <= heads[heads.length-1].from) st = i;
+      heads.push({ from:st, hline:i, level:lv, title:lines[i].t.trim() });
+    }
+
+    const secs = [];
+    const first = heads.length ? heads[0].from : lines.length;
+    if (first > 0) secs.push({ from:0, to:first, level:0, hline:-1 });
+    heads.forEach((h, k) => secs.push({ ...h, to: k + 1 < heads.length ? heads[k+1].from : lines.length }));
+
+    // 제목 경로(breadcrumb)
+    const stack = [];
+    for (const s of secs) {
+      if (!s.level) { s.path = ['(머리말)']; continue; }
+      while (stack.length && stack[stack.length-1].level >= s.level) stack.pop();
+      stack.push(s);
+      s.path = stack.map(x => x.title);
+    }
+
+    // 본문 없이 제목만 있는 섹션은 다음 섹션과 병합
+    const merged = [];
+    let carryFrom = null;
+    secs.forEach((s, k) => {
+      const hasBody = lines.slice(s.from, s.to)
+        .some((l, j) => s.from + j !== s.hline && l.t.trim() && !SEP.test(l.t));
+      if (carryFrom !== null) { s.from = carryFrom; carryFrom = null; }
+      if (!hasBody && s.level && k < secs.length - 1) { carryFrom = s.from; return; }
+      merged.push(s);
+    });
+
+    const out = [];
+    for (const s of merged) {
+      const last = lines[s.to - 1];
+      const r = trimRange(text, lines[s.from].s, last.s + last.t.length);
+      if (r) out.push({ start:r[0], end:r[1], text:text.slice(r[0], r[1]), path:s.path });
+    }
+    return out;
+  }
+
+  /* ---------- 3. 문단 ---------- */
+  function chunkPara(text) {
+    const out = [];
+    const re = /\n[ \t　]*\n/g;
+    let last = 0, m;
+    const push = (a, b) => {
+      const r = trimRange(text, a, b);
+      if (r) out.push({ start:r[0], end:r[1], text:text.slice(r[0], r[1]) });
+    };
+    while ((m = re.exec(text))) { push(last, m.index); last = m.index + m[0].length; re.lastIndex = last - 1; }
+    push(last, text.length);
+    return out;
+  }
+
+  /* ---------- state ---------- */
+  const state = { text:'', name:'', enc:'', size:300, overlap:0, res:{} };
+
+  function compute() {
+    state.res = {
+      fixed:  chunkFixed(state.text, state.size, state.overlap),
+      struct: chunkStruct(state.text),
+      para:   chunkPara(state.text),
+    };
+    for (const k in state.res) state.res[k].forEach(c => { c.len = clen(c.text); c.lenNoWs = clenNoWs(c.text); });
+  }
+
+  function stats(arr) {
+    if (!arr.length) return { n:0, avg:0, min:0, max:0, sd:0 };
+    const L = arr.map(c => c.len);
+    const avg = L.reduce((a,b) => a+b, 0) / L.length;
+    const sd = Math.sqrt(L.reduce((a,b) => a + (b-avg)**2, 0) / L.length);
+    return { n:L.length, avg, min:Math.min(...L), max:Math.max(...L), sd };
+  }
+
+  /* ---------- render ---------- */
+  function renderBody(t, m, c) {
+    const html = t.split('\n').map(line => {
+      if (SEP.test(line)) return `<span class="sep">${esc(line)}</span>`;
+      if (headingLevel(line)) return `<span class="h">${esc(line)}</span>`;
+      return esc(line);
+    }).join('\n');
+    if (m !== 'fixed') return html;
+    return (c.cutStart ? '<span class="cut" title="단어 중간에서 시작">✂</span>' : '') + html +
+           (c.cutEnd ? '<span class="cut" title="단어 중간에서 잘림">✂</span>' : '');
+  }
+
+  function render() {
+    compute();
+    const gmax = Math.max(1, ...METHODS.flatMap(M => state.res[M.key].map(c => c.len)));
+    const totalLen = clen(state.text);
+
+    $('fName').textContent = state.name;
+    $('fMeta').textContent = `${fmt(totalLen)}자 · ${fmt(state.text.split('\n').length)}줄 · ${state.enc}`;
+
+    // 요약 표
+    $('sumBody').innerHTML = METHODS.map(M => {
+      const s = stats(state.res[M.key]);
+      const bars = state.res[M.key].map((c, i) =>
+        `<i data-m="${M.key}" data-i="${i}" title="#${i+1} · ${fmt(c.len)}자" style="height:${Math.max(2, c.len / gmax * 100)}%;background:var(${M.color})"></i>`
+      ).join('');
+      const refTop = 100 - Math.min(100, state.size / gmax * 100);
+      const ref = state.size <= gmax ? `<div class="ref" style="top:${refTop}%"><span>${state.size}자</span></div>` : '';
+      return `<tr>
+        <td><span class="mname"><span class="dot" style="background:var(${M.color})"></span>${M.name}</span></td>
+        <td class="big" style="color:var(${M.color})">${fmt(s.n)}</td>
+        <td>${fmt(Math.round(s.avg))}자</td><td>${fmt(s.min)}자</td><td>${fmt(s.max)}자</td><td>±${fmt(Math.round(s.sd))}</td>
+        <td class="dist"><div class="strip">${ref}${bars}</div></td></tr>`;
+    }).join('');
+
+    // 탭 (좁은 화면)
+    const active = document.querySelector('#t6 .col.active')?.dataset.m || 'fixed';
+    $('ckTabs').innerHTML = METHODS.map(M =>
+      `<button type="button" data-m="${M.key}" class="ck-btn ${M.key === active ? 'on' : ''}">${M.name} (${state.res[M.key].length})</button>`
+    ).join('');
+
+    // 열
+    $('ckCols').innerHTML = METHODS.map(M => {
+      const arr = state.res[M.key];
+      const cards = arr.map((c, i) => {
+        const path = c.path ? `<span class="path" title="${esc(c.path.join(' › '))}">${esc(c.path.join(' › '))}</span>` : '<span class="path"></span>';
+        const flags = M.key === 'fixed' && (c.cutStart || c.cutEnd)
+          ? `<div class="flags">✂ ${[c.cutStart && '시작', c.cutEnd && '끝'].filter(Boolean).join('·')} 부분이 단어 중간에서 잘림</div>` : '';
+        return `<article class="chunk" data-m="${M.key}" data-i="${i}">
+          <header><span class="idx">#${i+1}</span>${path}<span class="len">${fmt(c.len)}자 <small>(공백 제외 ${fmt(c.lenNoWs)})</small></span></header>
+          <div class="lenbar"><i style="width:${c.len / gmax * 100}%"></i></div>
+          <pre class="ck-body">${renderBody(c.text, M.key, c)}</pre>${flags}
+        </article>`;
+      }).join('') || '<div class="empty">생성된 Chunk가 없습니다.</div>';
+      return `<section class="panel col ${M.key === active ? 'active' : ''}" data-m="${M.key}" style="--mc:var(${M.color});--msoft:var(${M.soft})">
+        <div class="col-head">
+          <h2>${M.name}<span class="n"><b>${fmt(arr.length)}</b> 개</span></h2>
+          <p class="rule">${esc(M.rule(state))}</p>
+        </div>
+        <div class="list">${cards}</div>
+      </section>`;
+    }).join('');
+
+    $('uploadView').classList.add('hidden');
+    $('resultView').classList.remove('hidden');
+  }
+
+  /* ---------- cross-highlight ---------- */
+  const overlaps = (a, b) => a.start < b.end && b.start < a.end;
+  function highlight(m, i) {
+    document.querySelectorAll('#t6 .chunk.rel').forEach(el => el.classList.remove('rel'));
+    if (m == null) return;
+    const src = state.res[m][i];
+    for (const M of METHODS) {
+      if (M.key === m) continue;
+      state.res[M.key].forEach((c, j) => {
+        if (overlaps(src, c)) document.querySelector(`.chunk[data-m="${M.key}"][data-i="${j}"]`)?.classList.add('rel');
+      });
+    }
+  }
+  function scrollToChunk(el) {
+    const list = el.closest('.list');
+    if (getComputedStyle(list).overflowY === 'auto' && list.scrollHeight > list.clientHeight) {
+      list.scrollTop = el.offsetTop - list.offsetTop - 10;
+    } else {
+      el.scrollIntoView({ behavior:'smooth', block:'center' });
+    }
+  }
+  function pin(m, i, syncOthers) {
+    document.querySelectorAll('#t6 .chunk.pin').forEach(el => el.classList.remove('pin'));
+    const el = document.querySelector(`.chunk[data-m="${m}"][data-i="${i}"]`);
+    if (!el) return;
+    el.classList.add('pin');
+    highlight(m, i);
+    if (!syncOthers) { setActive(m); scrollToChunk(el); return; }
+    const src = state.res[m][i];
+    for (const M of METHODS) {
+      if (M.key === m) continue;
+      const j = state.res[M.key].findIndex(c => overlaps(src, c));
+      const t = j >= 0 && document.querySelector(`.chunk[data-m="${M.key}"][data-i="${j}"]`);
+      if (t) { const list = t.closest('.list'); list.scrollTop = t.offsetTop - list.offsetTop - 10; }
+    }
+  }
+  function setActive(m) {
+    document.querySelectorAll('#t6 .col').forEach(c => c.classList.toggle('active', c.dataset.m === m));
+    document.querySelectorAll('#ckTabs button').forEach(b => b.classList.toggle('on', b.dataset.m === m));
+  }
+
+  $('ckCols').addEventListener('mouseover', e => {
+    const el = e.target.closest('.chunk');
+    if (el && el.dataset.hover !== '1') {
+      document.querySelectorAll('#t6 .chunk[data-hover]').forEach(x => delete x.dataset.hover);
+      el.dataset.hover = '1';
+      highlight(el.dataset.m, +el.dataset.i);
+    }
+  });
+  $('ckCols').addEventListener('mouseleave', () => {
+    document.querySelectorAll('#t6 .chunk[data-hover]').forEach(x => delete x.dataset.hover);
+    const p = document.querySelector('#t6 .chunk.pin');
+    p ? highlight(p.dataset.m, +p.dataset.i) : highlight(null);
+  });
+  $('ckCols').addEventListener('click', e => {
+    const el = e.target.closest('.chunk');
+    if (el && !window.getSelection().toString()) pin(el.dataset.m, +el.dataset.i, true);
+  });
+  $('sumBody').addEventListener('click', e => {
+    const b = e.target.closest('i[data-m]');
+    if (b) pin(b.dataset.m, +b.dataset.i, false);
+  });
+  $('ckTabs').addEventListener('click', e => {
+    const b = e.target.closest('button');
+    if (b) setActive(b.dataset.m);
+  });
+
+  /* ---------- input ---------- */
+  function load(text, name, enc) {
+    state.text = text.replace(/\r\n?/g, '\n').replace(/^﻿/, '');
+    state.name = name; state.enc = enc;
+    render();
+  }
+  async function readFile(f) {
+    if (!f) return;
+    const buf = await f.arrayBuffer();
+    let text, enc;
+    try { text = new TextDecoder('utf-8', { fatal:true }).decode(buf); enc = 'UTF-8'; }
+    catch { text = new TextDecoder('euc-kr').decode(buf); enc = 'EUC-KR(CP949)'; }
+    load(text, f.name, enc);
+  }
+
+  $('fileInput').addEventListener('change', e => readFile(e.target.files[0]));
+  $('fileInput2').addEventListener('change', e => { readFile(e.target.files[0]); e.target.value = ''; });
+  $('pasteBtn').addEventListener('click', () => {
+    const t = $('pasteArea').value;
+    if (t.trim()) load(t, '붙여넣은 텍스트', '직접 입력');
+  });
+
+  const drop = $('drop');
+  ['dragenter','dragover'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('over'); }));
+  ['dragleave','drop'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove('over'); }));
+  drop.addEventListener('drop', e => { e.stopPropagation(); readFile(e.dataTransfer.files[0]); });
+  // 결과 화면에서도 파일 드롭 허용 (청킹 탭이 열려 있을 때만)
+  const t1Open = () => $('t6').classList.contains('active');
+  document.addEventListener('dragover', e => { if (t1Open()) e.preventDefault(); });
+  document.addEventListener('drop', e => {
+    if (!t1Open()) return;
+    e.preventDefault();
+    if (e.dataTransfer.files[0]) readFile(e.dataTransfer.files[0]);
+  });
+
+  function onParam() {
+    const size = Math.max(20, Math.min(5000, parseInt($('sizeIn').value, 10) || 300));
+    const overlap = Math.max(0, Math.min(size - 1, parseInt($('overlapIn').value, 10) || 0));
+    state.size = size; state.overlap = overlap;
+    if (state.text) render();
+  }
+  $('sizeIn').addEventListener('change', onParam);
+  $('overlapIn').addEventListener('change', onParam);
+
+  /* ---------- sample ---------- */
+  const SAMPLE = `사내 문서 검색 시스템 도입 가이드
+문서번호: GUIDE-001
+개정일: 2026-09-01
+
+이 가이드는 사내 문서를 검색 가능한 형태로 준비하는 절차를 설명한다. 각 장은 준비, 분할, 검증 순서로 구성되어 있다.
+
+===========================================================
+제1장 문서 준비
+===========================================================
+대상 문서: 매뉴얼, 보고서, 회의록
+
+1.1 형식 통일
+- 모든 문서는 UTF-8 텍스트로 변환한다.
+- 머리말에는 문서번호와 개정일을 반드시 기재한다.
+
+1.2 불필요한 요소 제거
+표지, 목차, 반복되는 머리글과 바닥글은 검색 품질을 떨어뜨리므로 변환 단계에서 제거한다. 단, 표 안의 수치 정보는 문장 형태로 풀어서 보존하는 것이 좋다.
+
+===========================================================
+제2장 문서 분할
+===========================================================
+2.1 분할 단위 선택
+고정 길이 분할은 구현이 간단하지만 문장이나 표의 중간에서 잘릴 수 있다. 구조 경계 분할은 제목 단위로 의미가 보존되지만 섹션 길이의 편차가 크다. 문단 분할은 작성자가 의도한 흐름을 따르지만, 문단이 지나치게 짧거나 길면 검색 정확도가 떨어진다.
+
+2.2 권장 기준
+- 한 Chunk는 200~500자 사이를 권장한다.
+- 너무 긴 섹션은 문단 단위로 다시 나누고, 너무 짧은 문단은 앞뒤 문단과 합친다.
+
+===========================================================
+제3장 검증
+===========================================================
+분할이 끝나면 대표 질문 20개를 선정하여 검색 결과를 점검한다. 정답 문단이 상위 3개 결과 안에 포함되는 비율을 기록하고, 기준에 미달하면 분할 방식을 조정한다.`;
+  $('sampleBtn').addEventListener('click', () => load(SAMPLE, '예시 문서.txt', 'UTF-8'));
+})();
+
+/* 공통: 스트리밍 출력 (RAG 파이프라인 탭에서 사용) */
+function streamText(el, text, done) {
+  el.textContent = "";
+  let i = 0;
+  const iv = setInterval(() => {
+    el.textContent += text.slice(i, i + 2); i += 2;
+    if (i >= text.length) { clearInterval(iv); if (done) done(); }
+  }, 28);
+}
+
+/* ───────────── 공통 데이터: 리뷰 + 간이 임베딩 ───────────── */
+const CENTERS = { time: [0.21, 0.30], pack: [0.75, 0.31], kind: [0.48, 0.75] };
+const CONCEPT_KO = { time: "시간", pack: "포장", kind: "친절" };
+const REVIEWS = [
+  { m: "kim",  c: "time", s: 1, r: 5, x: 0.16, y: 0.24, t: "약속 시간보다 10분 일찍 도착하셨어요" },
+  { m: "kim",  c: "time", s: 1, r: 5, x: 0.23, y: 0.31, t: "시간 약속을 칼같이 지키세요" },
+  { m: "kim",  c: "time", s: 1, r: 4, x: 0.13, y: 0.35, t: "제때 오셔서 이사가 일찍 끝났어요" },
+  { m: "park", c: "time", s: 0, r: 2, x: 0.28, y: 0.41, t: "한 시간이나 늦게 오셨어요" },
+  { m: "park", c: "time", s: 0, r: 3, x: 0.32, y: 0.34, t: "연락도 없이 지각하셨네요" },
+  { m: "kim",  c: "time", s: 1, r: 5, x: 0.19, y: 0.19, t: "정시에 정확히 도착했습니다" },
+  { m: "park", c: "time", s: 1, r: 4, x: 0.25, y: 0.26, t: "늦지 않게 와주셨어요" },
+  { m: "park", c: "pack", s: 1, r: 5, x: 0.71, y: 0.23, t: "포장을 정말 꼼꼼하게 해주세요" },
+  { m: "park", c: "pack", s: 1, r: 5, x: 0.79, y: 0.29, t: "그릇 하나하나 완충재로 싸주셨어요" },
+  { m: "kim",  c: "pack", s: 0, r: 2, x: 0.84, y: 0.37, t: "박스가 찌그러져서 왔어요" },
+  { m: "park", c: "pack", s: 1, r: 4, x: 0.69, y: 0.35, t: "테이핑이 튼튼해서 파손이 없었어요" },
+  { m: "kim",  c: "pack", s: 0, r: 3, x: 0.77, y: 0.42, t: "포장이 대충이라 컵이 깨졌어요" },
+  { m: "park", c: "pack", s: 1, r: 5, x: 0.67, y: 0.27, t: "짐 싸는 솜씨가 장인급이에요" },
+  { m: "kim",  c: "kind", s: 1, r: 5, x: 0.43, y: 0.70, t: "정말 친절하고 매너가 좋으세요" },
+  { m: "kim",  c: "kind", s: 1, r: 5, x: 0.52, y: 0.73, t: "웃으면서 응대해주셔서 기분 좋았어요" },
+  { m: "park", c: "kind", s: 0, r: 2, x: 0.57, y: 0.80, t: "말투가 조금 퉁명스러웠어요" },
+  { m: "kim",  c: "kind", s: 1, r: 4, x: 0.46, y: 0.83, t: "끝까지 공손하게 대해주셨어요" },
+  { m: "park", c: "kind", s: 1, r: 4, x: 0.39, y: 0.77, t: "힘든 내색 없이 상냥하셨어요" },
+  { m: "kim",  c: "kind", s: 0, r: 3, x: 0.52, y: 0.66, t: "짜증 섞인 태도가 아쉬웠어요" },
+];
+const MECHS = {
+  kim:  { name: "김반장 기사님", emoji: "👨‍🔧", desc: "시간·친절 평가 좋음, 포장 아쉬움" },
+  park: { name: "박기사 기사님", emoji: "🧑‍🔧", desc: "포장 평가 좋음, 시간 아쉬움" },
+};
+/* 위치 → 간이 벡터: 지도 중심 기준 방향 벡터 (코사인 = 각도 비교, 교육 취지와 일치) */
+const ORIGIN = [0.48, 0.45];
+function posToVec(x, y) {
+  return [x - ORIGIN[0], y - ORIGIN[1]];
+}
+function cosine(a, b) {
+  let dot = 0, na = 0, nb = 0;
+  for (let i = 0; i < a.length; i++) { dot += a[i] * b[i]; na += a[i] * a[i]; nb += b[i] * b[i]; }
+  const raw = dot / (Math.sqrt(na) * Math.sqrt(nb));
+  /* 2차원 축소로 좁아진 각도 차이를 보기 좋게 증폭 (순위는 그대로 유지) */
+  const theta = Math.acos(Math.min(1, Math.max(-1, raw)));
+  return Math.cos(Math.min(theta * 2.2, Math.PI));
+}
+REVIEWS.forEach(r => r.vec = posToVec(r.x, r.y));
+
+/* 간이 사전: 단어 → 개념 가중치 */
+const LEXICON = {
+  time: ["시간", "정시", "제때", "제 시간", "늦", "약속", "지각", "빨리", "일찍", "도착", "지연", "기다", "왔어", "칼같"],
+  pack: ["포장", "박스", "꼼꼼", "파손", "깨", "테이핑", "완충", "랩", "싸", "그릇", "짐", "튼튼", "깨짐"],
+  kind: ["친절", "매너", "불친절", "공손", "태도", "응대", "상냥", "예의", "말투", "퉁명", "웃", "기분"],
+};
+function textToWeights(text) {
+  const w = { time: 0, pack: 0, kind: 0 };
+  let hits = 0;
+  for (const c of Object.keys(LEXICON)) {
+    for (const kw of LEXICON[c]) {
+      if (text.includes(kw)) { w[c] += 1; hits++; }
+    }
+  }
+  return hits ? w : null;
+}
+function weightsToPos(w) {
+  const total = w.time + w.pack + w.kind;
+  let x = 0, y = 0;
+  for (const c of ["time", "pack", "kind"]) {
+    x += (w[c] / total) * CENTERS[c][0];
+    y += (w[c] / total) * CENTERS[c][1];
+  }
+  return [x, y];
+}
+function queryVec(text) {
+  const w = textToWeights(text);
+  if (!w) return null;
+  let [x, y] = weightsToPos(w);
+  /* 중심 근처(방향이 애매)면 가장 강한 개념 쪽으로 살짝 당김 */
+  if (Math.hypot(x - ORIGIN[0], y - ORIGIN[1]) < 0.06) {
+    const top = Object.keys(w).sort((a, b) => w[b] - w[a])[0];
+    x = x * 0.6 + CENTERS[top][0] * 0.4;
+    y = y * 0.6 + CENTERS[top][1] * 0.4;
+  }
+  return { x, y, vec: posToVec(x, y), w };
+}
+
+/* ───────────── 탭 1: 임베딩 지도 ───────────── */
+const COLORS = { time: "var(--series-1)", pack: "var(--series-2)", kind: "var(--series-3)" };
+const svg = document.getElementById("mapSvg");
+const tip = document.getElementById("mapTip");
+const W = 800, H = 520, PAD = 50;
+const sx = v => PAD + v * (W - PAD * 2);
+const sy = v => PAD + v * (H - PAD * 2);
+let queryMark = null;
+
+function drawMap(query) {
+  let els = "";
+  /* 격자 */
+  for (let g = 0; g <= 4; g++) {
+    const gx = PAD + g * (W - PAD * 2) / 4, gy = PAD + g * (H - PAD * 2) / 4;
+    els += `<line x1="${gx}" y1="${PAD}" x2="${gx}" y2="${H - PAD}" stroke="var(--grid)" stroke-width="1"/>`;
+    els += `<line x1="${PAD}" y1="${gy}" x2="${W - PAD}" y2="${gy}" stroke="var(--grid)" stroke-width="1"/>`;
+  }
+  /* 클러스터 라벨 (색+텍스트 이중 표기) */
+  const LBL = { time: [0.21, 0.06], pack: [0.75, 0.06], kind: [0.48, 0.97] };
+  for (const c of ["time", "pack", "kind"]) {
+    els += `<text x="${sx(LBL[c][0])}" y="${sy(LBL[c][1])}" text-anchor="middle" font-size="13" font-weight="700" fill="${COLORS[c]}">${CONCEPT_KO[c]} 동네</text>`;
+  }
+  /* 질문 → 이웃 연결선 */
+  if (query) {
+    query.nn.forEach(n => {
+      els += `<line x1="${sx(query.x)}" y1="${sy(query.y)}" x2="${sx(n.rev.x)}" y2="${sy(n.rev.y)}" stroke="var(--ink-muted)" stroke-width="1.5" stroke-dasharray="4 3"/>`;
+    });
+  }
+  /* 리뷰 점 */
+  REVIEWS.forEach((r, i) => {
+    const hot = query && query.nn.some(n => n.rev === r);
+    els += `<circle data-i="${i}" cx="${sx(r.x)}" cy="${sy(r.y)}" r="${hot ? 11 : 8}" fill="${COLORS[r.c]}"
+      stroke="var(--surface-1)" stroke-width="2" style="cursor:pointer"/>`;
+    if (hot) els += `<circle cx="${sx(r.x)}" cy="${sy(r.y)}" r="15" fill="none" stroke="${COLORS[r.c]}" stroke-width="1.5"/>`;
+  });
+  /* 질문 점 */
+  if (query) {
+    els += `<rect x="${sx(query.x) - 8}" y="${sy(query.y) - 8}" width="16" height="16" transform="rotate(45 ${sx(query.x)} ${sy(query.y)})"
+      fill="var(--ink-1)" stroke="var(--surface-1)" stroke-width="2"/>`;
+    els += `<text x="${sx(query.x)}" y="${sy(query.y) - 16}" text-anchor="middle" font-size="12.5" font-weight="700" fill="var(--ink-1)">"${query.label}"</text>`;
+  }
+  svg.innerHTML = els;
+  svg.querySelectorAll("circle[data-i]").forEach(c => {
+    c.addEventListener("mousemove", e => {
+      const r = REVIEWS[+c.dataset.i];
+      tip.style.opacity = 1;
+      tip.innerHTML = `${r.t}<br><span style="opacity:.7">${MECHS[r.m].name} · 평점 ${r.r}/5</span>`;
+      const box = svg.getBoundingClientRect();
+      tip.style.left = (e.clientX - box.left + 14) + "px";
+      tip.style.top = (e.clientY - box.top - 10) + "px";
+    });
+    c.addEventListener("mouseleave", () => tip.style.opacity = 0);
+  });
+}
+function askMap(text) {
+  const q = queryVec(text);
+  const nnBox = document.getElementById("nnList");
+  if (!q) {
+    nnBox.innerHTML = `<div class="empty">"${text}" — 이 데모의 간이 사전에 없는 표현이에요. 실제 임베딩 모델은 모든 표현을 이해하지만, 교육용 데모는 어휘가 제한됩니다. 시간·포장·친절 관련 표현으로 시도해보세요.</div>`;
+    drawMap(null);
+    return;
+  }
+  const sims = REVIEWS.map(rev => ({ rev, sim: cosine(q.vec, rev.vec) }))
+    .sort((a, b) => b.sim - a.sim).slice(0, 3);
+  queryMark = { ...q, label: text.length > 14 ? text.slice(0, 14) + "…" : text, nn: sims };
+  drawMap(queryMark);
+  nnBox.innerHTML = "<div style='font-size:13.5px; font-weight:700; margin-bottom:4px'>가장 가까운 리뷰 3개 (코사인 유사도)</div>" +
+    sims.map(n => `
+      <div class="nn-item">
+        <span class="sw" style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${COLORS[n.rev.c]};flex-shrink:0"></span>
+        <span style="flex:1">${n.rev.t}</span>
+        <div class="sim-track"><div class="sim-fill" style="width:${Math.max(0, n.sim * 100).toFixed(0)}%; background:${COLORS[n.rev.c]}"></div></div>
+        <span class="sim-num">${(n.sim * 100).toFixed(0)}%</span>
+      </div>`).join("");
+}
+const MAP_PRESETS = ["제때 왔어요", "박스 튼튼하게 싸줬어요", "기사님 태도 어땠어?", "시간 잘 지켜요?"];
+document.getElementById("mapChips").innerHTML = MAP_PRESETS.map(p => `<button class="chip">${p}</button>`).join("");
+document.querySelectorAll("#mapChips .chip").forEach(c => c.addEventListener("click", () => {
+  document.getElementById("mapInput").value = c.textContent;
+  askMap(c.textContent);
+}));
+document.getElementById("mapGo").addEventListener("click", () => {
+  const v = document.getElementById("mapInput").value.trim();
+  if (v) askMap(v);
+});
+document.getElementById("mapInput").addEventListener("keydown", e => { if (e.key === "Enter") document.getElementById("mapGo").click(); });
+drawMap(null);
+
+/* ───────────── 탭 2: 검색 비교 ───────────── */
+function runSearch(qtext) {
+  const kwBox = document.getElementById("kwResults");
+  const semBox = document.getElementById("semResults");
+  /* 키워드: 2글자 이상 어절 부분 일치 */
+  const terms = qtext.replace(/[?!.]/g, "").split(/\s+/).filter(t => t.length >= 2);
+  const kwHits = REVIEWS.filter(r => terms.some(t => r.t.includes(t)));
+  kwBox.innerHTML = kwHits.length
+    ? kwHits.map(r => {
+        let h = r.t;
+        terms.forEach(t => { if (h.includes(t)) h = h.split(t).join(`<mark>${t}</mark>`); });
+        return `<div class="result-item">${h}</div>`;
+      }).join("")
+    : `<div class="empty">일치하는 글자가 없어 0건 😢</div>`;
+  /* 의미 검색 */
+  const q = queryVec(qtext);
+  if (!q) {
+    semBox.innerHTML = `<div class="empty">간이 사전에 없는 표현 — 시간·포장·친절 관련 표현으로 시도해보세요</div>`;
+    return;
+  }
+  const sims = REVIEWS.map(rev => ({ rev, sim: cosine(q.vec, rev.vec) }))
+    .sort((a, b) => b.sim - a.sim).slice(0, 5);
+  semBox.innerHTML = sims.map(n => `
+    <div class="result-item" style="display:flex; gap:8px; align-items:center">
+      <span style="flex:1">${n.rev.t}</span>
+      <div class="sim-track" style="width:70px"><div class="sim-fill" style="width:${Math.max(0, n.sim * 100).toFixed(0)}%"></div></div>
+      <span class="sim-num">${(n.sim * 100).toFixed(0)}%</span>
+    </div>`).join("");
+}
+const SEARCH_PRESETS = ["정시", "포장 잘해요?", "기사님 매너 어때요", "제때 왔어요"];
+document.getElementById("searchChips").innerHTML = SEARCH_PRESETS.map(p => `<button class="chip">${p}</button>`).join("");
+document.querySelectorAll("#searchChips .chip").forEach(c => c.addEventListener("click", () => {
+  document.getElementById("searchInput").value = c.textContent;
+  runSearch(c.textContent);
+}));
+document.getElementById("searchGo").addEventListener("click", () => {
+  const v = document.getElementById("searchInput").value.trim();
+  if (v) runSearch(v);
+});
+document.getElementById("searchInput").addEventListener("keydown", e => { if (e.key === "Enter") document.getElementById("searchGo").click(); });
+
+/* ───────────── 탭 3: RAG 파이프라인 ───────────── */
+let selMech = "kim";
+const QUESTIONS = [
+  { q: "시간 약속 잘 지켜요?", c: "time" },
+  { q: "포장은 꼼꼼하게 해주시나요?", c: "pack" },
+  { q: "기사님 친절하세요?", c: "kind" },
+  { q: "반려동물 이사도 가능한가요?", c: null },
+];
+document.getElementById("mechRow").innerHTML = Object.entries(MECHS).map(([k, m]) => `
+  <div class="mech-card ${k === selMech ? "sel" : ""}" data-m="${k}">
+    <span class="avatar">${m.emoji}</span>
+    <span><b>${m.name}</b><br><span style="color:var(--ink-muted); font-size:12px">${m.desc}</span></span>
+  </div>`).join("");
+document.querySelectorAll(".mech-card").forEach(c => c.addEventListener("click", () => {
+  selMech = c.dataset.m;
+  document.querySelectorAll(".mech-card").forEach(x => x.classList.toggle("sel", x.dataset.m === selMech));
+}));
+document.getElementById("qChips").innerHTML = QUESTIONS.map((q, i) => `<button class="chip" data-q="${i}">${q.q}</button>`).join("");
+document.querySelectorAll("#qChips .chip").forEach(c => c.addEventListener("click", () => runRag(QUESTIONS[+c.dataset.q])));
+
+function resetSteps() {
+  ["s1", "s2", "s3", "s4"].forEach(id => { const el = document.getElementById(id); el.classList.remove("on", "done"); });
+  ["s1b", "s2b", "s3b"].forEach(id => document.getElementById(id).innerHTML = "");
+  document.getElementById("ragAnswer").textContent = "";
+  document.getElementById("ragBadge").innerHTML = "";
+}
+function stepOn(id) {
+  const el = document.getElementById(id);
+  el.classList.add("on");
+  el.scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+function fakeVec() {
+  const arr = [];
+  for (let i = 0; i < 6; i++) arr.push((Math.random() * 2 - 1).toFixed(2));
+  return "[" + arr.join(", ") + ", … 총 1536개]";
+}
+function runRag(qobj) {
+  resetSteps();
+  const ragOff = document.getElementById("ragOff").checked;
+  const ans = document.getElementById("ragAnswer");
+  const badge = document.getElementById("ragBadge");
+
+  if (ragOff) {
+    /* RAG 끄기: 검색 없이 바로 생성 → 환각 */
+    stepOn("s4");
+    const canned = {
+      time: "네, 이 기사님은 항상 정확하게 시간을 지키기로 유명합니다. 지금까지 단 한 번도 늦은 적이 없다고 알려져 있어요.",
+      pack: "네, 프리미엄 5중 포장 시스템을 사용하시고 파손 시 전액 보상 보험도 가입되어 있습니다.",
+      kind: "네, 고객 만족도 99.9%의 매우 친절한 기사님입니다. 친절 서비스 대상도 수상하셨어요.",
+      null: "네! 반려동물 이사 전문 자격을 보유하고 계시고, 전용 케이지와 안심 케어 서비스도 제공됩니다. 🐶",
+    };
+    streamText(ans, canned[qobj.c], () => {
+      badge.innerHTML = '<span class="shield bad">❗ 환각 — 검색 없이 답했습니다. 수상 이력·보험·자격 전부 지어낸 것 (실제 리뷰와 대조해보세요)</span>';
+    });
+    return;
+  }
+
+  /* 1단계: 질문 임베딩 */
+  stepOn("s1");
+  document.getElementById("s1b").innerHTML = `"${qobj.q}" → <span style="font-family:ui-monospace,monospace; font-size:12px">${fakeVec()}</span><br><span style="font-size:12px; color:var(--ink-muted)">리뷰를 저장할 때 쓴 것과 같은 임베딩 모델을 사용해야 같은 지도 위에서 비교할 수 있습니다</span>`;
+
+  setTimeout(() => {
+    /* 2단계: 유사도 검색 */
+    document.getElementById("s1").classList.add("done");
+    stepOn("s2");
+    let hits = [];
+    if (qobj.c) {
+      const q = queryVec(qobj.q);
+      hits = REVIEWS.filter(r => r.m === selMech)
+        .map(rev => ({ rev, sim: cosine(q.vec, rev.vec) }))
+        .sort((a, b) => b.sim - a.sim).slice(0, 3)
+        .filter(h => h.sim > 0.5);
+    }
+    if (!hits.length) {
+      document.getElementById("s2b").innerHTML = `<b>검색 결과 0건</b> — "${qobj.q}"와 의미가 가까운 리뷰가 이 기사님에게 없습니다.`;
+      setTimeout(() => {
+        document.getElementById("s2").classList.add("done");
+        stepOn("s4");
+        streamText(ans, "관련된 리뷰가 없어 근거가 부족해요. 지어내지 않고 솔직하게 말씀드립니다 — 이 부분은 기사님께 직접 문의해 주세요.", () => {
+          badge.innerHTML = '<span class="shield ok">🛡️ 환각 차단 — 근거가 없으면 AI를 호출하지 않고 "없다"고 답합니다</span>';
+        });
+      }, 900);
+      return;
+    }
+    document.getElementById("s2b").innerHTML = hits.map((h, i) => `
+      <div class="nn-item">
+        <span style="font-weight:700; color:var(--series-1); flex-shrink:0">[${i + 1}]</span>
+        <span style="flex:1">(평점 ${h.rev.r}/5) ${h.rev.t}</span>
+        <div class="sim-track" style="width:80px"><div class="sim-fill" style="width:${Math.max(0, h.sim * 100).toFixed(0)}%"></div></div>
+        <span class="sim-num">${(h.sim * 100).toFixed(0)}%</span>
+      </div>`).join("");
+
+    setTimeout(() => {
+      /* 3단계: 프롬프트 조립 */
+      document.getElementById("s2").classList.add("done");
+      stepOn("s3");
+      const ctx = hits.map((h, i) => `[${i + 1}] (평점 ${h.rev.r}/5) ${h.rev.t}`).join("\n");
+      document.getElementById("s3b").innerHTML = `<div class="prompt-box">system: 아래 자료만 근거로 답하세요. 자료에 없으면 지어내지
+말고 "자료가 없다"고 하세요. 근거 번호를 [1],[2]로 표시하세요.
+
+# 자료
+${ctx}
+
+# 질문
+${qobj.q}</div>`;
+
+      setTimeout(() => {
+        /* 4단계: 답변 생성 */
+        document.getElementById("s3").classList.add("done");
+        stepOn("s4");
+        const pos = hits.filter(h => h.rev.s === 1).length;
+        const neg = hits.length - pos;
+        const cname = CONCEPT_KO[qobj.c];
+        let text;
+        if (pos > neg) {
+          text = `네, ${cname} 부분은 좋은 평가가 많아요. "${hits[0].rev.t}"[1]${hits[1] ? `, "${hits[1].rev.t}"[2]` : ""} 같은 리뷰가 확인됩니다. 검색된 리뷰 ${hits.length}건 중 ${pos}건이 긍정적이에요.`;
+          if (neg > 0) text += ` 다만 "${hits.find(h => h.rev.s === 0).rev.t}"[${hits.findIndex(h => h.rev.s === 0) + 1}]라는 의견도 있으니 참고하세요.`;
+        } else {
+          text = `${cname} 부분은 아쉽다는 평가가 보여요. "${hits[0].rev.t}"[1]${hits[1] ? `, "${hits[1].rev.t}"[2]` : ""} 같은 리뷰가 확인됩니다. 검색된 리뷰 ${hits.length}건 중 ${neg}건이 부정적입니다.`;
+        }
+        streamText(ans, text, () => {
+          badge.innerHTML = '<span class="shield ok">✅ 위 2단계에서 검색된 실제 리뷰만 근거로 생성 — [번호]로 출처 확인 가능</span>';
+        });
+      }, 1400);
+    }, 1100);
+  }, 900);
+}
+
+/* ───────────── 탭 4: 속도 비교 ───────────── */
+const bCanvas = document.getElementById("benchCanvas");
+const bCtx = bCanvas.getContext("2d");
+const DOTS = [];
+(function makeDots() {
+  /* 8개 클러스터, 시드 고정 유사난수 */
+  let seed = 42;
+  const rnd = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+  const cx = [], cy = [];
+  for (let c = 0; c < 8; c++) { cx.push(70 + rnd() * 660); cy.push(60 + rnd() * 240); }
+  for (let i = 0; i < 560; i++) {
+    const c = Math.floor(rnd() * 8);
+    DOTS.push({ x: cx[c] + (rnd() - 0.5) * 110, y: cy[c] + (rnd() - 0.5) * 90, c });
+  }
+  DOTS.target = { x: cx[3] + 8, y: cy[3] - 6, c: 3 };
+})();
+function drawBench(highlight, scanned) {
+  const css = getComputedStyle(document.documentElement);
+  bCtx.clearRect(0, 0, 800, 360);
+  DOTS.forEach((d, i) => {
+    let col = css.getPropertyValue("--baseline").trim();
+    if (highlight === "all" && i <= scanned) col = css.getPropertyValue("--series-1").trim();
+    if (highlight === "cluster" && d.c === DOTS.target.c) col = css.getPropertyValue("--series-1").trim();
+    bCtx.beginPath(); bCtx.arc(d.x, d.y, 3.4, 0, Math.PI * 2);
+    bCtx.fillStyle = col; bCtx.fill();
+  });
+  /* 질문 점 */
+  bCtx.save();
+  bCtx.translate(DOTS.target.x, DOTS.target.y); bCtx.rotate(Math.PI / 4);
+  bCtx.fillStyle = css.getPropertyValue("--ink-1").trim();
+  bCtx.fillRect(-7, -7, 14, 14);
+  bCtx.restore();
+  bCtx.fillStyle = css.getPropertyValue("--ink-1").trim();
+  bCtx.font = "700 13px system-ui";
+  bCtx.fillText("◆ = 질문 벡터", 16, 344);
+}
+let benchBusy = false;
+document.getElementById("benchFull").addEventListener("click", () => {
+  if (benchBusy) return; benchBusy = true;
+  document.getElementById("fullMs").textContent = "…";
+  const t0 = performance.now(), DUR = 3000;
+  (function frame() {
+    const p = Math.min(1, (performance.now() - t0) / DUR);
+    drawBench("all", Math.floor(p * DOTS.length));
+    document.getElementById("scanFill").style.width = (p * 100) + "%";
+    if (p < 1) requestAnimationFrame(frame);
+    else {
+      document.getElementById("fullMs").textContent = "1,842 ms";
+      benchBusy = false;
+    }
+  })();
+});
+document.getElementById("benchIdx").addEventListener("click", () => {
+  if (benchBusy) return; benchBusy = true;
+  document.getElementById("idxMs").textContent = "…";
+  document.getElementById("scanFill").style.width = "0%";
+  setTimeout(() => {
+    drawBench("cluster");
+    document.getElementById("scanFill").style.width = "6%";
+    setTimeout(() => {
+      document.getElementById("idxMs").textContent = "14 ms";
+      benchBusy = false;
+    }, 250);
+  }, 200);
+});
+</script>
+</body>
+</html>

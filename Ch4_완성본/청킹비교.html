@@ -1,0 +1,568 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chunking 비교</title>
+<style>
+:root{
+  --bg:#f6f5f2; --surface:#ffffff; --surface-2:#f1efea; --border:#e3e0d9; --border-strong:#cfcbc2;
+  --text:#1d1c1a; --muted:#6b6862; --faint:#9a968e;
+  --c1:#2f63c9; --c1-soft:#e8eefb;
+  --c2:#1d8456; --c2-soft:#e4f3eb;
+  --c3:#b25418; --c3-soft:#f9ece1;
+  --rel:#fff1b8; --rel-line:#d9a900; --warn:#b3261e;
+  --shadow:0 1px 2px rgba(0,0,0,.05), 0 2px 8px rgba(0,0,0,.04);
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#141413; --surface:#1d1d1b; --surface-2:#262623; --border:#33322e; --border-strong:#47453f;
+    --text:#ebe9e4; --muted:#a19d94; --faint:#77736b;
+    --c1:#86aaf2; --c1-soft:#1d2940;
+    --c2:#63c396; --c2-soft:#18301f;
+    --c3:#eb9d66; --c3-soft:#3a2819;
+    --rel:#3d3517; --rel-line:#d9b233; --warn:#f2877e;
+    --shadow:none; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#141413; --surface:#1d1d1b; --surface-2:#262623; --border:#33322e; --border-strong:#47453f;
+  --text:#ebe9e4; --muted:#a19d94; --faint:#77736b;
+  --c1:#86aaf2; --c1-soft:#1d2940;
+  --c2:#63c396; --c2-soft:#18301f;
+  --c3:#eb9d66; --c3-soft:#3a2819;
+  --rel:#3d3517; --rel-line:#d9b233; --warn:#f2877e;
+  --shadow:none; color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  background:var(--bg); color:var(--text);
+  font:15px/1.55 "Pretendard","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1480px; margin:0 auto; padding:24px 16px 64px}
+h1{font-size:22px; margin:0; letter-spacing:-.01em}
+.sub{color:var(--muted); margin:4px 0 0; font-size:14px}
+.top{display:flex; gap:16px; align-items:flex-end; justify-content:space-between; flex-wrap:wrap; margin-bottom:20px}
+button,.btn{
+  font:inherit; font-size:14px; border:1px solid var(--border-strong); background:var(--surface); color:var(--text);
+  padding:7px 12px; border-radius:8px; cursor:pointer;
+}
+button:hover,.btn:hover{background:var(--surface-2)}
+button.primary{background:var(--text); color:var(--bg); border-color:var(--text)}
+button.primary:hover{opacity:.88; background:var(--text)}
+.panel{background:var(--surface); border:1px solid var(--border); border-radius:12px; box-shadow:var(--shadow)}
+
+/* upload */
+.drop{
+  padding:36px 20px; text-align:center; border:2px dashed var(--border-strong); border-radius:12px;
+  background:var(--surface); transition:border-color .15s, background .15s;
+}
+.drop.over{border-color:var(--c1); background:var(--c1-soft)}
+.drop strong{display:block; font-size:17px; margin-bottom:6px}
+.drop p{margin:0 0 14px; color:var(--muted); font-size:14px}
+.drop .actions{display:flex; gap:8px; justify-content:center; flex-wrap:wrap}
+details.paste{margin-top:14px; text-align:left; max-width:760px; margin-inline:auto}
+details.paste summary{cursor:pointer; color:var(--muted); font-size:14px; text-align:center}
+details.paste textarea{
+  width:100%; min-height:160px; margin-top:10px; padding:10px; font:13px/1.5 ui-monospace,Consolas,monospace;
+  background:var(--surface-2); color:var(--text); border:1px solid var(--border); border-radius:8px; resize:vertical;
+}
+.filebar{
+  display:flex; flex-wrap:wrap; gap:10px 18px; align-items:center; padding:12px 16px; margin-bottom:16px;
+}
+.filebar .name{font-weight:600; word-break:break-all}
+.filebar .meta{color:var(--muted); font-size:13px}
+.filebar .spacer{flex:1}
+.ctrl{display:flex; gap:12px; align-items:center; flex-wrap:wrap; font-size:13px; color:var(--muted)}
+.ctrl label{display:flex; gap:6px; align-items:center}
+.ctrl input[type=number]{
+  width:72px; font:inherit; font-size:13px; padding:4px 6px; border-radius:6px; border:1px solid var(--border-strong);
+  background:var(--surface); color:var(--text);
+}
+
+/* summary */
+.summary{padding:6px 0; margin-bottom:16px; overflow-x:auto}
+.summary table{width:100%; border-collapse:collapse; font-size:14px; min-width:640px}
+.summary th,.summary td{padding:10px 16px; text-align:right; white-space:nowrap}
+.summary th{font-size:12px; color:var(--muted); font-weight:500; border-bottom:1px solid var(--border)}
+.summary th:first-child,.summary td:first-child{text-align:left}
+.summary tr + tr td{border-top:1px solid var(--border)}
+.summary td.big{font-size:22px; font-weight:700; font-variant-numeric:tabular-nums}
+.summary td{font-variant-numeric:tabular-nums}
+.summary td.dist{width:38%; min-width:220px; padding-top:6px; padding-bottom:6px}
+.mname{display:flex; align-items:center; gap:8px; font-weight:600}
+.dot{width:10px; height:10px; border-radius:3px; flex:none}
+.strip{position:relative; display:flex; align-items:flex-end; gap:1px; height:40px}
+.strip i{flex:1 1 0; min-width:1px; max-width:14px; border-radius:2px 2px 0 0; cursor:pointer; opacity:.85}
+.strip i:hover{opacity:1}
+.strip .ref{position:absolute; left:0; right:0; border-top:1px dashed var(--faint); pointer-events:none}
+.strip .ref span{position:absolute; right:0; top:-15px; font-size:10px; color:var(--faint)}
+
+/* columns */
+.tabs{display:none; gap:6px; margin-bottom:10px}
+.tabs button{flex:1; padding:8px 6px; font-size:13px}
+.tabs button.on{background:var(--text); color:var(--bg); border-color:var(--text)}
+.cols{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px}
+.col{display:flex; flex-direction:column; min-width:0; overflow:hidden}
+.col-head{padding:14px 16px 12px; border-bottom:1px solid var(--border); border-top:4px solid var(--mc)}
+.col-head h2{margin:0; font-size:16px; display:flex; align-items:baseline; gap:8px}
+.col-head h2 .n{margin-left:auto; font-size:13px; color:var(--muted); font-weight:500}
+.col-head h2 .n b{font-size:20px; color:var(--mc); font-variant-numeric:tabular-nums}
+.col-head .rule{margin:4px 0 0; font-size:12.5px; color:var(--muted)}
+.list{padding:10px; display:flex; flex-direction:column; gap:8px; max-height:calc(100vh - 140px); min-height:320px; overflow:auto; scroll-behavior:smooth}
+.chunk{
+  border:1px solid var(--border); border-left:3px solid var(--mc); border-radius:8px; background:var(--surface);
+  padding:8px 10px 10px; cursor:pointer; transition:background .12s, box-shadow .12s;
+}
+.chunk:hover{background:var(--surface-2)}
+.chunk.rel{background:var(--rel); border-color:var(--rel-line); border-left-color:var(--rel-line)}
+.chunk.pin{box-shadow:0 0 0 2px var(--mc)}
+.chunk header{display:flex; align-items:center; gap:8px; font-size:12px; color:var(--muted); margin-bottom:6px}
+.chunk .idx{font-weight:700; color:var(--mc); font-variant-numeric:tabular-nums}
+.chunk .path{overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0; flex:1}
+.chunk .len{margin-left:auto; flex:none; font-variant-numeric:tabular-nums; background:var(--msoft); color:var(--mc); padding:1px 7px; border-radius:99px; font-weight:600}
+.chunk .len small{font-weight:400; opacity:.8}
+.lenbar{height:3px; background:var(--surface-2); border-radius:2px; margin-bottom:8px; overflow:hidden}
+.lenbar i{display:block; height:100%; background:var(--mc); opacity:.7}
+.body{margin:0; white-space:pre-wrap; word-break:break-word; font:13px/1.6 ui-monospace,"D2Coding",Consolas,"Malgun Gothic",monospace; color:var(--text)}
+.body .h{font-weight:700; color:var(--mc)}
+.body .sep{color:var(--faint)}
+.cut{color:var(--warn); font-weight:700; font-family:system-ui,sans-serif}
+.flags{margin-top:6px; font-size:11.5px; color:var(--warn)}
+.hint{color:var(--muted); font-size:12.5px; margin:0 0 10px}
+.empty{padding:24px; text-align:center; color:var(--muted); font-size:13px}
+.hidden{display:none !important}
+
+@media (max-width: 1000px){
+  .tabs{display:flex}
+  .cols{grid-template-columns:1fr}
+  .col:not(.active){display:none}
+  .list{max-height:none}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div>
+      <h1>Chunking 방식 비교</h1>
+      <p class="sub">TXT 문서를 고정 길이 · 구조 경계 · 문단 기준으로 나눠 결과를 나란히 비교합니다. 모든 처리는 브라우저 안에서만 이뤄집니다.</p>
+    </div>
+    <button id="themeBtn" type="button" title="테마 전환">테마 전환</button>
+  </div>
+
+  <section id="uploadView">
+    <div class="drop" id="drop">
+      <strong>TXT 파일을 여기에 끌어다 놓으세요</strong>
+      <p>UTF-8 / EUC-KR(CP949) 인코딩을 자동으로 인식합니다.</p>
+      <div class="actions">
+        <label class="btn" style="background:var(--text);color:var(--bg);border-color:var(--text)">
+          파일 선택<input type="file" id="fileInput" accept=".txt,.md,text/plain" hidden>
+        </label>
+        <button type="button" id="sampleBtn">예시 문서로 보기</button>
+      </div>
+      <details class="paste">
+        <summary>또는 텍스트 직접 붙여넣기</summary>
+        <textarea id="pasteArea" placeholder="여기에 텍스트를 붙여넣고 아래 버튼을 누르세요"></textarea>
+        <div style="text-align:right;margin-top:8px"><button type="button" class="primary" id="pasteBtn">이 텍스트로 비교</button></div>
+      </details>
+    </div>
+  </section>
+
+  <section id="resultView" class="hidden">
+    <div class="panel filebar">
+      <span class="name" id="fName"></span>
+      <span class="meta" id="fMeta"></span>
+      <span class="spacer"></span>
+      <div class="ctrl">
+        <label>고정 길이 <input type="number" id="sizeIn" min="20" max="5000" step="10" value="300"> 자</label>
+        <label>오버랩 <input type="number" id="overlapIn" min="0" max="2000" step="10" value="0"> 자</label>
+        <label class="btn" style="font-size:13px;padding:5px 10px">다른 파일<input type="file" id="fileInput2" accept=".txt,.md,text/plain" hidden></label>
+      </div>
+    </div>
+
+    <div class="panel summary">
+      <table>
+        <thead><tr><th>방식</th><th>Chunk 수</th><th>평균</th><th>최소</th><th>최대</th><th>표준편차</th><th>Chunk별 글자 수 분포 (막대 클릭 → 이동)</th></tr></thead>
+        <tbody id="sumBody"></tbody>
+      </table>
+    </div>
+
+    <p class="hint">Chunk에 마우스를 올리면 다른 방식에서 <b>같은 원문 범위</b>를 포함하는 Chunk가 노란색으로 표시됩니다. 클릭하면 다른 열도 해당 위치로 스크롤됩니다.</p>
+    <div class="tabs" id="tabs"></div>
+    <div class="cols" id="cols"></div>
+  </section>
+</div>
+
+<script>
+(() => {
+  'use strict';
+
+  const METHODS = [
+    { key:'fixed',  name:'고정 길이', color:'--c1', soft:'--c1-soft',
+      rule: s => `원문을 ${s.size}자 단위로 자름${s.overlap ? ` (오버랩 ${s.overlap}자)` : ''} · 의미 경계 무시` },
+    { key:'struct', name:'구조 경계', color:'--c2', soft:'--c2-soft',
+      rule: () => '제목·소제목 줄에서 분할 · 제N장, N., N.N, #, [..], ■ 등 인식' },
+    { key:'para',   name:'문단',     color:'--c3', soft:'--c3-soft',
+      rule: () => '빈 줄(공백만 있는 줄 포함)을 기준으로 분할' },
+  ];
+
+  /* ---------- helpers ---------- */
+  const $ = id => document.getElementById(id);
+  const esc = s => s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const clen = s => Array.from(s).length;                     // 글자 수 (공백 포함)
+  const clenNoWs = s => Array.from(s.replace(/\s+/g,'')).length; // 공백 제외
+  const fmt = n => n.toLocaleString('ko-KR');
+
+  function trimRange(text, a, b) {
+    while (a < b && /\s/.test(text[a])) a++;
+    while (b > a && /\s/.test(text[b-1])) b--;
+    return a < b ? [a, b] : null;
+  }
+
+  /* ---------- heading detection ---------- */
+  const SEP = /^\s*([=\-─━_*~])\1{4,}\s*$/;
+  function headingLevel(line) {
+    if (/^\s/.test(line)) return 0;            // 들여쓴 줄은 목록으로 간주
+    const t = line.trim();
+    if (!t || t.length > 80) return 0;
+    let m;
+    if ((m = t.match(/^(#{1,6})\s+\S/))) return m[1].length;
+    if (/^제\s*\d+\s*[장편부]/.test(t)) return 1;
+    if (/^[IVX]{1,5}\.\s+\S/.test(t)) return 1;
+    if (/^제\s*\d+\s*절/.test(t)) return 2;
+    if ((m = t.match(/^(\d{1,2}(?:\.\d{1,2})+)\.?\s+\S/))) return 1 + m[1].split('.').length; // 1.1 → 3
+    if (/^\d{1,2}\.\s+\S/.test(t)) return 2;
+    if (/^\[[^\]]{1,40}\]$/.test(t)) return 4;
+    if (/^[■□◆◇▶▷]\s*\S/.test(t)) return 4;
+    return 0;
+  }
+
+  /* ---------- 1. 고정 길이 ---------- */
+  function chunkFixed(text, size, overlap) {
+    const out = [];
+    const step = Math.max(1, size - overlap);
+    for (let a = 0; a < text.length; a += step) {
+      let b = Math.min(text.length, a + size);
+      if (b < text.length && /[\uDC00-\uDFFF]/.test(text[b])) b++; // 서로게이트 쌍 보호
+      const t = text.slice(a, b);
+      if (t.trim()) {
+        out.push({
+          start:a, end:b, text:t,
+          cutStart: a > 0 && !/\s/.test(text[a-1]) && !/\s/.test(text[a]),
+          cutEnd:   b < text.length && !/\s/.test(text[b-1]) && !/\s/.test(text[b]),
+        });
+      }
+      if (b >= text.length) break;
+    }
+    return out;
+  }
+
+  /* ---------- 2. 구조 경계 ---------- */
+  function chunkStruct(text) {
+    const lines = [];
+    let pos = 0;
+    for (const t of text.split('\n')) { lines.push({ s:pos, t }); pos += t.length + 1; }
+
+    // 제목 줄 찾기 (바로 위의 구분선 ===== 은 해당 제목에 포함)
+    const heads = [];
+    for (let i = 0; i < lines.length; i++) {
+      const lv = headingLevel(lines[i].t);
+      if (!lv) continue;
+      let st = i;
+      while (st > 0 && SEP.test(lines[st-1].t)) st--;
+      if (heads.length && st <= heads[heads.length-1].from) st = i;
+      heads.push({ from:st, hline:i, level:lv, title:lines[i].t.trim() });
+    }
+
+    const secs = [];
+    const first = heads.length ? heads[0].from : lines.length;
+    if (first > 0) secs.push({ from:0, to:first, level:0, hline:-1 });
+    heads.forEach((h, k) => secs.push({ ...h, to: k + 1 < heads.length ? heads[k+1].from : lines.length }));
+
+    // 제목 경로(breadcrumb)
+    const stack = [];
+    for (const s of secs) {
+      if (!s.level) { s.path = ['(머리말)']; continue; }
+      while (stack.length && stack[stack.length-1].level >= s.level) stack.pop();
+      stack.push(s);
+      s.path = stack.map(x => x.title);
+    }
+
+    // 본문 없이 제목만 있는 섹션은 다음 섹션과 병합
+    const merged = [];
+    let carryFrom = null;
+    secs.forEach((s, k) => {
+      const hasBody = lines.slice(s.from, s.to)
+        .some((l, j) => s.from + j !== s.hline && l.t.trim() && !SEP.test(l.t));
+      if (carryFrom !== null) { s.from = carryFrom; carryFrom = null; }
+      if (!hasBody && s.level && k < secs.length - 1) { carryFrom = s.from; return; }
+      merged.push(s);
+    });
+
+    const out = [];
+    for (const s of merged) {
+      const last = lines[s.to - 1];
+      const r = trimRange(text, lines[s.from].s, last.s + last.t.length);
+      if (r) out.push({ start:r[0], end:r[1], text:text.slice(r[0], r[1]), path:s.path });
+    }
+    return out;
+  }
+
+  /* ---------- 3. 문단 ---------- */
+  function chunkPara(text) {
+    const out = [];
+    const re = /\n[ \t　]*\n/g;
+    let last = 0, m;
+    const push = (a, b) => {
+      const r = trimRange(text, a, b);
+      if (r) out.push({ start:r[0], end:r[1], text:text.slice(r[0], r[1]) });
+    };
+    while ((m = re.exec(text))) { push(last, m.index); last = m.index + m[0].length; re.lastIndex = last - 1; }
+    push(last, text.length);
+    return out;
+  }
+
+  /* ---------- state ---------- */
+  const state = { text:'', name:'', enc:'', size:300, overlap:0, res:{} };
+
+  function compute() {
+    state.res = {
+      fixed:  chunkFixed(state.text, state.size, state.overlap),
+      struct: chunkStruct(state.text),
+      para:   chunkPara(state.text),
+    };
+    for (const k in state.res) state.res[k].forEach(c => { c.len = clen(c.text); c.lenNoWs = clenNoWs(c.text); });
+  }
+
+  function stats(arr) {
+    if (!arr.length) return { n:0, avg:0, min:0, max:0, sd:0 };
+    const L = arr.map(c => c.len);
+    const avg = L.reduce((a,b) => a+b, 0) / L.length;
+    const sd = Math.sqrt(L.reduce((a,b) => a + (b-avg)**2, 0) / L.length);
+    return { n:L.length, avg, min:Math.min(...L), max:Math.max(...L), sd };
+  }
+
+  /* ---------- render ---------- */
+  function renderBody(t, m, c) {
+    const html = t.split('\n').map(line => {
+      if (SEP.test(line)) return `<span class="sep">${esc(line)}</span>`;
+      if (headingLevel(line)) return `<span class="h">${esc(line)}</span>`;
+      return esc(line);
+    }).join('\n');
+    if (m !== 'fixed') return html;
+    return (c.cutStart ? '<span class="cut" title="단어 중간에서 시작">✂</span>' : '') + html +
+           (c.cutEnd ? '<span class="cut" title="단어 중간에서 잘림">✂</span>' : '');
+  }
+
+  function render() {
+    compute();
+    const gmax = Math.max(1, ...METHODS.flatMap(M => state.res[M.key].map(c => c.len)));
+    const totalLen = clen(state.text);
+
+    $('fName').textContent = state.name;
+    $('fMeta').textContent = `${fmt(totalLen)}자 · ${fmt(state.text.split('\n').length)}줄 · ${state.enc}`;
+
+    // 요약 표
+    $('sumBody').innerHTML = METHODS.map(M => {
+      const s = stats(state.res[M.key]);
+      const bars = state.res[M.key].map((c, i) =>
+        `<i data-m="${M.key}" data-i="${i}" title="#${i+1} · ${fmt(c.len)}자" style="height:${Math.max(2, c.len / gmax * 100)}%;background:var(${M.color})"></i>`
+      ).join('');
+      const refTop = 100 - Math.min(100, state.size / gmax * 100);
+      const ref = state.size <= gmax ? `<div class="ref" style="top:${refTop}%"><span>${state.size}자</span></div>` : '';
+      return `<tr>
+        <td><span class="mname"><span class="dot" style="background:var(${M.color})"></span>${M.name}</span></td>
+        <td class="big" style="color:var(${M.color})">${fmt(s.n)}</td>
+        <td>${fmt(Math.round(s.avg))}자</td><td>${fmt(s.min)}자</td><td>${fmt(s.max)}자</td><td>±${fmt(Math.round(s.sd))}</td>
+        <td class="dist"><div class="strip">${ref}${bars}</div></td></tr>`;
+    }).join('');
+
+    // 탭 (좁은 화면)
+    const active = document.querySelector('.col.active')?.dataset.m || 'fixed';
+    $('tabs').innerHTML = METHODS.map(M =>
+      `<button type="button" data-m="${M.key}" class="${M.key === active ? 'on' : ''}">${M.name} (${state.res[M.key].length})</button>`
+    ).join('');
+
+    // 열
+    $('cols').innerHTML = METHODS.map(M => {
+      const arr = state.res[M.key];
+      const cards = arr.map((c, i) => {
+        const path = c.path ? `<span class="path" title="${esc(c.path.join(' › '))}">${esc(c.path.join(' › '))}</span>` : '<span class="path"></span>';
+        const flags = M.key === 'fixed' && (c.cutStart || c.cutEnd)
+          ? `<div class="flags">✂ ${[c.cutStart && '시작', c.cutEnd && '끝'].filter(Boolean).join('·')} 부분이 단어 중간에서 잘림</div>` : '';
+        return `<article class="chunk" data-m="${M.key}" data-i="${i}">
+          <header><span class="idx">#${i+1}</span>${path}<span class="len">${fmt(c.len)}자 <small>(공백 제외 ${fmt(c.lenNoWs)})</small></span></header>
+          <div class="lenbar"><i style="width:${c.len / gmax * 100}%"></i></div>
+          <pre class="body">${renderBody(c.text, M.key, c)}</pre>${flags}
+        </article>`;
+      }).join('') || '<div class="empty">생성된 Chunk가 없습니다.</div>';
+      return `<section class="panel col ${M.key === active ? 'active' : ''}" data-m="${M.key}" style="--mc:var(${M.color});--msoft:var(${M.soft})">
+        <div class="col-head">
+          <h2>${M.name}<span class="n"><b>${fmt(arr.length)}</b> 개</span></h2>
+          <p class="rule">${esc(M.rule(state))}</p>
+        </div>
+        <div class="list">${cards}</div>
+      </section>`;
+    }).join('');
+
+    $('uploadView').classList.add('hidden');
+    $('resultView').classList.remove('hidden');
+  }
+
+  /* ---------- cross-highlight ---------- */
+  const overlaps = (a, b) => a.start < b.end && b.start < a.end;
+  function highlight(m, i) {
+    document.querySelectorAll('.chunk.rel').forEach(el => el.classList.remove('rel'));
+    if (m == null) return;
+    const src = state.res[m][i];
+    for (const M of METHODS) {
+      if (M.key === m) continue;
+      state.res[M.key].forEach((c, j) => {
+        if (overlaps(src, c)) document.querySelector(`.chunk[data-m="${M.key}"][data-i="${j}"]`)?.classList.add('rel');
+      });
+    }
+  }
+  function scrollToChunk(el) {
+    const list = el.closest('.list');
+    if (getComputedStyle(list).overflowY === 'auto' && list.scrollHeight > list.clientHeight) {
+      list.scrollTop = el.offsetTop - list.offsetTop - 10;
+    } else {
+      el.scrollIntoView({ behavior:'smooth', block:'center' });
+    }
+  }
+  function pin(m, i, syncOthers) {
+    document.querySelectorAll('.chunk.pin').forEach(el => el.classList.remove('pin'));
+    const el = document.querySelector(`.chunk[data-m="${m}"][data-i="${i}"]`);
+    if (!el) return;
+    el.classList.add('pin');
+    highlight(m, i);
+    if (!syncOthers) { setActive(m); scrollToChunk(el); return; }
+    const src = state.res[m][i];
+    for (const M of METHODS) {
+      if (M.key === m) continue;
+      const j = state.res[M.key].findIndex(c => overlaps(src, c));
+      const t = j >= 0 && document.querySelector(`.chunk[data-m="${M.key}"][data-i="${j}"]`);
+      if (t) { const list = t.closest('.list'); list.scrollTop = t.offsetTop - list.offsetTop - 10; }
+    }
+  }
+  function setActive(m) {
+    document.querySelectorAll('.col').forEach(c => c.classList.toggle('active', c.dataset.m === m));
+    document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('on', b.dataset.m === m));
+  }
+
+  $('cols').addEventListener('mouseover', e => {
+    const el = e.target.closest('.chunk');
+    if (el && el.dataset.hover !== '1') {
+      document.querySelectorAll('.chunk[data-hover]').forEach(x => delete x.dataset.hover);
+      el.dataset.hover = '1';
+      highlight(el.dataset.m, +el.dataset.i);
+    }
+  });
+  $('cols').addEventListener('mouseleave', () => {
+    document.querySelectorAll('.chunk[data-hover]').forEach(x => delete x.dataset.hover);
+    const p = document.querySelector('.chunk.pin');
+    p ? highlight(p.dataset.m, +p.dataset.i) : highlight(null);
+  });
+  $('cols').addEventListener('click', e => {
+    const el = e.target.closest('.chunk');
+    if (el && !window.getSelection().toString()) pin(el.dataset.m, +el.dataset.i, true);
+  });
+  $('sumBody').addEventListener('click', e => {
+    const b = e.target.closest('i[data-m]');
+    if (b) pin(b.dataset.m, +b.dataset.i, false);
+  });
+  $('tabs').addEventListener('click', e => {
+    const b = e.target.closest('button');
+    if (b) setActive(b.dataset.m);
+  });
+
+  /* ---------- input ---------- */
+  function load(text, name, enc) {
+    state.text = text.replace(/\r\n?/g, '\n').replace(/^﻿/, '');
+    state.name = name; state.enc = enc;
+    render();
+  }
+  async function readFile(f) {
+    if (!f) return;
+    const buf = await f.arrayBuffer();
+    let text, enc;
+    try { text = new TextDecoder('utf-8', { fatal:true }).decode(buf); enc = 'UTF-8'; }
+    catch { text = new TextDecoder('euc-kr').decode(buf); enc = 'EUC-KR(CP949)'; }
+    load(text, f.name, enc);
+  }
+
+  $('fileInput').addEventListener('change', e => readFile(e.target.files[0]));
+  $('fileInput2').addEventListener('change', e => { readFile(e.target.files[0]); e.target.value = ''; });
+  $('pasteBtn').addEventListener('click', () => {
+    const t = $('pasteArea').value;
+    if (t.trim()) load(t, '붙여넣은 텍스트', '직접 입력');
+  });
+
+  const drop = $('drop');
+  ['dragenter','dragover'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('over'); }));
+  ['dragleave','drop'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove('over'); }));
+  drop.addEventListener('drop', e => readFile(e.dataTransfer.files[0]));
+  // 결과 화면에서도 파일 드롭 허용
+  document.addEventListener('dragover', e => e.preventDefault());
+  document.addEventListener('drop', e => { e.preventDefault(); if (e.dataTransfer.files[0]) readFile(e.dataTransfer.files[0]); });
+
+  function onParam() {
+    const size = Math.max(20, Math.min(5000, parseInt($('sizeIn').value, 10) || 300));
+    const overlap = Math.max(0, Math.min(size - 1, parseInt($('overlapIn').value, 10) || 0));
+    state.size = size; state.overlap = overlap;
+    if (state.text) render();
+  }
+  $('sizeIn').addEventListener('change', onParam);
+  $('overlapIn').addEventListener('change', onParam);
+
+  /* ---------- theme ---------- */
+  $('themeBtn').addEventListener('click', () => {
+    const root = document.documentElement;
+    const cur = root.dataset.theme || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    root.dataset.theme = cur === 'dark' ? 'light' : 'dark';
+    try { localStorage.setItem('chunk-theme', root.dataset.theme); } catch {}
+  });
+  try { const t = localStorage.getItem('chunk-theme'); if (t) document.documentElement.dataset.theme = t; } catch {}
+
+  /* ---------- sample ---------- */
+  const SAMPLE = `사내 문서 검색 시스템 도입 가이드
+문서번호: GUIDE-001
+개정일: 2026-09-01
+
+이 가이드는 사내 문서를 검색 가능한 형태로 준비하는 절차를 설명한다. 각 장은 준비, 분할, 검증 순서로 구성되어 있다.
+
+===========================================================
+제1장 문서 준비
+===========================================================
+대상 문서: 매뉴얼, 보고서, 회의록
+
+1.1 형식 통일
+- 모든 문서는 UTF-8 텍스트로 변환한다.
+- 머리말에는 문서번호와 개정일을 반드시 기재한다.
+
+1.2 불필요한 요소 제거
+표지, 목차, 반복되는 머리글과 바닥글은 검색 품질을 떨어뜨리므로 변환 단계에서 제거한다. 단, 표 안의 수치 정보는 문장 형태로 풀어서 보존하는 것이 좋다.
+
+===========================================================
+제2장 문서 분할
+===========================================================
+2.1 분할 단위 선택
+고정 길이 분할은 구현이 간단하지만 문장이나 표의 중간에서 잘릴 수 있다. 구조 경계 분할은 제목 단위로 의미가 보존되지만 섹션 길이의 편차가 크다. 문단 분할은 작성자가 의도한 흐름을 따르지만, 문단이 지나치게 짧거나 길면 검색 정확도가 떨어진다.
+
+2.2 권장 기준
+- 한 Chunk는 200~500자 사이를 권장한다.
+- 너무 긴 섹션은 문단 단위로 다시 나누고, 너무 짧은 문단은 앞뒤 문단과 합친다.
+
+===========================================================
+제3장 검증
+===========================================================
+분할이 끝나면 대표 질문 20개를 선정하여 검색 결과를 점검한다. 정답 문단이 상위 3개 결과 안에 포함되는 비율을 기록하고, 기준에 미달하면 분할 방식을 조정한다.`;
+  $('sampleBtn').addEventListener('click', () => load(SAMPLE, '예시 문서.txt', 'UTF-8'));
+})();
+</script>
+</body>
+</html>

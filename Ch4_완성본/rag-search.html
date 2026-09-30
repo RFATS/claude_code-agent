@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RAG 문서 검색</title>
+<style>
+  :root {
+    --bg: #f6f5f2; --surface: #ffffff; --surface-2: #f0efeb; --border: #e2e0da;
+    --text: #1d1c1a; --muted: #6b6862; --accent: #2f5bd3; --accent-bg: #e8eefc;
+    --bar-bg: #e6e4df; --error: #b3261e; --error-bg: #fcebea;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #161615; --surface: #1f1f1d; --surface-2: #282826; --border: #353431;
+      --text: #ecebe7; --muted: #a09d96; --accent: #8aa8f5; --accent-bg: #23304f;
+      --bar-bg: #34332f; --error: #f2b8b5; --error-bg: #3f1d1b;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #161615; --surface: #1f1f1d; --surface-2: #282826; --border: #353431;
+    --text: #ecebe7; --muted: #a09d96; --accent: #8aa8f5; --accent-bg: #23304f;
+    --bar-bg: #34332f; --error: #f2b8b5; --error-bg: #3f1d1b;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font: 15px/1.6 "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  }
+  main { max-width: 860px; margin: 0 auto; padding: 40px 16px 64px; }
+  h1 { font-size: 26px; margin: 0 0 4px; letter-spacing: -0.01em; }
+  .sub { color: var(--muted); margin: 0 0 24px; }
+
+  form { display: flex; gap: 8px; }
+  input[type="search"] {
+    flex: 1; min-width: 0; padding: 12px 14px; font: inherit; color: var(--text);
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+  }
+  input[type="search"]:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+  button {
+    padding: 0 20px; font: inherit; font-weight: 600; color: #fff; background: var(--accent);
+    border: 0; border-radius: 10px; cursor: pointer;
+  }
+  button:disabled { opacity: 0.6; cursor: default; }
+
+  .examples { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0 28px; }
+  .examples button {
+    padding: 4px 12px; font-size: 13px; font-weight: 400; color: var(--muted);
+    background: var(--surface); border: 1px solid var(--border); border-radius: 999px;
+  }
+  .examples button:hover { color: var(--accent); border-color: var(--accent); }
+
+  .status { color: var(--muted); font-size: 14px; margin-bottom: 12px; min-height: 1.6em; }
+  .status.error { color: var(--error); background: var(--error-bg); padding: 8px 12px; border-radius: 8px; }
+
+  .results { display: flex; flex-direction: column; gap: 14px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+  .card-head { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 10px; }
+  .rank {
+    flex: none; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center;
+    font-size: 13px; font-weight: 700; background: var(--accent-bg); color: var(--accent);
+  }
+  .meta { flex: 1; min-width: 0; }
+  .file { font-weight: 700; word-break: break-all; }
+  .section { font-size: 13px; color: var(--muted); }
+  .score { flex: none; width: 120px; text-align: right; }
+  .score-value { font-weight: 700; font-variant-numeric: tabular-nums; }
+  .score-label { font-size: 12px; color: var(--muted); margin-right: 4px; }
+  .bar { height: 6px; background: var(--bar-bg); border-radius: 3px; margin-top: 4px; overflow: hidden; }
+  .bar > span { display: block; height: 100%; background: var(--accent); border-radius: 3px; }
+  pre {
+    margin: 0; white-space: pre-wrap; word-break: break-word; font-family: inherit; font-size: 14px;
+    background: var(--surface-2); border-radius: 8px; padding: 12px 14px;
+  }
+
+  @media (max-width: 520px) {
+    .card-head { flex-wrap: wrap; }
+    .score { width: 100%; text-align: left; padding-left: 40px; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <h1>RAG 문서 검색</h1>
+  <p class="sub">질문과 의미가 가까운 문서 Chunk를 rag.db에서 찾습니다.</p>
+
+  <form id="search-form">
+    <input id="query" type="search" placeholder="예: 챔버 온도가 올라가면 어떤 불량이 생기나요?" autocomplete="off" autofocus>
+    <button id="submit" type="submit">검색</button>
+  </form>
+
+  <div class="examples" id="examples">
+    <button type="button">챔버 온도 상승으로 불량률이 증가한 사례</button>
+    <button type="button">압력 편차 허용 오차 기준은?</button>
+    <button type="button">파티클 불량의 원인</button>
+    <button type="button">냉각수 펌프 점검 주기</button>
+  </div>
+
+  <div class="status" id="status" role="status"></div>
+  <div class="results" id="results"></div>
+</main>
+
+<script>
+  const form = document.getElementById("search-form");
+  const input = document.getElementById("query");
+  const submit = document.getElementById("submit");
+  const statusEl = document.getElementById("status");
+  const resultsEl = document.getElementById("results");
+
+  function setStatus(text, isError = false) {
+    statusEl.textContent = text;
+    statusEl.classList.toggle("error", isError);
+  }
+
+  function el(tag, className, text) {
+    const node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text !== undefined) node.textContent = text;
+    return node;
+  }
+
+  function renderResult(r) {
+    const card = el("article", "card");
+    const head = el("div", "card-head");
+    head.append(el("div", "rank", r.rank));
+
+    const meta = el("div", "meta");
+    meta.append(el("div", "file", r.fileName), el("div", "section", r.section));
+    head.append(meta);
+
+    const score = el("div", "score");
+    const line = el("div");
+    line.append(el("span", "score-label", "유사도"), el("span", "score-value", r.similarity.toFixed(4)));
+    const bar = el("div", "bar");
+    const fill = el("span");
+    fill.style.width = `${Math.max(0, Math.min(1, r.similarity)) * 100}%`;
+    bar.append(fill);
+    score.append(line, bar);
+    head.append(score);
+
+    card.append(head, el("pre", "", r.content));
+    return card;
+  }
+
+  async function runSearch(query) {
+    query = query.trim();
+    if (!query) return;
+
+    submit.disabled = true;
+    setStatus("검색 중…");
+    resultsEl.replaceChildren();
+
+    try {
+      const res = await fetch(`/api/search?q=${encodeURIComponent(query)}&k=5`);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+
+      setStatus(`"${data.query}" 검색 결과 ${data.results.length}건 · ${data.elapsedMs}ms`);
+      resultsEl.replaceChildren(...data.results.map(renderResult));
+    } catch (err) {
+      setStatus(`검색 실패: ${err.message}`, true);
+    } finally {
+      submit.disabled = false;
+    }
+  }
+
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    runSearch(input.value);
+  });
+
+  document.getElementById("examples").addEventListener("click", (e) => {
+    if (e.target.tagName !== "BUTTON") return;
+    input.value = e.target.textContent;
+    runSearch(input.value);
+  });
+</script>
+</body>
+</html>
